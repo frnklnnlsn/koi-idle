@@ -1,0 +1,360 @@
+[gd_scene load_steps=5 format=3 uid="uid://kg4tm1ni7a1p"]
+
+[ext_resource type="PackedScene" uid="uid://7g1pu5t8amra" path="res://fish_interface/scenes/fish_card.tscn" id="1_wxb6m"]
+[ext_resource type="PackedScene" uid="uid://4vwbflnmb4sg" path="res://SandBox/graph_test/bellcurve.tscn" id="2_0bsfi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ta8u1"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="Theme" id="Theme_e2404"]
+
+[node name="fish_interface" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(1158, 200)
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "sell all"
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_ta8u1")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = SubResource("Theme_e2404")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+text = "FISH SALE"
+horizontal_alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+selected = 1
+item_count = 3
+popup/item_0/text = "tall"
+popup/item_1/text = "grande"
+popup/item_1/id = 1
+popup/item_2/text = "Venti"
+popup/item_2/id = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 10
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "buy"
+
+[node name="MarginContainer3" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 10
+
+[node name="qnty_container" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3"]
+layout_mode = 2
+size_flags_horizontal = 6
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "quantity:"
+
+[node name="qnty_line" type="LineEdit" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(125, 0)
+layout_mode = 2
+size_flags_horizontal = 8
+alignment = 1
+
+[node name="qnty_slider" type="HSlider" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+min_value = -100.0
+
+[node name="spacer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer2"]
+visible = false
+layout_mode = 2
+text = "hello"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ScrollContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_stretch_ratio = 0.0
+
+[node name="fish_card" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card2" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card3" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card4" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card5" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card6" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card7" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card8" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card9" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card10" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card11" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card12" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card13" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card14" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card15" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card16" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card17" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="fish_card18" parent="PanelContainer/VBoxContainer/ScrollContainer/HBoxContainer2" instance=ExtResource("1_wxb6m")]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer7" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="bellcurve" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer7" instance=ExtResource("2_0bsfi")]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+
+[node name="MarginContainer6" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="bellcurve" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer6" instance=ExtResource("2_0bsfi")]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+
+[node name="MarginContainer5" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="MarginContainer3" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "name:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Franklin"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "income:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "10 coin/sec"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "mass:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "1 kG"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+text = "growth rate:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "2 mG/sec"
+
+[node name="MarginContainer4" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3

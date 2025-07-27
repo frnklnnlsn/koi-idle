@@ -13,3 +13,13 @@ config_version=5
 config/name="koi idle godot"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/initial_position=Vector2i(1000, 100)
+window/size/always_on_top=true
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0

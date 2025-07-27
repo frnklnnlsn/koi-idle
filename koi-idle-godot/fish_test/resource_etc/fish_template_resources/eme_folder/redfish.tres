@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://fish_test/resource_etc/resource_scripts/fish_conf.gd" id="1_lt2g1"]
+
+[resource]
+script = ExtResource("1_lt2g1")
+name = "redfish"
+offsets = PackedFloat32Array(0.15, 0.23)
+colors = PackedColorArray(0.661005, 0.0902595, 0.0902595, 1, 1, 1, 1, 1)
+noise_type_index = 4
+frequency = 0.00876048
+seed = -14.0

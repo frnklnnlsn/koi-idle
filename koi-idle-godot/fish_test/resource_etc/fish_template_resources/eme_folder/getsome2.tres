@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://fish_test/resource_etc/resource_scripts/fish_conf.gd" id="1_rx571"]
+
+[resource]
+script = ExtResource("1_rx571")
+name = "getsome2"
+offsets = PackedFloat32Array(0.18, 0.32, 0.44, 0.52)
+colors = PackedColorArray(1, 0.856252, 0.552649, 1, 0.491168, 0.406201, 0.274781, 1, 0.436049, 0.374536, 0.803668, 1, 0.696671, 0.505022, 0.301007, 1)
+noise_type_index = 1
+frequency = 0.00129779
+seed = -3.0

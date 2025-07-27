@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3 uid="uid://br11xqqwv6olp"]
+
+[ext_resource type="Script" path="res://fish_test/resource_etc/resource_scripts/fish_conf.gd" id="1_vm5i8"]
+
+[resource]
+script = ExtResource("1_vm5i8")
+name = "christmas"
+offsets = PackedFloat32Array(0, 0.25)
+colors = PackedColorArray(0.222904, 0.554688, 0.130005, 1, 0.847656, 0.201981, 0.201981, 1)
+noise_type_index = 0
+frequency = 0.001
+seed = 10.0

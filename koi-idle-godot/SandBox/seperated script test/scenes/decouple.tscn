@@ -1,0 +1,46 @@
+[gd_scene load_steps=9 format=3 uid="uid://b2xqipn3ykule"]
+
+[ext_resource type="Script" path="res://fish_test/fish_test_scripts/fish_scripts/fish.gd" id="1_0eclj"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://fish_test/resource_etc/width_curve/fish_curve.tres" id="2_r3wuf"]
+
+[sub_resource type="Gradient" id="Gradient_kxyv5"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0.335227, 0.585227)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_4xcxg"]
+fractal_type = 2
+fractal_octaves = 1
+fractal_lacunarity = 1.0
+fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_be8be"]
+color_ramp = SubResource("Gradient_kxyv5")
+noise = SubResource("FastNoiseLite_4xcxg")
+
+[sub_resource type="Gradient" id="Gradient_afeuc"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.630682)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_w02u6"]
+fractal_type = 2
+fractal_octaves = 1
+fractal_lacunarity = 1.0
+fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_2h23e"]
+color_ramp = SubResource("Gradient_afeuc")
+noise = SubResource("FastNoiseLite_w02u6")
+
+[node name="Decouple" type="Node2D"]
+script = ExtResource("1_0eclj")
+
+[node name="skeleton" type="Line2D" parent="."]
+unique_name_in_owner = true
+texture = SubResource("NoiseTexture2D_be8be")
+
+[node name="body" type="Line2D" parent="."]
+unique_name_in_owner = true
+width = 100.0
+width_curve = ExtResource("2_r3wuf")
+texture = SubResource("NoiseTexture2D_2h23e")
+texture_mode = 2

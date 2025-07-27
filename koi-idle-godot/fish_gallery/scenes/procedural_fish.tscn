@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3 uid="uid://bf7jkn4kqcr1j"]
+
+[ext_resource type="Script" path="res://fish_gallery/scripts/procedural_fish.gd" id="1_2gj4d"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://fish_test/resource_etc/width_curve/fish_curve.tres" id="1_m7038"]
+[ext_resource type="Script" path="res://fish_gallery/scripts/procedural_skeleton.gd" id="2_5dgvl"]
+[ext_resource type="Script" path="res://fish_gallery/scenes/text_body.gd" id="4_8oqpn"]
+
+[sub_resource type="Gradient" id="Gradient_jsnq5"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.215909, 0.465909, 0.75)
+colors = PackedColorArray(0, 0, 0, 1, 0.858824, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cht2s"]
+frequency = 0.006
+fractal_type = 2
+fractal_octaves = 1
+fractal_lacunarity = 1.0
+fractal_gain = 1.0
+domain_warp_enabled = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b0tdw"]
+color_ramp = SubResource("Gradient_jsnq5")
+noise = SubResource("FastNoiseLite_cht2s")
+
+[node name="procedural_fish" type="Node2D"]
+script = ExtResource("1_2gj4d")
+circle_radius = 4000.0
+
+[node name="skeleton" type="Line2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_5dgvl")
+
+[node name="body" type="Line2D" parent="."]
+unique_name_in_owner = true
+width = 100.0
+width_curve = ExtResource("1_m7038")
+texture = SubResource("NoiseTexture2D_b0tdw")
+texture_mode = 2
+script = ExtResource("4_8oqpn")

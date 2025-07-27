@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://qx5lmv06ojim"]
+
+[ext_resource type="Texture2D" uid="uid://drrvlh1s7co32" path="res://icon.svg" id="1_cmdew"]
+
+[node name="InstnaceTest" type="Sprite2D"]
+position = Vector2(354, 346)
+texture = ExtResource("1_cmdew")

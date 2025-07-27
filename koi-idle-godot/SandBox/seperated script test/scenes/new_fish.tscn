@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://euqbie36eabr"]
+
+[ext_resource type="Script" path="res://SandBox/seperated script test/scenes/new_fish.gd" id="1_67oha"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://fish_test/resource_etc/width_curve/fish_curve.tres" id="2_7n4s8"]
+[ext_resource type="Script" path="res://SandBox/seperated script test/scenes/new_skeleton.gd" id="2_vbehb"]
+
+[node name="NewFish" type="Node2D"]
+script = ExtResource("1_67oha")
+circle_radius = 1500.0
+wander_strength = 1.0
+debug_mode = true
+
+[node name="skeleton" type="Line2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_vbehb")
+
+[node name="body" type="Line2D" parent="."]
+unique_name_in_owner = true
+width = 100.0
+width_curve = ExtResource("2_7n4s8")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.3, 0.3)

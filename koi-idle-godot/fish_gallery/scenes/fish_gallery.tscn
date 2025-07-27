@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=4 uid="uid://dq7ecws7gouf4"]
+
+[ext_resource type="Script" path="res://fish_gallery/scripts/fish_gallery.gd" id="1_w3qjt"]
+[ext_resource type="Resource" uid="uid://djhnaf5pe65ba" path="res://fish_test/resource_etc/fish_template_resources/main_folder/Franklin_koi_1.tres" id="2_wp5ea"]
+[ext_resource type="Script" path="res://fish_gallery/scenes/canvas_layer.gd" id="3_c2ytf"]
+[ext_resource type="Shader" path="res://fish_gallery/scenes/fish_gallery.gdshader" id="3_fjuix"]
+[ext_resource type="PackedScene" uid="uid://yovlfndii0yq" path="res://pond_scenes/scenes/pond.tscn" id="5_bmpci"]
+[ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="6_i0cil"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yp44y"]
+shader = ExtResource("3_fjuix")
+shader_parameter/intensity = 0.0
+shader_parameter/base_water_color = Color(0.105, 0.15, 0.118, 1)
+shader_parameter/highlight_scale = 1.0
+shader_parameter/clarity = 0.65
+
+[node name="FishGallery" type="Node"]
+script = ExtResource("1_w3qjt")
+fish_res = ExtResource("2_wp5ea")
+pallet_1 = PackedColorArray(0.861754, 0.427284, 0.241916, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0.839216, 0, 0, 1, 0.974878, 0.875194, 0.765368, 1)
+number_of_fish = 5
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 2
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
+zoom = Vector2(0.075, 0.075)
+
+[node name="background" type="CanvasLayer" parent="SubViewportContainer/SubViewport"]
+layer = -1
+script = ExtResource("3_c2ytf")
+
+[node name="background" type="ColorRect" parent="SubViewportContainer/SubViewport/background"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.08, 0.827451)
+
+[node name="Pond" parent="SubViewportContainer/SubViewport/background" instance=ExtResource("5_bmpci")]
+
+[node name="ColorRect" type="ColorRect" parent="SubViewportContainer/SubViewport/background"]
+material = SubResource("ShaderMaterial_yp44y")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.475927, 0.475927, 0.475927, 0.160784)
+
+[node name="lilpads" type="CanvasLayer" parent="SubViewportContainer/SubViewport"]
+
+[node name="lily_pads" type="TileMapLayer" parent="SubViewportContainer/SubViewport/lilpads"]
+tile_map_data = PackedByteArray("AAACAAUAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wUAAAAAAAAAAAD+/wEAAAAAAAAAAAAAAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAIAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAUAAAAAAAAAAAA=")
+tile_set = ExtResource("6_i0cil")
