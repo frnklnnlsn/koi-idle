@@ -12,13 +12,33 @@ config_version=5
 
 config/name="koi idle godot"
 config/features=PackedStringArray("4.3", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://art/icon.svg"
+
+[autoload]
+
+Economy="*res://scripts/Singletons/Economy.gd"
+FishGenerator="*res://scripts/Singletons/FishGenerator.gd"
+SaveManager="*res://scripts/Singletons/SaveManager.gd"
 
 [display]
 
-window/size/initial_position=Vector2i(1000, 100)
+window/size/initial_position_type=0
 window/size/always_on_top=true
 window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/kanban_tasks/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://SandBox/": "yellow",
+"res://addons/": "gray",
+"res://art/": "red",
+"res://assets/": "gray",
+"res://game_parts/": "blue"
+}
 
 [rendering]
 

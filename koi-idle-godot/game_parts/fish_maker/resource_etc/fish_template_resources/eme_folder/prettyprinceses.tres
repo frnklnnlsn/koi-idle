@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_emno8"]
+
+[resource]
+script = ExtResource("1_emno8")
+name = "prettyprinceses"
+offsets = PackedFloat32Array(0.25, 0.3)
+colors = PackedColorArray(0.942793, 0.819293, 1, 1, 0.742587, 0.612574, 0.987092, 1)
+noise_type_index = 4
+frequency = 0.0129785
+seed = 11.0

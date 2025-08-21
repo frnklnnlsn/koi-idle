@@ -1,0 +1,100 @@
+{
+	"categories": [
+		{
+			"uuid": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"title": "Task",
+			"color": "70bafa"
+		}
+	],
+	"stages": [
+		{
+			"uuid": "1652d0ce-a1b7-42ca-b6dc-88cda0b66a56",
+			"title": "Todo",
+			"tasks": [
+				"c655367f-1991-4ebe-b08f-62bcc53f06f4",
+				"a736e405-0e06-4be8-bdb8-5972163fe7f2"
+			]
+		},
+		{
+			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
+			"title": "Doing",
+			"tasks": [
+				"f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
+				"13f25e2b-af7c-4ac3-a131-1c2da322bfe0",
+				"7340ed6c-ee71-4458-8b0b-9fe2c32607bd"
+			]
+		},
+		{
+			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
+			"title": "Done",
+			"tasks": [
+				"911f1843-c172-47f8-9435-7dc63feb39bf",
+				"c7d71841-9412-4e93-8336-9e57c2dafb76"
+			]
+		}
+	],
+	"tasks": [
+		{
+			"uuid": "911f1843-c172-47f8-9435-7dc63feb39bf",
+			"title": "made a fish visualizer",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "c7d71841-9412-4e93-8336-9e57c2dafb76",
+			"title": "made a visual fish loader",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "13f25e2b-af7c-4ac3-a131-1c2da322bfe0",
+			"title": "create a economy singleton",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "c655367f-1991-4ebe-b08f-62bcc53f06f4",
+			"title": "create a Display singleton",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
+			"title": "on fish purchase buy generate",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "7340ed6c-ee71-4458-8b0b-9fe2c32607bd",
+			"title": "figure out growth curve value generation, and visualization",
+			"description": "might need to make the graph to see before making the values\n",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "a736e405-0e06-4be8-bdb8-5972163fe7f2",
+			"title": "display fish card",
+			"description": "fish card needs to be made so it can be juiced, maybe a node 2D also figure out who is talking to the who\n",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		}
+	],
+	"layout": {
+		"columns": [
+			[
+				"1652d0ce-a1b7-42ca-b6dc-88cda0b66a56"
+			],
+			[
+				"38085f38-6094-4a53-a375-626890fd9fbe"
+			],
+			[
+				"fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59"
+			]
+		]
+	}
+}

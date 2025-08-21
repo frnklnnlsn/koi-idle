@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://qx5lmv06ojim"]
+[gd_scene load_steps=2 format=3 uid="uid://c2plcyfsjgrp8"]
 
-[ext_resource type="Texture2D" uid="uid://drrvlh1s7co32" path="res://icon.svg" id="1_cmdew"]
+[ext_resource type="Texture2D" uid="uid://ddy15u414weyj" path="res://art/icon.svg" id="1_cmdew"]
 
 [node name="InstnaceTest" type="Sprite2D"]
 position = Vector2(354, 346)

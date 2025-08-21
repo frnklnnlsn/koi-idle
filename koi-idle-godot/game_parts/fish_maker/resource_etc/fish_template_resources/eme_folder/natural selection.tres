@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_k1dvv"]
+
+[resource]
+script = ExtResource("1_k1dvv")
+name = "natural selection"
+offsets = PackedFloat32Array(0.06, 0.21, 0.47, 0.67)
+colors = PackedColorArray(0.820652, 0.153872, 0.277534, 1, 0, 1, 0.115489, 1, 0.103792, 0.881963, 0.934443, 1, 0.996943, 0.993557, 0, 1)
+noise_type_index = 1
+frequency = 0.00129779
+seed = -75.0

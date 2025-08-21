@@ -1,0 +1,41 @@
+[gd_scene load_steps=8 format=3 uid="uid://xd2ubttpr57h"]
+
+[ext_resource type="Script" path="res://game_parts/fish_interface/scripts/fish_for_card.gd" id="1_imhqo"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://game_parts/fish_maker/resource_etc/width_curve/fish_curve.tres" id="2_fe658"]
+[ext_resource type="Script" path="res://game_parts/fish_interface/scripts/for_card_skeleton.gd" id="3_glnld"]
+[ext_resource type="Script" path="res://game_parts/fish_interface/scenes/camera_2d.gd" id="4_k2r8e"]
+
+[sub_resource type="Gradient" id="Gradient_n5icr"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_3d8ka"]
+fractal_type = 2
+fractal_octaves = 1
+fractal_lacunarity = 1.0
+fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b4wxk"]
+color_ramp = SubResource("Gradient_n5icr")
+noise = SubResource("FastNoiseLite_3d8ka")
+
+[node name="fish_for_card" type="Node2D"]
+script = ExtResource("1_imhqo")
+squiggle_amplitude = 20.0
+squiggle_chance = 0.5
+
+[node name="skeleton" type="Line2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_glnld")
+
+[node name="body" type="Line2D" parent="."]
+unique_name_in_owner = true
+width = 100.0
+width_curve = ExtResource("2_fe658")
+texture = SubResource("NoiseTexture2D_b4wxk")
+texture_mode = 2
+joint_mode = 1
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.095, 0.095)
+script = ExtResource("4_k2r8e")

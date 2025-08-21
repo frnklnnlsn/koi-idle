@@ -1,0 +1,407 @@
+[gd_scene load_steps=5 format=3 uid="uid://bgfra5dlu7rpi"]
+
+[ext_resource type="Script" path="res://game_parts/fish_maker/fish_test_scripts/camera_test_logic/camera_test_fish.gd" id="1_tqyxe"]
+[ext_resource type="Resource" uid="uid://d0yfa3t5nsohi" path="res://themes/base_fish.tres" id="2_yas88"]
+[ext_resource type="PackedScene" uid="uid://c36vfpnxk6phd" path="res://game_parts/fish_maker/fish_test_scenes/fish.tscn" id="4_00bb7"]
+
+[sub_resource type="Theme" id="Theme_w8pwe"]
+
+[node name="Node" type="Node"]
+script = ExtResource("1_tqyxe")
+fish_res = ExtResource("2_yas88")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 5
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(230, 129)
+render_target_update_mode = 4
+
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
+zoom = Vector2(0.075, 0.075)
+
+[node name="fish" parent="SubViewportContainer/SubViewport" instance=ExtResource("4_00bb7")]
+unique_name_in_owner = true
+speed = 0.4
+circle_radius = 300.0
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="save and color box" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="save_open_container" type="MarginContainer" parent="Control/VBoxContainer/save and color box"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/save_open_container"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="save_button" type="Button" parent="Control/VBoxContainer/save and color box/save_open_container/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 30)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+text = "Save"
+
+[node name="open" type="Button" parent="Control/VBoxContainer/save and color box/save_open_container/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Open"
+
+[node name="color_grid" type="GridContainer" parent="Control/VBoxContainer/save and color box"]
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_stretch_ratio = 0.0
+
+[node name="color_1_box" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/color_grid"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="color_picker_1_slider" type="VSlider" parent="Control/VBoxContainer/save and color box/color_grid/color_1_box"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Color_picker1" type="ColorPickerButton" parent="Control/VBoxContainer/save and color box/color_grid/color_1_box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 10
+text = "hello"
+flat = true
+
+[node name="color_2_box" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/color_grid"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="color_picker_2_slider" type="VSlider" parent="Control/VBoxContainer/save and color box/color_grid/color_2_box"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Color_picker2" type="ColorPickerButton" parent="Control/VBoxContainer/save and color box/color_grid/color_2_box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 10
+text = "hello"
+flat = true
+
+[node name="color_3_box" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/color_grid"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="color_picker_3_slider" type="VSlider" parent="Control/VBoxContainer/save and color box/color_grid/color_3_box"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Color_picker3" type="ColorPickerButton" parent="Control/VBoxContainer/save and color box/color_grid/color_3_box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 10
+text = "hello"
+flat = true
+
+[node name="color_4_box" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/color_grid"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="color_picker_4_slider" type="VSlider" parent="Control/VBoxContainer/save and color box/color_grid/color_4_box"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Color_picker4" type="ColorPickerButton" parent="Control/VBoxContainer/save and color box/color_grid/color_4_box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 10
+text = "hello"
+flat = true
+
+[node name="color_5_box" type="HBoxContainer" parent="Control/VBoxContainer/save and color box/color_grid"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="color_picker_5_slider" type="VSlider" parent="Control/VBoxContainer/save and color box/color_grid/color_5_box"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+
+[node name="Color_picker5" type="ColorPickerButton" parent="Control/VBoxContainer/save and color box/color_grid/color_5_box"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(75, 75)
+layout_mode = 2
+size_flags_horizontal = 10
+text = "hello"
+flat = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/save and color box"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme = SubResource("Theme_w8pwe")
+
+[node name="bottom settings" type="HBoxContainer" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+
+[node name="left side h" type="HBoxContainer" parent="Control/VBoxContainer/bottom settings"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="spacer" type="HBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="seed_container" type="VBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "seed:"
+
+[node name="seed_line" type="LineEdit" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="seed_slider" type="HSlider" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+min_value = -100.0
+
+[node name="noise_container" type="VBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container"]
+layout_mode = 2
+
+[node name="frequency_label" type="Label" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "frqcy:
+"
+
+[node name="frequency_line" type="LineEdit" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="frequency_slider" type="HSlider" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+max_value = 0.01
+step = 0.0
+
+[node name="noise_type" type="OptionButton" parent="Control/VBoxContainer/bottom settings/left side h/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+selected = 0
+item_count = 6
+popup/item_0/text = "Simplex"
+popup/item_1/text = "Simplex Smooth"
+popup/item_1/id = 1
+popup/item_2/text = "Cellular"
+popup/item_2/id = 2
+popup/item_3/text = "Perlin"
+popup/item_3/id = 3
+popup/item_4/text = "Value Cubic"
+popup/item_4/id = 4
+popup/item_5/text = "Value"
+popup/item_5/id = 5
+
+[node name="name_container" type="VBoxContainer" parent="Control/VBoxContainer/bottom settings"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/bottom settings/name_container"]
+layout_mode = 2
+text = "name"
+horizontal_alignment = 1
+
+[node name="name_edit" type="LineEdit" parent="Control/VBoxContainer/bottom settings/name_container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 25
+placeholder_text = "~insert name~"
+alignment = 1
+
+[node name="right_side" type="VBoxContainer" parent="Control/VBoxContainer/bottom settings"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Control/VBoxContainer/bottom settings/right_side"]
+layout_mode = 2
+text = "# of colors
+"
+horizontal_alignment = 1
+
+[node name="number_scale" type="HSlider" parent="Control/VBoxContainer/bottom settings/right_side"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 30)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_stretch_ratio = 0.0
+min_value = 1.0
+max_value = 5.0
+value = 1.0
+
+[node name="Label2" type="Label" parent="Control/VBoxContainer/bottom settings/right_side"]
+layout_mode = 2
+text = "zoom
+"
+horizontal_alignment = 1
+
+[node name="camera_zoom" type="HSlider" parent="Control/VBoxContainer/bottom settings/right_side"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 30)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_stretch_ratio = 0.0
+min_value = 0.009
+max_value = 0.5
+step = 0.001
+value = 0.12
+
+[node name="spacer_(hbox)" type="HBoxContainer" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+
+[node name="Fish Resources pop up" type="PanelContainer" parent="Control"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/Fish Resources pop up"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control/Fish Resources pop up/VBoxContainer"]
+layout_mode = 2
+
+[node name="title" type="Label" parent="Control/Fish Resources pop up/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 25
+text = "Fish Resources"
+
+[node name="exit" type="Button" parent="Control/Fish Resources pop up/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "exit"
+
+[node name="HSeparator" type="HSeparator" parent="Control/Fish Resources pop up/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control/Fish Resources pop up/VBoxContainer"]
+layout_mode = 2
+
+[node name="Folder_ label" type="Label" parent="Control/Fish Resources pop up/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Folder"
+
+[node name="folder_button" type="OptionButton" parent="Control/Fish Resources pop up/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Control/Fish Resources pop up/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="button_container" type="VBoxContainer" parent="Control/Fish Resources pop up/VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="pressed" from="Control/VBoxContainer/save and color box/save_open_container/HBoxContainer/save_button" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="Control/VBoxContainer/save and color box/save_open_container/HBoxContainer/open" to="." method="_on_open_pressed"]
+[connection signal="drag_ended" from="Control/VBoxContainer/save and color box/color_grid/color_1_box/color_picker_1_slider" to="." method="_on_color_picker_1_slider_drag_ended"]
+[connection signal="drag_ended" from="Control/VBoxContainer/save and color box/color_grid/color_2_box/color_picker_2_slider" to="." method="_on_color_picker_2_slider_drag_ended"]
+[connection signal="drag_ended" from="Control/VBoxContainer/save and color box/color_grid/color_3_box/color_picker_3_slider" to="." method="_on_color_picker_3_slider_drag_ended"]
+[connection signal="drag_ended" from="Control/VBoxContainer/save and color box/color_grid/color_4_box/color_picker_4_slider" to="." method="_on_color_picker_4_slider_drag_ended"]
+[connection signal="drag_ended" from="Control/VBoxContainer/save and color box/color_grid/color_5_box/color_picker_5_slider" to="." method="_on_color_picker_5_slider_drag_ended"]
+[connection signal="focus_entered" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container/HBoxContainer/seed_line" to="." method="_on_seed_line_focus_entered"]
+[connection signal="focus_exited" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container/HBoxContainer/seed_line" to="." method="_on_seed_line_focus_exited"]
+[connection signal="text_submitted" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/seed_container/HBoxContainer/seed_line" to="." method="_on_seed_line_text_submitted"]
+[connection signal="focus_entered" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container/HBoxContainer/frequency_line" to="." method="_on_frequency_line_focus_entered"]
+[connection signal="focus_exited" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container/HBoxContainer/frequency_line" to="." method="_on_frequency_line_focus_exited"]
+[connection signal="text_submitted" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_container/HBoxContainer/frequency_line" to="." method="_on_frequency_line_text_submitted"]
+[connection signal="item_selected" from="Control/VBoxContainer/bottom settings/left side h/VBoxContainer/noise_type" to="." method="_on_noise_type_item_selected"]
+[connection signal="focus_exited" from="Control/VBoxContainer/bottom settings/name_container/name_edit" to="." method="_on_name_edit_focus_exited"]
+[connection signal="text_submitted" from="Control/VBoxContainer/bottom settings/name_container/name_edit" to="." method="_on_name_edit_text_submitted"]
+[connection signal="drag_ended" from="Control/VBoxContainer/bottom settings/right_side/number_scale" to="." method="_on_number_scale_drag_ended"]
+[connection signal="pressed" from="Control/Fish Resources pop up/VBoxContainer/HBoxContainer/exit" to="." method="_on_exit_pressed"]
+[connection signal="item_selected" from="Control/Fish Resources pop up/VBoxContainer/HBoxContainer2/folder_button" to="." method="_on_folder_button_item_selected"]

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_ibhcr"]
+
+[resource]
+script = ExtResource("1_ibhcr")
+name = "twinsy"
+offsets = PackedFloat32Array(0.29, 0.37, 0.73)
+colors = PackedColorArray(0.27038, 0.00890856, 0.2599, 1, 0.611413, 0.215365, 0.445406, 1, 0.954823, 0.776457, 0.59417, 1)
+noise_type_index = 3
+frequency = 0.00454245
+seed = -9.0

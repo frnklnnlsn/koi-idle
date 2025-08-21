@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_uoowu"]
+
+[resource]
+script = ExtResource("1_uoowu")
+name = "timmydatrout"
+offsets = PackedFloat32Array(0, 0.78)
+colors = PackedColorArray(0.203187, 0.610303, 0.917459, 1, 0.106965, 0.0509293, 0.355299, 1)
+noise_type_index = 2
+frequency = 0.00778708
+seed = 31.0

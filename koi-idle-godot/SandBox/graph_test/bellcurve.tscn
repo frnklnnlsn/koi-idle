@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://4vwbflnmb4sg"]
 
-[ext_resource type="Script" path="res://bellcurve.gd" id="1_5xjl8"]
+[ext_resource type="Script" path="res://SandBox/graph_test/bellcurve.gd" id="1_5xjl8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebuor"]
 bg_color = Color(0.6, 0.6, 0.6, 0)

@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="RarityGraphTheme" load_steps=2 format=3 uid="uid://ygls0875l468"]
+
+[ext_resource type="Script" path="res://scripts/RarityGraphTheme.gd" id="1_chbbt"]
+
+[resource]
+script = ExtResource("1_chbbt")
+curve_color = Color(1, 1, 1, 1)
+curve_width = 3.0
+show_axes = true
+axis_color = Color(0, 0, 0, 1)
+axis_width = 5.0
+show_ticks = true
+tick_length = 10.0
+num_x_ticks = 9
+tick_font_size = 16
+tick_text_color = Color(0, 0, 0, 1)
+show_labels = true
+label_font_size = 12
+label_text_color = Color(1, 1, 1, 1)
+show_regions = true
+region_colors = Array[Color]([Color(0.2, 0.8, 0.5, 0.8), Color(0.3, 0.7, 1, 0.8), Color(0.4, 0.6, 1, 0.8), Color(1, 0.6, 0.2, 0.8), Color(1, 0.4, 0.4, 0.8)])
+marker_color = Color(1, 0, 0, 1)
+marker_dot_radius = 6.0
+marker_outline_color = Color(1, 1, 1, 1)
+marker_outline_width = 0.0
+show_marker_line = true
+marker_line_color = Color(1, 0, 0, 1)
+marker_line_width = 2.0
+dash_length = 10.0
+dash_gap = 5.0

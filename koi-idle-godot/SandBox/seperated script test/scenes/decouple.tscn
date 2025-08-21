@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://b2xqipn3ykule"]
 
-[ext_resource type="Script" path="res://fish_test/fish_test_scripts/fish_scripts/fish.gd" id="1_0eclj"]
-[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://fish_test/resource_etc/width_curve/fish_curve.tres" id="2_r3wuf"]
+[ext_resource type="Script" path="res://game_parts/fish_maker/fish_test_scripts/fish_scripts/fish.gd" id="1_0eclj"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://game_parts/fish_maker/resource_etc/width_curve/fish_curve.tres" id="2_r3wuf"]
 
 [sub_resource type="Gradient" id="Gradient_kxyv5"]
 interpolation_mode = 1

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_7ugw6"]
+
+[resource]
+script = ExtResource("1_7ugw6")
+name = "urmom"
+offsets = PackedFloat32Array(0.27, 0.27, 0.38, 0.48, 0.6)
+colors = PackedColorArray(0.307935, 0.181425, 0.715014, 1, 0, 1, 0.437838, 1, 0.4864, 0.257346, 0.756114, 1, 0, 1, 0.971467, 1, 0.204665, 0.0978986, 0.842731, 1)
+noise_type_index = 2
+frequency = 0.00129779
+seed = 14.0

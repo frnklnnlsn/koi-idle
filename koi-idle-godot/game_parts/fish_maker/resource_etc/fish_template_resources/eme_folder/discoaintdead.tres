@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="fish_conf" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_conf.gd" id="1_xupb7"]
+
+[resource]
+script = ExtResource("1_xupb7")
+name = "discoaintdead"
+offsets = PackedFloat32Array(0.12, 0.15, 0.16, 0.38, 0.48)
+colors = PackedColorArray(1, 1, 1, 1, 0.973279, 0.674932, 1, 1, 0.376548, 0.0317843, 0.964674, 1, 0.0391456, 0.944633, 0.881889, 1, 0, 0.598505, 1, 1)
+noise_type_index = 4
+frequency = 1.0
+seed = -1.0

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://baiuqbcojsl28"]
+
+[ext_resource type="Script" path="res://SandBox/value generation testing/value_gen_test.gd" id="1_p0rw5"]
+
+[node name="ValueGenTest" type="Node2D"]
+script = ExtResource("1_p0rw5")
