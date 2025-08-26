@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=4 uid="uid://dq7ecws7gouf4"]
+[gd_scene load_steps=9 format=4 uid="uid://dq7ecws7gouf4"]
 
 [ext_resource type="Script" path="res://game_parts/fish_gallery/scripts/fish_gallery.gd" id="1_w3qjt"]
 [ext_resource type="Resource" uid="uid://djhnaf5pe65ba" path="res://game_parts/fish_maker/resource_etc/fish_template_resources/main_folder/Franklin_koi_1.tres" id="2_wp5ea"]
@@ -6,6 +6,7 @@
 [ext_resource type="Shader" path="res://game_parts/fish_gallery/scenes/fish_gallery.gdshader" id="3_fjuix"]
 [ext_resource type="PackedScene" uid="uid://yovlfndii0yq" path="res://game_parts/pond_scenes/scenes/pond.tscn" id="5_bmpci"]
 [ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="6_i0cil"]
+[ext_resource type="PackedScene" uid="uid://kg4tm1ni7a1p" path="res://game_parts/user_interface/scenes/shop_interface.tscn" id="7_rn1fo"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_yp44y"]
 shader = ExtResource("3_fjuix")
@@ -69,3 +70,6 @@ color = Color(0.475927, 0.475927, 0.475927, 0.160784)
 [node name="lily_pads" type="TileMapLayer" parent="SubViewportContainer/SubViewport/lilpads"]
 tile_map_data = PackedByteArray("AAACAAUAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wUAAAAAAAAAAAD+/wEAAAAAAAAAAAAAAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAIAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAUAAAAAAAAAAAA=")
 tile_set = ExtResource("6_i0cil")
+
+[node name="fish_interface" parent="." instance=ExtResource("7_rn1fo")]
+visible = false

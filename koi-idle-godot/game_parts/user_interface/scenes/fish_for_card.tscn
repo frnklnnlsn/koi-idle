@@ -1,9 +1,9 @@
 [gd_scene load_steps=8 format=3 uid="uid://xd2ubttpr57h"]
 
-[ext_resource type="Script" path="res://game_parts/fish_interface/scripts/fish_for_card.gd" id="1_imhqo"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_for_card.gd" id="1_imhqo"]
 [ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://game_parts/fish_maker/resource_etc/width_curve/fish_curve.tres" id="2_fe658"]
-[ext_resource type="Script" path="res://game_parts/fish_interface/scripts/for_card_skeleton.gd" id="3_glnld"]
-[ext_resource type="Script" path="res://game_parts/fish_interface/scenes/camera_2d.gd" id="4_k2r8e"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/for_card_skeleton.gd" id="3_glnld"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scenes/camera_2d.gd" id="4_k2r8e"]
 
 [sub_resource type="Gradient" id="Gradient_n5icr"]
 

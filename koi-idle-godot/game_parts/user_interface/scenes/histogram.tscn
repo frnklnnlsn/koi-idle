@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://divpetnns07be"]
+
+[ext_resource type="Script" path="res://SandBox/graph_test/histogram.gd" id="1_odqf1"]
+
+[node name="Histogram" type="Control"]
+custom_minimum_size = Vector2(300, 270)
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_odqf1")

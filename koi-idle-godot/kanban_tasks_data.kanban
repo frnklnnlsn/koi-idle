@@ -12,16 +12,16 @@
 			"title": "Todo",
 			"tasks": [
 				"c655367f-1991-4ebe-b08f-62bcc53f06f4",
-				"a736e405-0e06-4be8-bdb8-5972163fe7f2"
+				"7340ed6c-ee71-4458-8b0b-9fe2c32607bd",
+				"ddad7e0c-2073-4b92-9fd9-259cb5a975fc"
 			]
 		},
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
 			"tasks": [
-				"f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
-				"13f25e2b-af7c-4ac3-a131-1c2da322bfe0",
-				"7340ed6c-ee71-4458-8b0b-9fe2c32607bd"
+				"4b7b7665-c66c-456c-941e-21197a1858f9",
+				"13f25e2b-af7c-4ac3-a131-1c2da322bfe0"
 			]
 		},
 		{
@@ -29,7 +29,9 @@
 			"title": "Done",
 			"tasks": [
 				"911f1843-c172-47f8-9435-7dc63feb39bf",
-				"c7d71841-9412-4e93-8336-9e57c2dafb76"
+				"c7d71841-9412-4e93-8336-9e57c2dafb76",
+				"f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
+				"a736e405-0e06-4be8-bdb8-5972163fe7f2"
 			]
 		}
 	],
@@ -50,7 +52,7 @@
 		},
 		{
 			"uuid": "13f25e2b-af7c-4ac3-a131-1c2da322bfe0",
-			"title": "create a economy singleton",
+			"title": "economy singleton",
 			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []
@@ -78,8 +80,22 @@
 		},
 		{
 			"uuid": "a736e405-0e06-4be8-bdb8-5972163fe7f2",
-			"title": "display fish card",
+			"title": "edit: display fish card",
 			"description": "fish card needs to be made so it can be juiced, maybe a node 2D also figure out who is talking to the who\n",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "4b7b7665-c66c-456c-941e-21197a1858f9",
+			"title": "fish interface UI",
+			"description": "\nadd sell lock functionality\n\n\nadd funciton to buy max, (requires economy)\nadd function to keep and keep all, (take fish res, add it to list of kept fish) remove card\nadd function to sell and sell all (for each fish card que free card, dont save resource)\n\nneed a list of fish resource during purchase will be different then fish in pond, \neither keep all or sell all will remove the fish res from that list and add to permanant or\njust remove\n",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "ddad7e0c-2073-4b92-9fd9-259cb5a975fc",
+			"title": "fish handler singleton",
+			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []
 		}

@@ -15,7 +15,7 @@ extends Node
 
 
 func _ready():
-	generate_random_fish(50)
+	generate_random_fish(25)
 
 	pass
 

@@ -20,7 +20,7 @@ var selected_pallet: PackedColorArray = PackedColorArray([
 
 var fish_cost_array = [1,10,100] # the cost of the different ranks
 
-var fish_base_value = 100
+var fish_base_value = .1
 var fish_base_mass = .5
 var fish_base_income = 1
 var groth_rate 
@@ -34,7 +34,7 @@ var groth_rate
 
 func generate_fish(num,rank):
 	
-	var save_data = SaveManager.load_saved_data() #should return the save data resource
+	#var save_data = SaveManager.load_saved_data() #should return the save data resource
 	var fish_res_Array = []
 	
 	for i in range(num):
@@ -45,10 +45,10 @@ func generate_fish(num,rank):
 		fish_res_Array.append(new_fish)
 		
 	#take the array of new fish res, and send it where it needs to be sent
-	save_data.list_of_fish.append(fish_res_Array)
-	SaveManager.save_current_data(save_data) ### adds the new_fish to the save_data resource 
-	Economy.update_income(fish_res_Array) ### update the economy stuff
-	new_fish.emit(fish_res_Array)
+	#save_data.list_of_shop_fish.append(fish_res_Array)### saves new generated fish to the shop list, that is the array to hold purchased fish, before sendiong
+	#SaveManager.save_current_data(save_data) ### adds the new_fish to the save_data resource 
+	#Economy.update_income(fish_res_Array) ### move this to the Economy, casue I am already sending signal
+	new_fish.emit(fish_res_Array) #fish interface is listening
 
 
  
@@ -98,6 +98,9 @@ func provide_values_based_on_rank(rank):
 
 func new_fish_res_get(value:float,rank:int) -> fish_conf: #returns resource with the given stats
 	var new_res = fish_res.duplicate(true)
+	
+	new_res.ID = generate_id(15)
+	new_res.rank = rank
 	new_res.value = value * fish_base_value
 	var new_mass =  value * fish_base_mass
 	new_res.mass = new_mass
@@ -110,7 +113,7 @@ func new_fish_res_get(value:float,rank:int) -> fish_conf: #returns resource with
 	new_res.carrying_capacity = carrying_capacity_get(new_mass)
 	new_res.x_start = x_start_get(new_growth_rate)
 	new_res.y_start = new_mass
-	
+	new_res.mid_point = mid_point_get()
 	return new_res
  
 
@@ -139,7 +142,7 @@ func create_right_skewed_array(My_Array:Array) -> Array:
 		
 		for j in range(weight):
 			weighted_array.append(i)
-	
+
 	return weighted_array
 
 
@@ -149,7 +152,9 @@ func growth_rate_get() -> float:
 	var growth_rate = randf_range(.75,5)
 	return growth_rate
 
-
+func mid_point_get() -> float:
+	var mid_point = randf_range(.75,5)
+	return mid_point
 func carrying_capacity_get(mass) -> int:
 	var y_start = mass*randi_range(1,100)
 	return y_start
@@ -239,3 +244,16 @@ func generate_colors(number_of_color: int, pallet: PackedColorArray) -> PackedCo
 		var index = randi_range(0, pallet.size() - 1)  # Use full range of palette
 		colors.append(pallet[index])
 	return colors
+
+
+func generate_id(length: int = 15) -> String:
+	var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var id = ""
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	
+	for i in length:
+		var random_index = rng.randi() % characters.length()
+		id += characters[random_index]
+	
+	return id
