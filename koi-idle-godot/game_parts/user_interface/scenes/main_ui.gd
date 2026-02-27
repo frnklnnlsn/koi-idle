@@ -2,6 +2,7 @@ extends Control
 
 @onready var net_worth_label = %net_worth
 @onready var capacity_label = %capacity
+@onready var fish_interface = %fish_interface
 
 
 func _process(delta)->void:
@@ -17,3 +18,16 @@ func _process(delta)->void:
 	net_worth_label.text ="$: " + str(net_worth)
 	
 	
+
+
+
+
+
+func _on_button_2_pressed():
+	if fish_interface.visible == false:
+		fish_interface.visible = true
+	else:
+		fish_interface.visible = false
+	
+	
+	pass # Replace with function body.

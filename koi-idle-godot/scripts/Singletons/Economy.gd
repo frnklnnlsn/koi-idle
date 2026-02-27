@@ -8,7 +8,7 @@ func _ready()->void:
 	FishGenerator.new_fish.connect(for_new_fish)
 
 
-func _process(delta)->void: #save the income and networth to the savedata
+func _process(delta)->void: #save the income and networth to the savedata, is this good?
 	var save_data = SaveManager.load_saved_data() 
 	save_data.income = income
 	save_data.net_worth = net_worth

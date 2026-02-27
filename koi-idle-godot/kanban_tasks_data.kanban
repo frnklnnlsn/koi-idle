@@ -98,6 +98,13 @@
 			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []
+		},
+		{
+			"uuid": "f5154ad4-94ba-493b-b7a9-dcf4a742d71d",
+			"title": "",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
 		}
 	],
 	"layout": {

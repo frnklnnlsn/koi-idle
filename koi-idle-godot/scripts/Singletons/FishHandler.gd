@@ -1,13 +1,15 @@
 extends Node
 #var list_of_work_fish:Array 
 #var lsit_of_retired_fish:Array
-#var list_of_shop_fish:Array
+var list_of_shop_fish:Array
 var capacity = 100
 var total_fish:int
 
 
 
 func _ready()->void:
+	var save_data = SaveManager.load_saved_data()
+	list_of_shop_fish = save_data.list_of_shop_fish
 	FishGenerator.new_fish.connect(save_shop_fish)
 
 

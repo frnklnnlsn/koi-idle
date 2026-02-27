@@ -88,7 +88,7 @@ stretch_shrink = 2
 [node name="FishViewport" type="SubViewport" parent="SubViewportContainer"]
 unique_name_in_owner = true
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(566, 314)
 render_target_update_mode = 4
 
 [node name="card_button" type="Button" parent="."]

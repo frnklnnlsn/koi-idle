@@ -183,7 +183,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(125, 0)
 layout_mode = 2
 size_flags_horizontal = 8
-text = "10"
+text = "1"
 alignment = 1
 
 [node name="qnty_slider" type="HSlider" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container"]

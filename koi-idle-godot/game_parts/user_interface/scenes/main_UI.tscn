@@ -1,7 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://bd0wbjjmochmp"]
+[gd_scene load_steps=10 format=4 uid="uid://bd0wbjjmochmp"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/main_ui.gd" id="1_e4xtb"]
 [ext_resource type="PackedScene" uid="uid://kg4tm1ni7a1p" path="res://game_parts/user_interface/scenes/shop_interface.tscn" id="2_k8snr"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scenes/sub_viewport.gd" id="2_xfou0"]
+[ext_resource type="Script" path="res://game_parts/fish_gallery/scenes/canvas_layer.gd" id="3_khd06"]
+[ext_resource type="PackedScene" uid="uid://yovlfndii0yq" path="res://game_parts/pond_scenes/scenes/pond.tscn" id="4_b1kcu"]
+[ext_resource type="Shader" path="res://game_parts/fish_gallery/scenes/fish_gallery.gdshader" id="5_ol864"]
+[ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="6_hcvnt"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gu02c"]
+shader = ExtResource("5_ol864")
+shader_parameter/intensity = 0.0
+shader_parameter/base_water_color = Color(0.105, 0.15, 0.118, 1)
+shader_parameter/highlight_scale = 1.0
+shader_parameter/clarity = 0.65
 
 [node name="Main_UI" type="Control"]
 layout_mode = 3
@@ -11,6 +24,59 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_e4xtb")
+
+[node name="PondViewport" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 2
+
+[node name="SubViewport" type="SubViewport" parent="PondViewport"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+script = ExtResource("2_xfou0")
+
+[node name="Camera2D" type="Camera2D" parent="PondViewport/SubViewport"]
+zoom = Vector2(0.075, 0.075)
+
+[node name="background" type="CanvasLayer" parent="PondViewport/SubViewport"]
+layer = -1
+script = ExtResource("3_khd06")
+
+[node name="background" type="ColorRect" parent="PondViewport/SubViewport/background"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.08, 0.827451)
+
+[node name="Pond" parent="PondViewport/SubViewport/background" instance=ExtResource("4_b1kcu")]
+
+[node name="ColorRect" type="ColorRect" parent="PondViewport/SubViewport/background"]
+visible = false
+material = SubResource("ShaderMaterial_gu02c")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.475927, 0.475927, 0.475927, 0.160784)
+
+[node name="lilpads" type="CanvasLayer" parent="PondViewport/SubViewport"]
+visible = false
+
+[node name="lily_pads" type="TileMapLayer" parent="PondViewport/SubViewport/lilpads"]
+tile_map_data = PackedByteArray("AAACAAUAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wUAAAAAAAAAAAD+/wEAAAAAAAAAAAAAAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAIAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAUAAAAAAAAAAAA=")
+tile_set = ExtResource("6_hcvnt")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 clip_contents = true
@@ -45,7 +111,26 @@ layout_mode = 2
 text = "0/100
 "
 
+[node name="Spacer" type="Label" parent="VBoxContainer/Panel/HBoxContainer2"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Button2" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+layout_mode = 2
+text = "show"
+
+[node name="Temp" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Temp"
+script = ExtResource("7_1o2js")
+
 [node name="fish_interface" parent="VBoxContainer" instance=ExtResource("2_k8snr")]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
+
+[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Button2" to="." method="_on_button_2_pressed"]
+[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Temp" to="VBoxContainer/Panel/HBoxContainer2/Temp" method="_on_pressed"]

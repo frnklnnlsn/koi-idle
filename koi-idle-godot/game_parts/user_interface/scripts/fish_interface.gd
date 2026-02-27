@@ -23,6 +23,7 @@ var rank = 0
 
 var temp_fish_array = []
 @onready var selected_fish: fish_conf
+
 var fish_collection: Array = []
 var card_placement_index = 0
 
@@ -31,6 +32,8 @@ func _ready() -> void:
 	histogram_graph.bar_clicked.connect(for_bar_clicked)
 	keep.connect(for_keep_fish)
 	sell.connect(for_sell_fish)
+	
+	populate_fish_cards(FishHandler.list_of_shop_fish)
 
 ### Fish Card Management
 func populate_fish_cards(new_fish_array: Array):
@@ -158,15 +161,15 @@ func remove_fish_cards(fish_list: Array):
 				child.queue_free()
 
 func set_fish_label_data(fish_res: fish_conf) -> void:
-	print("=== DEBUG FISH DATA ===")
-	print("Fish resource: ", fish_res)
-	print("Fish ID: ", fish_res.ID)
-	print("Fish rank: ", fish_res.rank)
-	print("All properties: ")
-	for prop in fish_res.get_property_list():
-		if prop.name in ["ID", "rank", "cost", "income", "value"]:
-			print("  ", prop.name, ": ", fish_res.get(prop.name))
-	print("=======================")
+	#print("=== DEBUG FISH DATA ===")
+	#print("Fish resource: ", fish_res)
+	#print("Fish ID: ", fish_res.ID)
+	#print("Fish rank: ", fish_res.rank)
+	#print("All properties: ")
+	#for prop in fish_res.get_property_list():
+		#if prop.name in ["ID", "rank", "cost", "income", "value"]:
+			#print("  ", prop.name, ": ", fish_res.get(prop.name))
+	#print("=======================")
 	
 	fish_name.text = str(fish_res.ID)
 	fish_rank.text = str(fish_res.rank)
