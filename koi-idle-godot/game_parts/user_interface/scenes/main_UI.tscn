@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=4 uid="uid://bd0wbjjmochmp"]
+[gd_scene load_steps=12 format=4 uid="uid://bd0wbjjmochmp"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/main_ui.gd" id="1_e4xtb"]
 [ext_resource type="PackedScene" uid="uid://kg4tm1ni7a1p" path="res://game_parts/user_interface/scenes/shop_interface.tscn" id="2_k8snr"]
@@ -8,6 +8,8 @@
 [ext_resource type="Shader" path="res://game_parts/fish_gallery/scenes/fish_gallery.gdshader" id="5_ol864"]
 [ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="6_hcvnt"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
+[ext_resource type="Script" path="res://SandBox/PondComposition/component_scripts/fish_display.gd" id="7_k1q3n"]
+[ext_resource type="Script" path="res://SandBox/PondComposition/component_scripts/fish_factory.gd" id="8_7vram"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gu02c"]
 shader = ExtResource("5_ol864")
@@ -51,7 +53,6 @@ script = ExtResource("3_khd06")
 
 [node name="background" type="ColorRect" parent="PondViewport/SubViewport/background"]
 unique_name_in_owner = true
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -72,11 +73,16 @@ grow_vertical = 2
 color = Color(0.475927, 0.475927, 0.475927, 0.160784)
 
 [node name="lilpads" type="CanvasLayer" parent="PondViewport/SubViewport"]
-visible = false
 
 [node name="lily_pads" type="TileMapLayer" parent="PondViewport/SubViewport/lilpads"]
 tile_map_data = PackedByteArray("AAACAAUAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wUAAAAAAAAAAAD+/wEAAAAAAAAAAAAAAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAIAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAUAAAAAAAAAAAA=")
 tile_set = ExtResource("6_hcvnt")
+
+[node name="FishDisplay" type="Node" parent="PondViewport/SubViewport"]
+script = ExtResource("7_k1q3n")
+
+[node name="FishFactory" type="Node" parent="PondViewport/SubViewport"]
+script = ExtResource("8_7vram")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 clip_contents = true

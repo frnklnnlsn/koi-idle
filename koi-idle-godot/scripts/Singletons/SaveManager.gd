@@ -3,13 +3,14 @@ extends Node
 var save_path := "user://savegame.tres"
 
 func _ready() -> void:
-	print("stops here")
-	pass
+	var save_data := ResourceLoader.load(save_path)
+	print(save_data.list_of_work_fish)
 	#reset_save_data()
 	#var save_data := ResourceLoader.load(save_path)
 	#save_data = SaveData.new()
 	##save_current_data(save_data)
 	#make_player_save()
+	pass
 
 func load_saved_data() -> SaveData:
 	var save_data := ResourceLoader.load(save_path)
