@@ -12,16 +12,16 @@ extends Control
 @onready var fish_list_vbox: VBoxContainer = %FishListVBox
 
 # Detail label panel (same nodes as the shop, wired to FishLabelDisplay)
-@onready var name_label:   Label = %NameLable
-@onready var rank_label:   Label = %RankLable
-@onready var income_label: Label = %IncomeLable
-@onready var cost_label:   Label = %CostLable    # add if present in your scene
-@onready var sell_label:   Label = %SellLable    # add if present in your scene
+@onready var name_label:   Label = %fish_name
+@onready var rank_label:   Label = %fish_rank
+@onready var income_label: Label = %fish_income
+@onready var cost_label:   Label = %fish_cost    # add if present in your scene
+@onready var sell_label:   Label = %fish_sell    # add if present in your scene
 
 # Graphs (same references the shop uses)
-@onready var distribution_graph = %DistributionGraph   # adjust unique names
-@onready var growth_curve       = %GrowthCurve
-@onready var histogram_graph    = %HistogramGraph
+@onready var distribution_graph = %bellcurve   # adjust unique names
+@onready var growth_curve       = %Growth_curve
+@onready var histogram_graph    = %Histogram
 
 # Optional: a larger "selected fish" viewport, same as the shop's big preview
 @onready var preview_viewport: SubViewport = %PreviewViewport  # null-safe below
@@ -38,39 +38,39 @@ var _selected_row: Control = null
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	print("name_label: ", name_label)
+	print("rank_label: ", rank_label)
+	print("income_label: ", income_label)
+	print("cost_label: ", cost_label)
+	print("sell_label: ", sell_label)
 	assert(fish_list_vbox != null, "FishListVBox node not found — check the %FishListVBox unique name in the scene")
-	
+
 	_renderer = FishViewportRenderer.new()
 	add_child(_renderer)
-	
+
 	_list_manager = FishListManager.new(fish_list_vbox)
 	add_child(_list_manager)
-	# ...
-	# FishLabelDisplay accepts null nodes gracefully — omit labels your scene
-	# doesn't have by passing null.
+
 	_label_display = FishLabelDisplay.new(
-		name_label,
-		rank_label,
-		cost_label,   # pass null if your list panel has no cost label
-		income_label,
-		sell_label    # pass null if no sell label
+		name_label, rank_label, cost_label, income_label, sell_label
 	)
+
+	print("distribution_graph: ", distribution_graph)
+	print("growth_curve: ", growth_curve)
+	print("histogram_graph: ", histogram_graph)
 
 	_graph_manager = ShopGraphManager.new(
-		distribution_graph,
-		growth_curve,
-		histogram_graph
+		distribution_graph, growth_curve, histogram_graph
 	)
+	add_child(_graph_manager)
 
-	# Wire list manager signals → local handlers
 	_list_manager.row_hovered.connect(_on_row_hovered)
 	_list_manager.row_clicked.connect(_on_row_clicked)
-	
+
 	var save_data = SaveManager.load_saved_data()
 	var list_of_fish = save_data.list_of_work_fish
 	if list_of_fish != null:
 		populate_list(list_of_fish)
-
 # ── Public API ────────────────────────────────────────────────────────────────
 
 ## Call this with your array of fish_conf resources to build the list.

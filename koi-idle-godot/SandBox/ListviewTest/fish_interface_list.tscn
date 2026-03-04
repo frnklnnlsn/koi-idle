@@ -69,7 +69,8 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
 
-[node name="RnakLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+[node name="RankLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -81,6 +82,7 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="IncomeLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 text = "Rank"
@@ -91,6 +93,7 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="NameLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 size_flags_horizontal = 3

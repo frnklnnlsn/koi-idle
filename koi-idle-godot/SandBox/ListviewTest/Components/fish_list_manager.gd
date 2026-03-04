@@ -10,6 +10,8 @@ signal rows_changed
 
 var vbox: VBoxContainer
 var row_scene = preload("res://SandBox/ListviewTest/scenes/fish_list_row.tscn")
+
+
 # ── Init ──────────────────────────────────────────────────────────────────────
 
 func _init(list_vbox: VBoxContainer) -> void:
@@ -60,9 +62,10 @@ func clear_all() -> void:
 ## Fill the inline labels that live on the row itself (name, rank, income).
 ## The full detail panel is driven by FishLabelDisplay on hover/click.
 func _populate_row_labels(row: Control, fish: fish_conf) -> void:
-	var name_l  = row.get_node_or_null("%RowNameLabel")
-	var rank_l  = row.get_node_or_null("%RowRankLabel")
+	var name_l   = row.get_node_or_null("%RowNameLabel")
+	var rank_l   = row.get_node_or_null("%RowRankLabel")
 	var income_l = row.get_node_or_null("%RowIncomeLabel")
+	print("row labels: ", name_l, rank_l, income_l)
 	if name_l:   name_l.text   = str(fish.ID)
 	if rank_l:   rank_l.text   = str(fish.rank)
 	if income_l: income_l.text = str(fish.income)

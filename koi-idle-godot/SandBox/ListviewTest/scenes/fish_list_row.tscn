@@ -26,7 +26,7 @@ render_target_update_mode = 4
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NameLable" type="Label" parent="."]
+[node name="RowNameLabel" type="Label" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 text = "f7yhyh7i323
@@ -37,7 +37,7 @@ horizontal_alignment = 1
 [node name="VSeparator2" type="VSeparator" parent="."]
 layout_mode = 2
 
-[node name="RankLable" type="Label" parent="."]
+[node name="RowRankLabel" type="Label" parent="."]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
@@ -49,7 +49,7 @@ horizontal_alignment = 1
 [node name="VSeparator3" type="VSeparator" parent="."]
 layout_mode = 2
 
-[node name="IncomeLable" type="Label" parent="."]
+[node name="RowIncomeLabel" type="Label" parent="."]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
