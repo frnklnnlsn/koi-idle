@@ -11,100 +11,72 @@
 			"uuid": "1652d0ce-a1b7-42ca-b6dc-88cda0b66a56",
 			"title": "Todo",
 			"tasks": [
-				"c655367f-1991-4ebe-b08f-62bcc53f06f4",
-				"7340ed6c-ee71-4458-8b0b-9fe2c32607bd",
-				"ddad7e0c-2073-4b92-9fd9-259cb5a975fc"
+				"82037116-8bb3-418a-a608-2b938a76e1d2",
+				"5d578349-26a0-460a-86ff-6ab775fa4d01",
+				"752cf15b-2702-41b2-99ea-068b315ae7e0"
 			]
 		},
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
-			"tasks": [
-				"4b7b7665-c66c-456c-941e-21197a1858f9",
-				"13f25e2b-af7c-4ac3-a131-1c2da322bfe0"
-			]
+			"tasks": []
 		},
 		{
 			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
 			"title": "Done",
-			"tasks": [
-				"911f1843-c172-47f8-9435-7dc63feb39bf",
-				"c7d71841-9412-4e93-8336-9e57c2dafb76",
-				"f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
-				"a736e405-0e06-4be8-bdb8-5972163fe7f2"
-			]
+			"tasks": []
 		}
 	],
 	"tasks": [
-		{
-			"uuid": "911f1843-c172-47f8-9435-7dc63feb39bf",
-			"title": "made a fish visualizer",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "c7d71841-9412-4e93-8336-9e57c2dafb76",
-			"title": "made a visual fish loader",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "13f25e2b-af7c-4ac3-a131-1c2da322bfe0",
-			"title": "economy singleton",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "c655367f-1991-4ebe-b08f-62bcc53f06f4",
-			"title": "create a Display singleton",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "f913c06f-ff6c-4b72-84b6-3e5e65830c7c",
-			"title": "on fish purchase buy generate",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "7340ed6c-ee71-4458-8b0b-9fe2c32607bd",
-			"title": "figure out growth curve value generation, and visualization",
-			"description": "might need to make the graph to see before making the values\n",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "a736e405-0e06-4be8-bdb8-5972163fe7f2",
-			"title": "edit: display fish card",
-			"description": "fish card needs to be made so it can be juiced, maybe a node 2D also figure out who is talking to the who\n",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "4b7b7665-c66c-456c-941e-21197a1858f9",
-			"title": "fish interface UI",
-			"description": "\nadd sell lock functionality\n\n\nadd funciton to buy max, (requires economy)\nadd function to keep and keep all, (take fish res, add it to list of kept fish) remove card\nadd function to sell and sell all (for each fish card que free card, dont save resource)\n\nneed a list of fish resource during purchase will be different then fish in pond, \neither keep all or sell all will remove the fish res from that list and add to permanant or\njust remove\n",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
-		{
-			"uuid": "ddad7e0c-2073-4b92-9fd9-259cb5a975fc",
-			"title": "fish handler singleton",
-			"description": "",
-			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
-			"steps": []
-		},
 		{
 			"uuid": "f5154ad4-94ba-493b-b7a9-dcf4a742d71d",
 			"title": "",
 			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []
+		},
+		{
+			"uuid": "82037116-8bb3-418a-a608-2b938a76e1d2",
+			"title": "FishCharacter",
+			"description": "Split Procedural Fish into components, so that it can be itterated on faster",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": [
+				{
+					"details": "Composition",
+					"done": false
+				},
+				{
+					"details": "Procedural Body",
+					"done": false
+				},
+				{
+					"details": "New Designs",
+					"done": false
+				},
+				{
+					"details": "Color Pallet",
+					"done": false
+				}
+			]
+		},
+		{
+			"uuid": "5d578349-26a0-460a-86ff-6ab775fa4d01",
+			"title": "Implament Clock",
+			"description": "Clock needs to talk with various parts of the Game.",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "752cf15b-2702-41b2-99ea-068b315ae7e0",
+			"title": "UserInterface",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": [
+				{
+					"details": "ViewPondList",
+					"done": false
+				}
+			]
 		}
 	],
 	"layout": {

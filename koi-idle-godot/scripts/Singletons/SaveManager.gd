@@ -1,45 +1,28 @@
+# save_manager.gd
 extends Node
 
-var save_path := "user://savegame.tres"
+const SAVE_PATH := "user://savegame.tres"
 
 func _ready() -> void:
-	var save_data := ResourceLoader.load(save_path)
-	print(save_data.list_of_work_fish)
-	#reset_save_data()
-	#var save_data := ResourceLoader.load(save_path)
-	#save_data = SaveData.new()
-	##save_current_data(save_data)
-	#make_player_save()
-	pass
+	# Ensure a save file exists on first launch
+	make_player_save()
 
 func load_saved_data() -> SaveData:
-	var save_data := ResourceLoader.load(save_path)
+	var save_data := ResourceLoader.load(SAVE_PATH) as SaveData
 	if save_data != null:
-		#print("Loaded save from:", ProjectSettings.globalize_path(save_path))
 		return save_data
-	else:
-		#print("❌ Failed to load save file.")
-		return null
+	push_warning("SaveManager: No save file found, returning empty SaveData.")
+	return SaveData.new()  # never returns null
 
-func make_player_save():
-	var save_data := ResourceLoader.load(save_path)
-	if save_data == null:
-		save_data = SaveData.new()
+func make_player_save() -> void:
+	# Only creates a new save if one doesn't already exist
+	if not FileAccess.file_exists(SAVE_PATH):
+		var save_data := SaveData.new()
+		ResourceSaver.save(save_data, SAVE_PATH)
 
+func save_current_data(save_data: SaveData) -> void:
+	ResourceSaver.save(save_data, SAVE_PATH)
 
-
-	# Save to disk
-	var error = ResourceSaver.save(save_data,save_path)
-	#print("Saving to:", ProjectSettings.globalize_path(save_path))
-	#print("Save result code:", error)  # 0 = OK
-
-func save_current_data(save_data: SaveData):
-	var error = ResourceSaver.save(save_data, save_path)
-	#print("Save result code:", error)
-
-
-
-func reset_save_data():
-	var save_data = SaveData.new()
-	var error = ResourceSaver.save(save_data, save_path)
-	#print("Save result code:", error)
+func reset_save_data() -> void:
+	var save_data := SaveData.new()
+	ResourceSaver.save(save_data, SAVE_PATH)

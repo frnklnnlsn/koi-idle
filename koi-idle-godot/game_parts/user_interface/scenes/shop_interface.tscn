@@ -208,7 +208,7 @@ theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 10
 
-[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer"]
+[node name="Buy" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer"]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -481,7 +481,7 @@ size_flags_horizontal = 3
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card/HBoxContainer/keep" to="." method="_on_keep_pressed"]
 [connection signal="item_selected" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/class_button" to="." method="_on_class_button_item_selected"]
 [connection signal="text_submitted" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container/HBoxContainer/qnty_line" to="." method="_on_qnty_line_text_submitted"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer/Buy" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer2/buy max" to="." method="_on_buy_max_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer4/HBoxContainer/MarginContainer/sell all" to="." method="_on_sell_all_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer4/HBoxContainer/MarginContainer2/keep all" to="." method="_on_keep_all_pressed"]

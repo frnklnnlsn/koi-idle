@@ -1,0 +1,349 @@
+[gd_scene load_steps=10 format=3 uid="uid://bm0if5kw5881g"]
+
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_card.gd" id="1_5yjlm"]
+[ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_q7idn"]
+[ext_resource type="Script" path="res://SandBox/ListviewTest/fish_interface_list.gd" id="1_rjon6"]
+[ext_resource type="PackedScene" uid="uid://4vwbflnmb4sg" path="res://SandBox/graph_test/bellcurve.tscn" id="2_citw5"]
+[ext_resource type="PackedScene" uid="uid://bqirbbsed5kfc" path="res://SandBox/graph_test/growth_curve.tscn" id="3_60prq"]
+[ext_resource type="PackedScene" uid="uid://c83nj3e08njta" path="res://fish_list_row.tscn" id="3_vhpe5"]
+[ext_resource type="PackedScene" uid="uid://divpetnns07be" path="res://game_parts/user_interface/scenes/histogram.tscn" id="4_5oxw5"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gsvso"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tao52"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="FishInterfaceList" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rjon6")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_gsvso")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer"]
+custom_minimum_size = Vector2(1158, 200)
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 20
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="ListContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="IconSpacer" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="RnakLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ID"
+label_settings = ExtResource("1_q7idn")
+horizontal_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="IncomeLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+text = "Rank"
+label_settings = ExtResource("1_q7idn")
+horizontal_alignment = 1
+
+[node name="VSeparator2" type="VSeparator" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="NameLableHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.6
+text = "Income
+(coin/sec)"
+label_settings = ExtResource("1_q7idn")
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FishListVBox" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ListLineContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/ScrollContainer/FishListVBox" instance=ExtResource("3_vhpe5")]
+layout_mode = 2
+
+[node name="FishDisplayContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+custom_minimum_size = Vector2(425, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="display_fish_card" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+script = ExtResource("1_5yjlm")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card"]
+layout_mode = 2
+stretch = true
+stretch_shrink = 4
+
+[node name="FishViewport" type="SubViewport" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card/SubViewportContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(45, 45)
+render_target_update_mode = 4
+
+[node name="Panel" type="Panel" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tao52")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card"]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="fish info container" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "name:"
+
+[node name="fish_name" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "f7yhyh7i323"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "rank:"
+
+[node name="fish_rank" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "ONE"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+text = "cost:"
+
+[node name="fish_cost" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer4"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "2000"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "income:"
+
+[node name="fish_income" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "10 coin/sec"
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer5"]
+layout_mode = 2
+text = "sell value:"
+
+[node name="sell value" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/fish info container/VBoxContainer/HBoxContainer5"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+text = "1500"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MarginContainer8" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MarginContainer7" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="bellcurve" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer7" instance=ExtResource("2_citw5")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 270)
+layout_mode = 2
+
+[node name="MarginContainer6" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="Growth_curve" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer6" instance=ExtResource("3_60prq")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 270)
+layout_mode = 2
+
+[node name="histogramContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 10
+
+[node name="Histogram" parent="PanelContainer/VBoxContainer/HBoxContainer/histogramContainer" instance=ExtResource("4_5oxw5")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MarginContainer5" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="MarginContainer3" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "name:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Franklin"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "income:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "10 coin/sec"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "mass:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "1 kG"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+text = "growth rate:"
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer3/VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "2 mG/sec"
+
+[node name="MarginContainer4" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[connection signal="mouse_entered" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_mouse_exited"]
+[connection signal="mouse_entered" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card/SubViewportContainer" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_sub_viewport_container_mouse_entered"]
+[connection signal="mouse_exited" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card/SubViewportContainer" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_sub_viewport_container_mouse_exited"]
+[connection signal="mouse_entered" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card/Panel" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_panel_mouse_entered"]
+[connection signal="mouse_exited" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card/Panel" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/FishDisplayContainer/display_fish_card" method="_on_panel_mouse_exited"]

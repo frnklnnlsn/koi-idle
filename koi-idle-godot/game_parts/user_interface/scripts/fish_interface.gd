@@ -63,14 +63,15 @@ func _on_card_selected(fish: fish_conf):
 	selected_fish = null if selected_fish == fish else fish
 
 func _on_keep(list: Array):
-	if not selected_fish: return
+	if list.is_empty(): return
 	card_manager.remove_cards(list)
 	_after_transaction(list)
 	FishHandler.save_work_fish(list)
 	FishHandler.remove_shop_fish(list)
+	DisplayManager.display_new_fish.emit(list)
 
 func _on_sell(list: Array):
-	if not selected_fish: return
+	if list.is_empty(): return
 	card_manager.remove_cards(list)
 	_after_transaction(list)
 	Economy.for_sell_fish(list)

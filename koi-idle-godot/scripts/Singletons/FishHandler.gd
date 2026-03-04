@@ -7,11 +7,13 @@ var total_fish:int
 
 
 
-func _ready()->void:
-	var save_data = SaveManager.load_saved_data()
+func _ready() -> void:
+	var save_data := SaveManager.load_saved_data()
+	if save_data == null:
+		push_error("Could not load save data in " + name)
+		return
 	list_of_shop_fish = save_data.list_of_shop_fish
 	FishGenerator.new_fish.connect(save_shop_fish)
-
 
 func _process(delta)->void:
 	calculate_total_fish()

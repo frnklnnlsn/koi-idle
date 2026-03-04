@@ -8,8 +8,8 @@
 [ext_resource type="Shader" path="res://game_parts/fish_gallery/scenes/fish_gallery.gdshader" id="5_ol864"]
 [ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="6_hcvnt"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
-[ext_resource type="Script" path="res://SandBox/PondComposition/component_scripts/fish_display.gd" id="7_k1q3n"]
-[ext_resource type="Script" path="res://SandBox/PondComposition/component_scripts/fish_factory.gd" id="8_7vram"]
+[ext_resource type="Script" path="res://SandBox/Composition/component_scripts/fish_display.gd" id="7_k1q3n"]
+[ext_resource type="Script" path="res://SandBox/Composition/component_scripts/fish_factory.gd" id="8_7vram"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gu02c"]
 shader = ExtResource("5_ol864")
@@ -27,7 +27,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_e4xtb")
 
-[node name="PondViewport" type="SubViewportContainer" parent="."]
+[node name="PondViewportContainer" type="SubViewportContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -37,21 +37,21 @@ grow_vertical = 2
 stretch = true
 stretch_shrink = 2
 
-[node name="SubViewport" type="SubViewport" parent="PondViewport"]
+[node name="PondViewport" type="SubViewport" parent="PondViewportContainer"]
 unique_name_in_owner = true
 handle_input_locally = false
 size = Vector2i(576, 324)
 render_target_update_mode = 4
 script = ExtResource("2_xfou0")
 
-[node name="Camera2D" type="Camera2D" parent="PondViewport/SubViewport"]
+[node name="Camera2D" type="Camera2D" parent="PondViewportContainer/PondViewport"]
 zoom = Vector2(0.075, 0.075)
 
-[node name="background" type="CanvasLayer" parent="PondViewport/SubViewport"]
+[node name="background" type="CanvasLayer" parent="PondViewportContainer/PondViewport"]
 layer = -1
 script = ExtResource("3_khd06")
 
-[node name="background" type="ColorRect" parent="PondViewport/SubViewport/background"]
+[node name="background" type="ColorRect" parent="PondViewportContainer/PondViewport/background"]
 unique_name_in_owner = true
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,9 +60,9 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.08, 0.08, 0.08, 0.827451)
 
-[node name="Pond" parent="PondViewport/SubViewport/background" instance=ExtResource("4_b1kcu")]
+[node name="Pond" parent="PondViewportContainer/PondViewport/background" instance=ExtResource("4_b1kcu")]
 
-[node name="ColorRect" type="ColorRect" parent="PondViewport/SubViewport/background"]
+[node name="ColorRect" type="ColorRect" parent="PondViewportContainer/PondViewport/background"]
 visible = false
 material = SubResource("ShaderMaterial_gu02c")
 anchors_preset = 15
@@ -72,16 +72,16 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.475927, 0.475927, 0.475927, 0.160784)
 
-[node name="lilpads" type="CanvasLayer" parent="PondViewport/SubViewport"]
+[node name="lilpads" type="CanvasLayer" parent="PondViewportContainer/PondViewport"]
 
-[node name="lily_pads" type="TileMapLayer" parent="PondViewport/SubViewport/lilpads"]
+[node name="lily_pads" type="TileMapLayer" parent="PondViewportContainer/PondViewport/lilpads"]
 tile_map_data = PackedByteArray("AAACAAUAAAAAAAAAAAACAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAD8/wUAAAAAAAAAAAD+/wEAAAAAAAAAAAAAAAYAAAAAAAAAAAACAAYAAAAAAAAAAAADAAIAAAAAAAAAAAADAAEAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAUAAAAAAAAAAAA=")
 tile_set = ExtResource("6_hcvnt")
 
-[node name="FishDisplay" type="Node" parent="PondViewport/SubViewport"]
+[node name="FishDisplay" type="Node" parent="PondViewportContainer/PondViewport"]
 script = ExtResource("7_k1q3n")
 
-[node name="FishFactory" type="Node" parent="PondViewport/SubViewport"]
+[node name="FishFactory" type="Node" parent="PondViewportContainer/PondViewport"]
 script = ExtResource("8_7vram")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
