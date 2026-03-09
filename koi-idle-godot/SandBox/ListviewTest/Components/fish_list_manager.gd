@@ -23,7 +23,7 @@ func _init(list_vbox: VBoxContainer) -> void:
 ## Pass in a FishViewportRenderer so the viewport is filled the same way cards are.
 func add_row(fish: fish_conf, renderer: FishViewportRenderer) -> Control:
 	var row = row_scene.instantiate()
-	assert(row is HBoxContainer and row.get_script() != null, 
+	assert(row is PanelContainer and row.get_script() != null, 
 		   "fish_list_row.tscn root node is missing fish_list_row.gd script")
 
 	row.fish_resource = fish
@@ -51,7 +51,7 @@ func remove_rows(fish_list: Array) -> void:
 ## Wipe every row out of the list.
 func clear_all() -> void:
 	if not vbox:
-		push_error("FishListManager: vbox is null — was it passed correctly in _init()?")
+		#push_error("FishListManager: vbox is null — was it passed correctly in _init()?")
 		return
 	for child in vbox.get_children():
 		child.queue_free()
@@ -65,7 +65,7 @@ func _populate_row_labels(row: Control, fish: fish_conf) -> void:
 	var name_l   = row.get_node_or_null("%RowNameLabel")
 	var rank_l   = row.get_node_or_null("%RowRankLabel")
 	var income_l = row.get_node_or_null("%RowIncomeLabel")
-	print("row labels: ", name_l, rank_l, income_l)
+	#print("row labels: ", name_l, rank_l, income_l)
 	if name_l:   name_l.text   = str(fish.ID)
 	if rank_l:   rank_l.text   = str(fish.rank)
 	if income_l: income_l.text = str(fish.income)
@@ -81,3 +81,13 @@ func _on_row_hovered(fish: fish_conf) -> void:
 
 func _on_row_clicked(fish: fish_conf) -> void:
 	row_clicked.emit(fish)
+	
+func merge(fish_array: Array, renderer: FishViewportRenderer) -> void:
+	var existing: Array = []
+	for child in vbox.get_children():
+		if child.get("fish_resource") != null:
+			existing.append(child.fish_resource)
+	
+	for fish in fish_array:
+		if fish not in existing:
+			add_row(fish, renderer)

@@ -1,4 +1,4 @@
-# ShopDisplay.gd
+# shop_ui.gd
 extends Control
 
 signal sell(fish_resource_array: Array)
@@ -6,6 +6,11 @@ signal sell(fish_resource_array: Array)
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
 @onready var fish_viewport:     SubViewport   = %FishViewport
 @onready var display_fish_card: Control       = %display_fish_card
+@onready var rank_cost_label: Label = %RankCostLabel
+@onready var class_button: OptionButton = %class_button
+@onready var buy_button: Button = %BuyButton
+@onready var buy_max_button: Button = %BuyMaxButton
+
 
 var card_manager:  FishCardManager
 var renderer:      FishViewportRenderer
@@ -16,13 +21,19 @@ var selected_fish: fish_conf = null
 var rank:           int = 0
 var number_of_fish: int = 1
 
-
+var _last_known_net_worth: float = -1.0
 # --- Lifecycle ---
 
 func _ready() -> void:
 	_init_managers()
 	_connect_signals()
 	await _populate(FishHandler.list_of_shop_fish)
+	_refresh_affordability()
+
+func _process(_delta: float) -> void:
+	if PassiveSystems.net_worth != _last_known_net_worth:
+		_last_known_net_worth = PassiveSystems.net_worth
+		_refresh_affordability()
 
 func _init_managers() -> void:
 	renderer      = FishViewportRenderer.new()
@@ -99,12 +110,10 @@ func _after_transaction() -> void:
 	selected_fish = null
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 	graph_manager.clear_hover()
+	_refresh_affordability()
 
 
-# --- Signal receivers ---
-
-func _on_new_fish(arr: Array) -> void:
-	await _populate(arr)
+# --- Signal receivers --
 
 
 # --- Button handlers ---
@@ -128,8 +137,11 @@ func _on_qnty_line_text_submitted(t: String) -> void:
 
 func _on_class_button_item_selected(i: int) -> void:
 	rank = i
+	rank_cost_label.text = "Cost: %d" % FishGenerator.FISH_COST[rank]
 
 func _on_button_pressed() -> void:
+	if PassiveSystems.net_worth < FishGenerator.FISH_COST[rank]:
+		return
 	FishGenerator.generate_fish(number_of_fish, rank)
 
 func _on_buy_max_pressed() -> void:
@@ -139,3 +151,25 @@ func _on_buy_max_pressed() -> void:
 	var can_buy: int = min(remainder, int(PassiveSystems.net_worth / cost))
 	if can_buy > 0:
 		FishGenerator.generate_fish(can_buy, rank)
+
+
+func _refresh_affordability() -> void:
+	# Clamp rank down to highest affordable
+	while rank > 0 and PassiveSystems.net_worth < FishGenerator.FISH_COST[rank]:
+		rank -= 1
+	class_button.selected = rank
+	rank_cost_label.text = "Cost: %d" % FishGenerator.FISH_COST[rank]
+
+	# Disable ranks you can't afford
+	for i in FishGenerator.FISH_COST.size():
+		var cost: int = FishGenerator.FISH_COST[i]
+		class_button.set_item_disabled(i, PassiveSystems.net_worth < cost)
+
+	# Block buying if you can't afford current rank
+	var can_afford: bool = PassiveSystems.net_worth >= FishGenerator.FISH_COST[rank]
+	buy_button.disabled = not can_afford
+	buy_max_button.disabled = not can_afford
+
+func _on_new_fish(arr: Array) -> void:
+	await _populate(arr)
+	_refresh_affordability()

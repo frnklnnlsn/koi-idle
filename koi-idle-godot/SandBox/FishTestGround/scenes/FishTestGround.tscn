@@ -1,0 +1,203 @@
+[gd_scene load_steps=4 format=3 uid="uid://cc1cpbhtcd80l"]
+
+[ext_resource type="Script" path="res://SandBox/FishTestGround/Scripts/fish_test_ground.gd" id="1_v2m5d"]
+[ext_resource type="Script" path="res://SandBox/FishTestGround/Scripts/debug_panel.gd" id="2_m3s53"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rsckn"]
+radius = 700.0
+
+[node name="FishTestGround" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_v2m5d")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 2
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(576, 324)
+render_target_update_mode = 4
+
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
+zoom = Vector2(0.075, 0.075)
+
+[node name="Area2D" type="Area2D" parent="SubViewportContainer/SubViewport"]
+
+[node name="BoundaryShape" type="CollisionShape2D" parent="SubViewportContainer/SubViewport/Area2D"]
+unique_name_in_owner = true
+shape = SubResource("CircleShape2D_rsckn")
+
+[node name="ShadowContainer" type="Node2D" parent="SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
+
+[node name="FishContainer" type="Node2D" parent="SubViewportContainer/SubViewport"]
+unique_name_in_owner = true
+
+[node name="DebugPanel" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_m3s53")
+
+[node name="PanelBody" type="PanelContainer" parent="DebugPanel"]
+unique_name_in_owner = true
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -461.0
+offset_right = -953.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 0
+size_flags_vertical = 8
+
+[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelBody"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelBody/MarginContainer"]
+layout_mode = 2
+
+[node name="SpawnCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpawnCountSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpawnButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Spawn
+"
+
+[node name="ClearButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear
+"
+
+[node name="BoundaryLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BoundarySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ZoomLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ZoomSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 3.0
+step = 0.1
+value = 0.5
+
+[node name="StateOption" type="OptionButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpeedLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SpeedSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ShadowToggle" type="CheckButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ShadowToggle
+"
+
+[node name="ShadowScaleLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ShadowScaleSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ShadowOpacityLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ShadowOpacitySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FishCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FpsLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="TogglePanelButton" type="Button" parent="DebugPanel"]
+unique_name_in_owner = true
+offset_right = 115.0
+offset_bottom = 31.0
+text = "◀ Panel"
+
+[node name="PanelFishCharacter" type="PanelContainer" parent="DebugPanel"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 184.0
+grow_horizontal = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelFishCharacter"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelFishCharacter/MarginContainer"]
+layout_mode = 2
+
+[node name="WaveAmplitudeSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaveAmplitudeLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaveFrequencySlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaveFrequencyLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaveStartSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaveStartLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WavePhaseSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WavePhaseLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2

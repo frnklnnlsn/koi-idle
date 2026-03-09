@@ -1,4 +1,4 @@
-class_name Pond extends SubViewport
+class_name Toilet extends SubViewport
 
 
 var _display: FishDisplay  # class-level variable
@@ -18,6 +18,6 @@ func _ready() -> void:
 
 func Display(list):
 	if _display == null:
-		push_warning("Display called before FishDisplay was initialized.")
+		#push_warning("Display called before FishDisplay was initialized.")
 		return
 	_display.display_all(list, self)

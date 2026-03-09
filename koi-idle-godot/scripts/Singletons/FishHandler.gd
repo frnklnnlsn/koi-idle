@@ -1,14 +1,15 @@
+#FishHandler.gd
 extends Node
 #var list_of_work_fish:Array 
 #var lsit_of_retired_fish:Array
 var list_of_shop_fish:Array
-var capacity = 100
+var capacity = 20
 var total_fish:int
 
-
+signal keep_fish(list)
 
 func _ready() -> void:
-	var save_data := SaveManager.load_saved_data()
+	var save_data :SaveData= SaveManager.load_saved_data()
 	if save_data == null:
 		push_error("Could not load save data in " + name)
 		return
@@ -78,3 +79,13 @@ func remove_work_fish(remove_work_fish:Array)->void:
 				save_data.list_of_work_fish.remove_at(index)
 		
 		SaveManager.save_current_data(save_data)
+
+func flush_to_retired(fish_list: Array) -> void:
+	var save_data: SaveData = SaveManager.load_saved_data()  # <-- missing this
+	if not save_data:
+		push_error("Could not load save data in flush_to_retired")
+		return
+	for fish in fish_list:
+		PassiveSystems.retire_fish(fish)
+		save_data.list_of_retired_fish.append(fish)
+	SaveManager.save_current_data(save_data)

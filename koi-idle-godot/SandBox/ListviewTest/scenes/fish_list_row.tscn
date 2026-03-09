@@ -1,32 +1,49 @@
-[gd_scene load_steps=3 format=3 uid="uid://btjfq1ts34p5o"]
+[gd_scene load_steps=6 format=3 uid="uid://btjfq1ts34p5o"]
 
 [ext_resource type="Script" path="res://SandBox/ListviewTest/scenes/fish_list_row.gd" id="1_f8qhh"]
 [ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_sn4uf"]
 
-[node name="FishListRow" type="HBoxContainer"]
-script = ExtResource("1_f8qhh")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fyua3"]
+bg_color = Color(0.7655, 0.491586, 0.724425, 1)
 
-[node name="Spacer2" type="Label" parent="."]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ucq3i"]
+bg_color = Color(0.707749, 0.579895, 0.34638, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iq83y"]
+bg_color = Color(0.370471, 0.674774, 0.511318, 1)
+
+[node name="FishListRow" type="PanelContainer"]
+offset_right = 271.0
+offset_bottom = 30.0
+script = ExtResource("1_f8qhh")
+normal_color = SubResource("StyleBoxFlat_fyua3")
+hover_color = SubResource("StyleBoxFlat_ucq3i")
+selected_color = SubResource("StyleBoxFlat_iq83y")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Spacer2" type="Label" parent="HBoxContainer"]
 custom_minimum_size = Vector2(3, 0)
 layout_mode = 2
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="HBoxContainer"]
 custom_minimum_size = Vector2(30, 30)
 layout_mode = 2
 stretch = true
 stretch_shrink = 4
 
-[node name="FishViewport" type="SubViewport" parent="SubViewportContainer"]
+[node name="FishViewport" type="SubViewport" parent="HBoxContainer/SubViewportContainer"]
 unique_name_in_owner = true
 handle_input_locally = false
 size = Vector2i(7, 7)
 render_target_update_mode = 4
 
-[node name="Spacer" type="Label" parent="."]
+[node name="Spacer" type="Label" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="RowNameLabel" type="Label" parent="."]
+[node name="RowNameLabel" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "f7yhyh7i323
@@ -34,10 +51,10 @@ text = "f7yhyh7i323
 label_settings = ExtResource("1_sn4uf")
 horizontal_alignment = 1
 
-[node name="VSeparator2" type="VSeparator" parent="."]
+[node name="VSeparator2" type="VSeparator" parent="HBoxContainer"]
 layout_mode = 2
 
-[node name="RowRankLabel" type="Label" parent="."]
+[node name="RowRankLabel" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
@@ -46,10 +63,10 @@ text = "One
 label_settings = ExtResource("1_sn4uf")
 horizontal_alignment = 1
 
-[node name="VSeparator3" type="VSeparator" parent="."]
+[node name="VSeparator3" type="VSeparator" parent="HBoxContainer"]
 layout_mode = 2
 
-[node name="RowIncomeLabel" type="Label" parent="."]
+[node name="RowIncomeLabel" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(65, 0)
 layout_mode = 2

@@ -24,7 +24,6 @@ noise = SubResource("FastNoiseLite_cht2s")
 
 [node name="procedural_fish" type="Node2D"]
 script = ExtResource("1_2gj4d")
-circle_radius = 4000.0
 
 [node name="skeleton" type="Line2D" parent="."]
 unique_name_in_owner = true

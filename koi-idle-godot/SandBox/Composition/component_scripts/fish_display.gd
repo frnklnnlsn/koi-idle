@@ -8,4 +8,6 @@ func _init(fish_factory: FishFactory):
 
 func display_all(fish_list: Array, container: Node):
 	for fish in fish_list:
-		container.add_child(factory.build(fish))
+		var fish_node = factory.build(fish)
+		fish_node.name = fish.ID
+		container.add_child(fish_node)

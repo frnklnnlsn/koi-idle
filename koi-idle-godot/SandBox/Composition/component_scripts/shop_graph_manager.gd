@@ -4,6 +4,7 @@ extends Node
 var distribution_graph
 var growth_curve
 var histogram_graph
+var is_pond: bool = false  # ← ADD THIS
 
 func _init(dist, growth, hist):
 	distribution_graph = dist
@@ -12,8 +13,11 @@ func _init(dist, growth, hist):
 
 func update_for_fish(fish: fish_conf):
 	if distribution_graph: distribution_graph.set_fish_value(fish.value)
-	if growth_curve:        growth_curve.set_fish_growth(fish)
-	if histogram_graph:     histogram_graph.set_fish_card_hover(fish)
+	if growth_curve:
+		growth_curve.set_fish_growth(fish)
+		if is_pond:                             # ← ADD THIS
+			growth_curve.set_progress_marker(fish)
+	if histogram_graph: histogram_graph.set_fish_card_hover(fish)
 
 func refresh_histogram(fish_array: Array):
 	if histogram_graph: histogram_graph.set_fish_collection(fish_array)

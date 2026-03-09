@@ -11,20 +11,24 @@
 			"uuid": "1652d0ce-a1b7-42ca-b6dc-88cda0b66a56",
 			"title": "Todo",
 			"tasks": [
-				"82037116-8bb3-418a-a608-2b938a76e1d2",
-				"5d578349-26a0-460a-86ff-6ab775fa4d01",
-				"752cf15b-2702-41b2-99ea-068b315ae7e0"
+				"82037116-8bb3-418a-a608-2b938a76e1d2"
 			]
 		},
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
-			"tasks": []
+			"tasks": [
+				"631f981b-bdbd-4891-9dc4-2ef0fc0ebee0",
+				"d2ac99ed-33d8-4821-8b8a-201961107e0f"
+			]
 		},
 		{
 			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
 			"title": "Done",
-			"tasks": []
+			"tasks": [
+				"5d578349-26a0-460a-86ff-6ab775fa4d01",
+				"752cf15b-2702-41b2-99ea-068b315ae7e0"
+			]
 		}
 	],
 	"tasks": [
@@ -56,6 +60,10 @@
 				{
 					"details": "Color Pallet",
 					"done": false
+				},
+				{
+					"details": "body growth",
+					"done": false
 				}
 			]
 		},
@@ -74,7 +82,43 @@
 			"steps": [
 				{
 					"details": "ViewPondList",
+					"done": true
+				}
+			]
+		},
+		{
+			"uuid": "631f981b-bdbd-4891-9dc4-2ef0fc0ebee0",
+			"title": "shop tweaks",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": [
+				{
+					"details": "show cost of fish",
 					"done": false
+				}
+			]
+		},
+		{
+			"uuid": "d2ac99ed-33d8-4821-8b8a-201961107e0f",
+			"title": "Fishing",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": [
+				{
+					"details": "Add Buttons",
+					"done": true
+				},
+				{
+					"details": "Add Fishing Timer",
+					"done": true
+				},
+				{
+					"details": "Fishing Logic",
+					"done": false
+				},
+				{
+					"details": "Connect to economy",
+					"done": true
 				}
 			]
 		}

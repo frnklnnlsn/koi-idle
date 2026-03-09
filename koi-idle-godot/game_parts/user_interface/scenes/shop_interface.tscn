@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://kg4tm1ni7a1p"]
 
-[ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_interface.gd" id="1_yhc75"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/shop_ui.gd" id="1_t4rps"]
 [ext_resource type="PackedScene" uid="uid://4vwbflnmb4sg" path="res://SandBox/graph_test/bellcurve.tscn" id="2_0bsfi"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_card.gd" id="2_elyan"]
 [ext_resource type="PackedScene" uid="uid://bqirbbsed5kfc" path="res://SandBox/graph_test/growth_curve.tscn" id="4_kd6vj"]
@@ -40,7 +40,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_yhc75")
+script = ExtResource("1_t4rps")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -90,7 +90,7 @@ stretch_shrink = 4
 [node name="FishViewport" type="SubViewport" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card/SubViewportContainer"]
 unique_name_in_owner = true
 handle_input_locally = false
-size = Vector2i(45, 45)
+size = Vector2i(2, 2)
 render_target_update_mode = 4
 
 [node name="Panel" type="Panel" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card"]
@@ -144,7 +144,11 @@ layout_mode = 2
 text = "FISH SALE"
 horizontal_alignment = 1
 
-[node name="class_button" type="OptionButton" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="class_button" type="OptionButton" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -159,6 +163,11 @@ popup/item_2/text = "rank: 2"
 popup/item_2/id = 2
 popup/item_3/text = "rank: 3"
 popup/item_3/id = 3
+
+[node name="RankCostLabel" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "2 $"
 
 [node name="MarginContainer3" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -208,7 +217,8 @@ theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 10
 
-[node name="Buy" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer"]
+[node name="BuyButton" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -221,7 +231,7 @@ theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 10
 
-[node name="buy max" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer2"]
+[node name="BuyMaxButton" type="Button" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
@@ -479,9 +489,9 @@ size_flags_horizontal = 3
 [connection signal="mouse_exited" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card/Panel" to="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card" method="_on_panel_mouse_exited"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card/HBoxContainer/sell" to="." method="_on_sell_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/MarginContainer/display_fish_card/HBoxContainer/keep" to="." method="_on_keep_pressed"]
-[connection signal="item_selected" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/class_button" to="." method="_on_class_button_item_selected"]
+[connection signal="item_selected" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/class_button" to="." method="_on_class_button_item_selected"]
 [connection signal="text_submitted" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer3/qnty_container/HBoxContainer/qnty_line" to="." method="_on_qnty_line_text_submitted"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer/Buy" to="." method="_on_button_pressed"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer2/buy max" to="." method="_on_buy_max_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer/BuyButton" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer2/HBoxContainer/MarginContainer2/BuyMaxButton" to="." method="_on_buy_max_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer4/HBoxContainer/MarginContainer/sell all" to="." method="_on_sell_all_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer/MarginContainer4/HBoxContainer/MarginContainer2/keep all" to="." method="_on_keep_all_pressed"]

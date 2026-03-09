@@ -29,7 +29,7 @@ zoom = Vector2(0.075, 0.075)
 
 [node name="fish" parent="SubViewportContainer/SubViewport" instance=ExtResource("4_00bb7")]
 unique_name_in_owner = true
-speed = 0.4
+speed = 0.05
 circle_radius = 300.0
 
 [node name="Control" type="Control" parent="."]

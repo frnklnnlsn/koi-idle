@@ -1,259 +1,153 @@
+# FishGenerator.gd
 extends Node
 
-### signals
-signal new_fish(fish_array:Array)
+signal new_fish(fish_array: Array)
 
+@onready var fish_res: fish_conf = preload("res://themes/base_fish.tres")
 
-### this signleton upon request of say a button, will call a function, asking for number and rank, and create that many
-### fish which will be passed to the save_data manager, where the fish will be saved in a nested fish_list_array
-### this singleton will also call upon Economy to update its values of net_worth, income, on a per fish bought basis
-@onready var fish_res:fish_conf = preload("res://themes/base_fish.tres")
+# --- Constants ---
+const FISH_BASE_VALUE: float = 0.1
+const FISH_BASE_MASS: float = 0.5
+const FISH_BASE_INCOME: float = 1.0
 
+const FISH_COST: Array = [1, 100, 1000, 10000]
 
 var selected_pallet: PackedColorArray = PackedColorArray([
-	Color(1.0, 0.0, 0.0),    # Red
-	Color(0.0, 0.0, 0.0),    # Black
-	Color(1.0, 1.0, 1.0),    # White
-	Color(1.0, 0.5, 0.0),    # Orange
-	Color(0.96, 0.96, 0.86)  # Beige
+	Color(1.0, 0.0, 0.0),   # Red
+	Color(0.0, 0.0, 0.0),   # Black
+	Color(1.0, 1.0, 1.0),   # White
+	Color(1.0, 0.5, 0.0),   # Orange
+	Color(0.96, 0.96, 0.86) # Beige
 ])
 
-var fish_cost_array = [1,10,100] # the cost of the different ranks
-
-var fish_base_value = .1
-var fish_base_mass = .5
-var fish_base_income = 1
-var groth_rate 
-#signal build_fish()
-
-### the variables that are getting passed in right now are number of fish to be purchased, 1,2,3,4,5... 
-### and the rank of fish, this is what seperates the range of fish stats that will be give
-### rarity will just be a measure of distribution
+# --- Rank ranges [start_value, end_value, peak_position, decay_rate] ---
+const RANK_RANGES: Array = [
+	[1,   100, 10,  0.8], # Rank 0
+	[100, 200, 110, 0.8], # Rank 1
+	[200, 300, 310, 0.8], # Rank 2
+	[300, 400, 410, 0.8], # Rank 3
+]
 
 
+# --- Public ---
 
-func generate_fish(num,rank):
-	
-	#var save_data = SaveManager.load_saved_data() #should return the save data resource
-	var fish_res_Array = []
-	
+func generate_fish(num: int, rank: int) -> void:
+	var fish_array: Array = []
+
 	for i in range(num):
-		var fish_value = provide_values_based_on_rank(rank)
-		var new_fish = new_fish_res_get(fish_value,rank) ### generates new stats for a res
-		visual_params_new_set(new_fish) ### generates and sets the new visual stuff
-		
-		fish_res_Array.append(new_fish)
-		
-	#take the array of new fish res, and send it where it needs to be sent
-	#save_data.list_of_shop_fish.append(fish_res_Array)### saves new generated fish to the shop list, that is the array to hold purchased fish, before sendiong
-	#SaveManager.save_current_data(save_data) ### adds the new_fish to the save_data resource 
-	#Economy.update_income(fish_res_Array) ### move this to the Economy, casue I am already sending signal
-	new_fish.emit(fish_res_Array) #fish interface is listening
+		var value: float = _value_for_rank(rank)
+		var fish: fish_conf = _build_fish(value, rank)
+		_apply_visuals(fish)
+		fish_array.append(fish)
+
+	new_fish.emit(fish_array)
 
 
- 
+# --- Fish construction ---
+
+func _value_for_rank(rank: int) -> float:
+	var distribution: Array = _create_right_skewed_array(RANK_RANGES[rank])
+	return distribution[randi_range(0, distribution.size() - 1)]
+
+func _build_fish(value: float, rank: int) -> fish_conf:
+	var fish: fish_conf = fish_res.duplicate(true)
+
+	fish.ID = _generate_id(15)
+	fish.rank = rank
+	fish.cost = FISH_COST[rank]
+	fish.value = value * FISH_BASE_VALUE
+	fish.mass = value * FISH_BASE_MASS
+	fish.income = value * FISH_BASE_INCOME
+
+	fish.growth_rate = _growth_rate()
+	fish.carrying_capacity = _carrying_capacity(fish.mass)
+	fish.mid_point = _mid_point()
+	fish.x_start = _x_start(fish.growth_rate)
+	fish.y_start = fish.mass
+
+	return fish
 
 
-###start_value: int, end_value: int, peak_position: int, decay_rate: float = 0.1
-###    0                1				2					3			
-var rank_1_Array = [
-	1, #start value
-	100, #end value
-	10, #peakposition
-	0.8, #decay_rate
-]
+# --- Growth parameters ---
 
-var rank_2_Array = [
-	100, #start value
-	200, #end value
-	110, #peakposition
-	0.8, #decay_rate
-]
+func _growth_rate() -> float:
+	return randf_range(0.3, 1.5)
 
-var rank_3_Array = [
-	200, #start value
-	300, #end value
-	310, #peakposition
-	0.8, #decay_rate
-]
+func _mid_point() -> float:
+	return randf_range(6.0, 48.0) # hours until 50% of carrying capacity
 
-func provide_values_based_on_rank(rank):
-	#for each rank make an array with the valid ranges
-	#this is the array of all rank ranges
-	var range_array= [
-		rank_1_Array, #rank 0
-		rank_2_Array, #rank 1
-		rank_3_Array, #rank 2
-	]
-	
-	# put the correspounding array for the given rank in the get list of numbers funtion
-	# returns the range_hold which is the distribution of possible outcomes of this rank
-	var range_hold = create_right_skewed_array(range_array[rank])
-	var size = range_hold.size() # get the size of the array
-	var picker = randi_range(0,size) # grab a random number from within the size limit
-	var value = range_hold[picker] # set that number as the value
-	return value 
+func _carrying_capacity(mass: float) -> int:
+	return int(mass * randi_range(1, 100))
+
+func _x_start(_growth_rate: float) -> float:
+	return randf_range(-10.0, -4.0) # starts fish on left/early side of S-curve
 
 
+# --- Stat distribution ---
 
-func new_fish_res_get(value:float,rank:int) -> fish_conf: #returns resource with the given stats
-	var new_res = fish_res.duplicate(true)
-	
-	new_res.ID = generate_id(15)
-	new_res.rank = rank
-	new_res.value = value * fish_base_value
-	var new_mass =  value * fish_base_mass
-	new_res.mass = new_mass
-	new_res.income = value * fish_base_income
-	
-	new_res.cost = fish_cost_array[rank]
-	
-	var new_growth_rate = growth_rate_get()
-	new_res.growth_rate = new_growth_rate
-	new_res.carrying_capacity = carrying_capacity_get(new_mass)
-	new_res.x_start = x_start_get(new_growth_rate)
-	new_res.y_start = new_mass
-	new_res.mid_point = mid_point_get()
-	return new_res
- 
+func _create_right_skewed_array(rank_array: Array) -> Array:
+	var start: int = rank_array[0]
+	var end: int = rank_array[1]
+	var peak: int = rank_array[2]
+	var decay: float = rank_array[3]
+	var weighted: Array = []
 
-	
-func create_right_skewed_array(My_Array:Array) -> Array:
-	var weighted_array = []
-	### compreses to save time
-	var start_value = My_Array[0]
-	var end_value = My_Array[1]
-	var peak_position = My_Array[2]
-	var decay_rate = My_Array[3]
-	
-	for i in range(start_value, end_value + 1):
+	for i in range(start, end + 1):
 		var weight: int
-		
-		if i <= peak_position:
-			# Left side: steep drop-off
-			var distance_left = peak_position - i
-			weight = int(100 * exp(-pow(distance_left, 2) / 10.0))
+		if i <= peak:
+			var dist: float = peak - i
+			weight = int(100 * exp(-pow(dist, 2) / 10.0))
 		else:
-			# Right side: gradual exponential decay (long tail)
-			var distance_right = i - peak_position
-			weight = int(100 * exp(-decay_rate * distance_right))
-		
+			var dist: float = i - peak
+			weight = int(100 * exp(-decay * dist))
+
 		weight = max(weight, 1)
-		
 		for j in range(weight):
-			weighted_array.append(i)
+			weighted.append(i)
 
-	return weighted_array
-
-
-### growth rate stuffff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-func growth_rate_get() -> float:
-	var growth_rate = randf_range(.75,5)
-	return growth_rate
-
-func mid_point_get() -> float:
-	var mid_point = randf_range(.75,5)
-	return mid_point
-func carrying_capacity_get(mass) -> int:
-	var y_start = mass*randi_range(1,100)
-	return y_start
+	return weighted
 
 
-func x_start_get(G_R) -> float:
-	var x_start
-	if G_R <=1:
-		x_start = randf_range(6,10)
-		return x_start
-	elif G_R <= 1.5:
-		x_start = randf_range(5,10)
-		return x_start
-	elif G_R <= 2:
-		x_start = randf_range(3,10)
-		return x_start
-	elif G_R <= 3:
-		x_start = randf_range(2.5,10)
-		return x_start
-	else:
-		x_start = randf_range(2,10)
-		return x_start
+# --- Visuals ---
 
+func _apply_visuals(fish: fish_conf) -> void:
+	var num_colors: int = randi_range(1, 5)
+	var palette: PackedColorArray = _unique_colors(num_colors, selected_pallet)
 
-### visual stuffff ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	fish.colors = _pick_colors(num_colors, palette)
+	fish.offsets = _generate_offsets(num_colors)
+	fish.seed = randi_range(-99, 99)
+	fish.frequency = randf_range(0.0001, 0.003)
+	fish.noise_type_index = 0
 
-func visual_params_new_set(new_res:fish_conf):
-	var number_of_color = generate_number_of_color()
-	var pallet = generate_unique_colors(number_of_color,selected_pallet)
-	new_res.colors = generate_colors(number_of_color,pallet)
-	new_res.offsets = generate_offsets(number_of_color)
-	new_res.seed = generate_seed()
-	new_res.frequency = generate_frequency()
-	new_res.noise_type_index = 0 
+func _unique_colors(count: int, palette: PackedColorArray) -> PackedColorArray:
+	var shuffled: Array = Array(palette)
+	shuffled.shuffle()
+	var result: PackedColorArray = PackedColorArray()
+	for i in range(min(count, shuffled.size())):
+		result.append(shuffled[i])
+	return result
 
+func _pick_colors(count: int, palette: PackedColorArray) -> PackedColorArray:
+	var colors: PackedColorArray = PackedColorArray()
+	for i in range(count):
+		colors.append(palette[randi_range(0, palette.size() - 1)])
+	return colors
 
-
-func generate_seed() -> int:
-	var seed  =  randi_range(-99,99)
-	return seed
-
-
-
-func generate_frequency() -> float:
-	var frequency = randf_range(0.0001,0.003)
-	return frequency
-
-
-func generate_name(number)-> String:
-	var fish_name:String = "fish_" + str(number)
-	return fish_name
-
-
-func generate_number_of_color()-> int:
-	var number  =  randi_range(1,5)
-	return number
-
-
-func generate_offsets(number_of_color) -> PackedFloat32Array:
-	var offsets:PackedFloat32Array = []
-	for color in number_of_color:
-		var offset = randf_range(0,1)
-		offsets.append(offset)
+func _generate_offsets(count: int) -> PackedFloat32Array:
+	var offsets: PackedFloat32Array = PackedFloat32Array()
+	for i in range(count):
+		offsets.append(randf_range(0.0, 1.0))
 	return offsets
 
 
-func generate_unique_colors(number_of_color: int, pallet: PackedColorArray) -> PackedColorArray:
-	# Step 1: Convert to normal Array
-	var array_colors := []
-	for color in pallet:
-		array_colors.append(color)
+# --- Utility ---
 
-	# Step 2: Shuffle
-	array_colors.shuffle()
-
-	# Step 3: Convert back to PackedColorArray
-	var packed_colors := PackedColorArray()
-	for i in range(min(number_of_color, array_colors.size())):
-		packed_colors.append(array_colors[i])
-
-	return packed_colors
-
-
-func generate_colors(number_of_color: int, pallet: PackedColorArray) -> PackedColorArray:
-	var colors := PackedColorArray()
-	for i in range(number_of_color):
-		var index = randi_range(0, pallet.size() - 1)  # Use full range of palette
-		colors.append(pallet[index])
-	return colors
-
-
-func generate_id(length: int = 15) -> String:
-	var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	var id = ""
-	var rng = RandomNumberGenerator.new()
+func _generate_id(length: int = 15) -> String:
+	var chars: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	var id: String = ""
 	rng.randomize()
-	
-	for i in length:
-		var random_index = rng.randi() % characters.length()
-		id += characters[random_index]
-	
+	for i in range(length):
+		id += chars[rng.randi() % chars.length()]
 	return id

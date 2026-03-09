@@ -11,6 +11,7 @@ func build(fish_res) -> Node:
 	var instance = BODY_SCRIPT.new()
 	line_body.add_child(instance)
 	instance.modify_parent(fish_res)
+	scene.add_to_group("fish")  # tag it
 	return scene
 
 func _duplicate_texture(line_body):

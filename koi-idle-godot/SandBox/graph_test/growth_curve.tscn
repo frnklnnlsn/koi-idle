@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://SandBox/graph_test/growth_curve.gd" id="1_g22cg"]
 
-[node name="Growth_curve" type="Control"]
+[node name="GrowthCurve" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

@@ -73,7 +73,7 @@ func _ready():
 ### pop up stuff, currently jank, but sets first index as open folder
 	fish_resources_pop_up.visible = false
 	populate_folder_button()
-	var partial_folder_path = "res://fish_test/resource_etc/fish_template_resources/"
+	var partial_folder_path = "res://game_parts/fish_maker/resource_etc/fish_template_resources/"
 	var list = DirAccess.get_directories_at(partial_folder_path)
 	var sub_folder = list[0]
 	var dict = create_res_dict(partial_folder_path,sub_folder)
@@ -195,7 +195,7 @@ func get_color_offsets():
 
 
 func _on_save_button_pressed():
-	var partial_path = "res://fish_test/resource_etc/fish_template_resources/"
+	var partial_path = "res://game_parts/fish_maker/resource_etc/fish_template_resources/"
 	var directory = partial_path + sub_folder + "/"
 	var file_name = str(fish_name + ".tres")
 	var file_path = directory + file_name
@@ -308,7 +308,7 @@ func set_color_picker_values(new_res):
 
 
 func populate_folder_button():
-	var folder_path = "res://fish_test/resource_etc/fish_template_resources/"
+	var folder_path = "res://game_parts/fish_maker/resource_etc/fish_template_resources/"
 	var list = DirAccess.get_directories_at(folder_path)
 	for folder in list:
 		folder_button.add_item(folder)
@@ -483,7 +483,7 @@ func _on_exit_pressed():
 
 
 func _on_folder_button_item_selected(index):
-	var partial_folder_path = "res://fish_test/resource_etc/fish_template_resources/"
+	var partial_folder_path = "res://game_parts/fish_maker/resource_etc/fish_template_resources/"
 	var list = DirAccess.get_directories_at(partial_folder_path)
 	sub_folder = list[index]
 	var dict = create_res_dict(partial_folder_path,sub_folder)

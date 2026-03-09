@@ -11,16 +11,18 @@ config_version=5
 [application]
 
 config/name="koi idle godot"
+run/main_scene="res://game_parts/user_interface/scenes/main_UI.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://art/icon.svg"
 
 [autoload]
 
-Economy="*res://scripts/Singletons/Economy.gd"
 FishGenerator="*res://scripts/Singletons/FishGenerator.gd"
 SaveManager="*res://scripts/Singletons/SaveManager.gd"
 FishHandler="*res://scripts/Singletons/FishHandler.gd"
 DisplayManager="*res://scripts/Singletons/DisplayManager.gd"
+FishGrowthManager="*res://scripts/Singletons/FishGrowthManager.gd"
+PassiveSystems="*res://scripts/Singletons/PassiveSystems.gd"
 
 [display]
 
