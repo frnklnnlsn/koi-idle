@@ -26,6 +26,7 @@ class_name fish_conf
 ### vsual stuff
 @export var offsets:PackedFloat32Array
 @export var colors:PackedColorArray
+@export var fin_color: Color
 @export var noise_type_index: int
 @export var frequency:float
 @export var seed:float

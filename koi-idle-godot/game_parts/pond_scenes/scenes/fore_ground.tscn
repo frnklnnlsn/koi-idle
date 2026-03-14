@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=4 uid="uid://12twcglpbak0"]
+
+[ext_resource type="TileSet" uid="uid://dp68va7raq4td" path="res://art/tile_set/lily_pad.tres" id="1_e8ngo"]
+[ext_resource type="Texture2D" uid="uid://b65xax3hmsimh" path="res://art/Sprites/UglyAHHHPipe.png" id="2_lj1tq"]
+
+[node name="ForeGround" type="CanvasLayer"]
+follow_viewport_scale = 0.001
+metadata/_edit_vertical_guides_ = [358.0]
+
+[node name="lily_pads" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAADAAIAAAAAAAAAAAAKAAoAAAAAAAAAAAAZAAMAAAAAAAAAAAAcABAAAAAAAAAAAAAGABUAAAAAAAAAAAATABIAAAAAAAAAAAA=")
+tile_set = ExtResource("1_e8ngo")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(268, -8)
+texture = ExtResource("2_lj1tq")

@@ -11,23 +11,24 @@
 			"uuid": "1652d0ce-a1b7-42ca-b6dc-88cda0b66a56",
 			"title": "Todo",
 			"tasks": [
-				"82037116-8bb3-418a-a608-2b938a76e1d2"
+				"d2ac99ed-33d8-4821-8b8a-201961107e0f",
+				"631f981b-bdbd-4891-9dc4-2ef0fc0ebee0",
+				"752cf15b-2702-41b2-99ea-068b315ae7e0"
 			]
 		},
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
 			"tasks": [
-				"631f981b-bdbd-4891-9dc4-2ef0fc0ebee0",
-				"d2ac99ed-33d8-4821-8b8a-201961107e0f"
+				"82037116-8bb3-418a-a608-2b938a76e1d2",
+				"40ebe9e5-747f-4af8-8bc1-a61ddfbf1812"
 			]
 		},
 		{
 			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
 			"title": "Done",
 			"tasks": [
-				"5d578349-26a0-460a-86ff-6ab775fa4d01",
-				"752cf15b-2702-41b2-99ea-068b315ae7e0"
+				"5d578349-26a0-460a-86ff-6ab775fa4d01"
 			]
 		}
 	],
@@ -119,6 +120,30 @@
 				{
 					"details": "Connect to economy",
 					"done": true
+				}
+			]
+		},
+		{
+			"uuid": "40ebe9e5-747f-4af8-8bc1-a61ddfbf1812",
+			"title": "Flush Scene",
+			"description": "I will have the toilet radius slowly shrink\nMaybe add fading to the visuals of the fish on flush,\nstagger the exiting from the scene",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": [
+				{
+					"details": "Flush Logic",
+					"done": true
+				},
+				{
+					"details": "Flush Visuals",
+					"done": true
+				},
+				{
+					"details": "Pond Enter Visuals",
+					"done": false
+				},
+				{
+					"details": "Flush Button",
+					"done": false
 				}
 			]
 		}

@@ -6,6 +6,7 @@ const BODY_SCRIPT = preload("res://game_parts/fish_gallery/scripts/procedural_bo
 
 func build(fish_res) -> Node:
 	var scene = FISH_SCENE.instantiate()
+	scene.fish_res = fish_res
 	var line_body = scene.get_node("body")
 	_duplicate_texture(line_body)
 	var instance = BODY_SCRIPT.new()

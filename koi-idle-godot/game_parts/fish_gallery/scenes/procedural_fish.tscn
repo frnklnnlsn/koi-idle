@@ -24,10 +24,17 @@ noise = SubResource("FastNoiseLite_cht2s")
 
 [node name="procedural_fish" type="Node2D"]
 script = ExtResource("1_2gj4d")
+fish_scale = 0.1
+circle_radius = 100.0
+boundary_avoidance_distance = 30.0
 
 [node name="skeleton" type="Line2D" parent="."]
 unique_name_in_owner = true
+joint_mode = 1
+end_cap_mode = 2
 script = ExtResource("2_5dgvl")
+fish_scale = 0.15
+ellipse_color = Color(1, 0.498039, 0.890196, 1)
 
 [node name="body" type="Line2D" parent="."]
 unique_name_in_owner = true
@@ -35,4 +42,7 @@ width = 100.0
 width_curve = ExtResource("1_m7038")
 texture = SubResource("NoiseTexture2D_b0tdw")
 texture_mode = 2
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
 script = ExtResource("4_8oqpn")

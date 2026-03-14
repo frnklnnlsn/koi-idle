@@ -119,6 +119,7 @@ func _apply_visuals(fish: fish_conf) -> void:
 	fish.seed = randi_range(-99, 99)
 	fish.frequency = randf_range(0.0001, 0.003)
 	fish.noise_type_index = 0
+	fish.fin_color = fish.colors[randi_range(0, fish.colors.size() - 1)]
 
 func _unique_colors(count: int, palette: PackedColorArray) -> PackedColorArray:
 	var shuffled: Array = Array(palette)

@@ -31,20 +31,11 @@ func _on_view_pressed() -> void:
 func _on_flush_pressed() -> void:
 	var save_data = SaveManager.load_saved_data()
 
-	print("=== FLUSH DEBUG ===")
-	print("Work fish count: ", save_data.list_of_work_fish.size())
-	print("Retired fish count BEFORE: ", save_data.list_of_retired_fish.size())
-
 	var retired_ids = save_data.list_of_retired_fish.map(func(f): return f.ID)
-	print("Retired IDs: ", retired_ids)
 
 	for fish in save_data.list_of_work_fish:
-		print("Checking work fish ID: ", fish.ID, " | already retired: ", fish.ID in retired_ids)
 		if fish.ID not in retired_ids:
 			save_data.list_of_retired_fish.append(fish)
-
-	print("Retired fish count AFTER: ", save_data.list_of_retired_fish.size())
-	print("Work fish count after clear: ", save_data.list_of_work_fish.size())
 
 	save_data.list_of_work_fish.clear()
 	SaveManager.save_current_data(save_data)

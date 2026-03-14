@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3 uid="uid://ceo0jkwaeceei"]
+
+[ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
+[ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
+radius = 33.0
+height = 100.0
+
+[node name="ToiletArea" type="Area2D"]
+metadata/_edit_vertical_guides_ = [128.0]
+
+[node name="ToiletSprite" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(-18, -1)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("1_b7m5k")
+
+[node name="BoundaryShape" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, 1)
+shape = SubResource("CapsuleShape2D_lsxmt")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_t615y")
