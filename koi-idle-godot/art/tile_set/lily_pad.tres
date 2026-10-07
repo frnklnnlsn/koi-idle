@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://dp68va7raq4td"]
+[gd_resource type="TileSet" format=3 uid="uid://dp68va7raq4td"]
 
 [ext_resource type="Texture2D" uid="uid://cdsudyk0jfnu3" path="res://art/tile_set/lily_pads(3).png" id="1_g1nkm"]
 

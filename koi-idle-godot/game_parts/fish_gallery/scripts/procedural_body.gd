@@ -1,16 +1,3 @@
-extends Node
-
-
-@onready var res:fish_conf
-
-func modify_parent(fish_res):
-	var parent = self.get_parent()
-	res = fish_res
-	parent.texture.color_ramp.colors = fish_res.colors
-	parent.texture.color_ramp.offsets = fish_res.offsets
-	parent.texture.noise.noise_type = fish_res.noise_type_index
-	parent.texture.noise.seed = fish_res.seed
-	parent.texture.noise.frequency = fish_res.frequency
 
 
 

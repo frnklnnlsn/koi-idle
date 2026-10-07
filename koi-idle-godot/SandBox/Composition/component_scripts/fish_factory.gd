@@ -2,7 +2,7 @@ class_name FishFactory
 extends Node
 
 const FISH_SCENE = preload("res://game_parts/fish_gallery/scenes/procedural_fish.tscn")
-const BODY_SCRIPT = preload("res://game_parts/fish_gallery/scripts/procedural_body.gd")
+const BODY_SCRIPT = preload("res://game_parts/user_interface/scripts/modifiers/fish_card_modifier.gd")
 
 func build(fish_res) -> Node:
 	var scene = FISH_SCENE.instantiate()

@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://cc1cpbhtcd80l"]
+[gd_scene format=3 uid="uid://cc1cpbhtcd80l"]
 
-[ext_resource type="Script" path="res://SandBox/FishTestGround/Scripts/fish_test_ground.gd" id="1_v2m5d"]
+[ext_resource type="Script" uid="uid://dsuc0d5qof2nf" path="res://SandBox/FishTestGround/Scripts/fish_test_ground.gd" id="1_v2m5d"]
 [ext_resource type="PackedScene" uid="uid://ceo0jkwaeceei" path="res://SandBox/FishTestGround/scenes/toilet_area.tscn" id="2_bi3rm"]
-[ext_resource type="Script" path="res://SandBox/FishTestGround/Scripts/debug_panel.gd" id="2_m3s53"]
+[ext_resource type="Script" uid="uid://ba58r253s7vjt" path="res://SandBox/FishTestGround/Scripts/debug_panel.gd" id="2_m3s53"]
 
-[node name="FishTestGround" type="Control"]
+[node name="FishTestGround" type="Control" unique_id=321413330]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,7 +13,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_v2m5d")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=2003167195]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,27 +23,27 @@ grow_vertical = 2
 stretch = true
 stretch_shrink = 2
 
-[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1228199274]
 handle_input_locally = false
 size = Vector2i(640, 360)
 render_target_update_mode = 4
 
-[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport"]
+[node name="Camera2D" type="Camera2D" parent="SubViewportContainer/SubViewport" unique_id=1755192319]
 unique_name_in_owner = true
 
-[node name="ToiletArea" parent="SubViewportContainer/SubViewport" instance=ExtResource("2_bi3rm")]
+[node name="ToiletArea" parent="SubViewportContainer/SubViewport" unique_id=649339299 instance=ExtResource("2_bi3rm")]
 
-[node name="ShadowContainer" type="Node2D" parent="SubViewportContainer/SubViewport"]
+[node name="ShadowContainer" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=1707548798]
 unique_name_in_owner = true
 
-[node name="FishContainer" type="Node2D" parent="SubViewportContainer/SubViewport"]
+[node name="FishContainer" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=782247456]
 unique_name_in_owner = true
 
-[node name="DebugPanel" type="CanvasLayer" parent="."]
+[node name="DebugPanel" type="CanvasLayer" parent="." unique_id=2008053196]
 unique_name_in_owner = true
 script = ExtResource("2_m3s53")
 
-[node name="PanelBody" type="PanelContainer" parent="DebugPanel"]
+[node name="PanelBody" type="PanelContainer" parent="DebugPanel" unique_id=1347863854]
 unique_name_in_owner = true
 anchors_preset = 12
 anchor_top = 1.0
@@ -56,100 +56,100 @@ grow_vertical = 0
 size_flags_horizontal = 0
 size_flags_vertical = 8
 
-[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelBody"]
+[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelBody" unique_id=1979367123]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelBody/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelBody/MarginContainer" unique_id=559301713]
 layout_mode = 2
 
-[node name="SpawnCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="SpawnCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1691625260]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SpawnCountSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="SpawnCountSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1536780134]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SpawnButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="SpawnButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=70060583]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Spawn
 "
 
-[node name="ClearButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ClearButton" type="Button" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=978690427]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Clear
 "
 
-[node name="BoundaryLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="BoundaryLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1789471735]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="BoundarySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="BoundarySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1794435633]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ZoomLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ZoomLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=468153354]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ZoomSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ZoomSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1087819739]
 unique_name_in_owner = true
 layout_mode = 2
 max_value = 3.0
 step = 0.1
 value = 0.5
 
-[node name="StateOption" type="OptionButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="StateOption" type="OptionButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=618101922]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SpeedLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="SpeedLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=971787361]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="SpeedSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="SpeedSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1488305870]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ShadowToggle" type="CheckButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ShadowToggle" type="CheckButton" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=790732652]
 unique_name_in_owner = true
 layout_mode = 2
 text = "ShadowToggle
 "
 
-[node name="ShadowScaleLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ShadowScaleLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1098087066]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ShadowScaleSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ShadowScaleSlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1675953007]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ShadowOpacityLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ShadowOpacityLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=58637621]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ShadowOpacitySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="ShadowOpacitySlider" type="HSlider" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=1565213935]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="FishCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="FishCountLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=868396488]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="FpsLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer"]
+[node name="FpsLabel" type="Label" parent="DebugPanel/PanelBody/MarginContainer/VBoxContainer" unique_id=887084784]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="TogglePanelButton" type="Button" parent="DebugPanel"]
+[node name="TogglePanelButton" type="Button" parent="DebugPanel" unique_id=56394507]
 unique_name_in_owner = true
 offset_right = 115.0
 offset_bottom = 31.0
 text = "◀ Panel"
 
-[node name="PanelFishCharacter" type="PanelContainer" parent="DebugPanel"]
+[node name="PanelFishCharacter" type="PanelContainer" parent="DebugPanel" unique_id=589660190]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -157,50 +157,50 @@ offset_left = -40.0
 offset_bottom = 184.0
 grow_horizontal = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelFishCharacter"]
+[node name="MarginContainer" type="MarginContainer" parent="DebugPanel/PanelFishCharacter" unique_id=426466492]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelFishCharacter/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="DebugPanel/PanelFishCharacter/MarginContainer" unique_id=235340812]
 layout_mode = 2
 
-[node name="WaveAmplitudeSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveAmplitudeSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1253370162]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WaveAmplitudeLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveAmplitudeLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=458242076]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WaveFrequencySlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveFrequencySlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1780937275]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WaveFrequencyLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveFrequencyLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1857484960]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WaveStartSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveStartSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1709868090]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WaveStartLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WaveStartLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=981564349]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WavePhaseSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WavePhaseSlider" type="HSlider" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=698719376]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="WavePhaseLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="WavePhaseLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1274690926]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="EditingStateLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="EditingStateLabel" type="Label" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=1692635677]
 unique_name_in_owner = true
 layout_mode = 2
 text = "State Label"
 
-[node name="PrintParamsButton" type="Button" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer"]
+[node name="PrintParamsButton" type="Button" parent="DebugPanel/PanelFishCharacter/MarginContainer/VBoxContainer" unique_id=557219975]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Params Button"

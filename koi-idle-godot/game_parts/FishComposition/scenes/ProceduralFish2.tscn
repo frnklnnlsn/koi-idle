@@ -1,0 +1,32 @@
+[gd_scene load_steps=8 format=3 uid="uid://desxqohi2bttl"]
+
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/procedural_fish_2.gd" id="1_uft11"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/skeleton.gd" id="2_qm11o"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_state_machine.gd" id="3_db1mi"]
+[ext_resource type="Curve" uid="uid://bpu6unfnt3dt2" path="res://game_parts/fish_maker/resource_etc/width_curve/fish_curve.tres" id="3_q4o3n"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_steering.gd" id="4_ief5y"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_body_chain.gd" id="5_xrqsj"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_eating.gd" id="6_hh0d1"]
+
+[node name="ProceduralFish2" type="Node2D"]
+script = ExtResource("1_uft11")
+
+[node name="Skeleton" type="Line2D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_qm11o")
+
+[node name="FishBody" type="Line2D" parent="."]
+unique_name_in_owner = true
+width_curve = ExtResource("3_q4o3n")
+
+[node name="FishStateMachine" type="Node" parent="."]
+script = ExtResource("3_db1mi")
+
+[node name="FishSteering" type="Node" parent="."]
+script = ExtResource("4_ief5y")
+
+[node name="FishBodyChain" type="Node" parent="."]
+script = ExtResource("5_xrqsj")
+
+[node name="FishEating" type="Node" parent="."]
+script = ExtResource("6_hh0d1")
