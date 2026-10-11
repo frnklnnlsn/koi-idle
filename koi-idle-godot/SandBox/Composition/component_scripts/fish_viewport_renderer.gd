@@ -1,7 +1,7 @@
 class_name FishViewportRenderer
 extends Node
 
-var fish_scene = preload("res://game_parts/user_interface/scenes/fish_for_card.tscn")
+var fish_scene = preload("res://game_parts/FishComposition/scenes/ProceduralFishCard.tscn")
 var modifier_script = preload("res://game_parts/user_interface/scripts/modifiers/fish_card_modifier.gd")
 
 func setup_fish_in_card(card: Control, fish: fish_conf):
@@ -18,7 +18,8 @@ func clear_viewport(viewport: SubViewport):
 
 func _place_fish(viewport: SubViewport, fish: fish_conf):
 	var scene = fish_scene.instantiate()
-	var line_body = scene.get_node("%body")
+	scene.fish_res = fish   # lets the skeleton pick up fin_color
+	var line_body = scene.get_node("FishBody")
 	_duplicate_texture(line_body)
 	var modifier = modifier_script.new()
 	line_body.add_child(modifier)

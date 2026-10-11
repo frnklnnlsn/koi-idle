@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" uid="uid://desxqohi2bttl" path="res://game_parts/FishComposition/scenes/ProceduralFish2.tscn" id="1_base"]
+[ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/card_follow_camera.gd" id="2_cam"]
+
+[node name="ProceduralFishCard" instance=ExtResource("1_base")]
+swim_area = null
+
+[node name="FishSteering" parent="." index="3"]
+lock_heading = true
+
+[node name="CardCamera" type="Camera2D" parent="."]
+zoom = Vector2(0.95, 0.95)
+script = ExtResource("2_cam")

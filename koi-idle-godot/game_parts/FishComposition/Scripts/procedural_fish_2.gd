@@ -110,20 +110,30 @@ func _ready() -> void:
 	fish_body.width *= fish_scale
 	skeleton.width  *= fish_scale
 
-	# Seed the Line2Ds with initial positions.
+	# Pick the starting heading first so the body can be laid out behind it.
+	if _steering.lock_heading:
+		current_direction = _steering.locked_direction.normalized()
+	else:
+		current_direction = Vector2.RIGHT.rotated(randf() * TAU)
+
+	# Seed the Line2Ds with initial positions, head at start_position and the
+	# tail trailing opposite the heading (so the fish doesn't spend its first
+	# seconds swinging round to face where it's going).
 	# start_position is a LOCAL offset from the node's position (default 0,0),
 	# matching the old procedural_fish so spawners can just set node.position.
+	var back = -current_direction
+	var side = back.rotated(PI / 2)
 	for i in range(num_points):
 		var offset = i * seg_length
 		var wave_y = sin(offset * wavelength) * amplitude
-		fish_body.add_point(start_position + Vector2(offset, wave_y))
-		skeleton.add_point(start_position + Vector2(offset, wave_y))
+		var p = start_position + back * offset + side * wave_y
+		fish_body.add_point(p)
+		skeleton.add_point(p)
 
 	# Init components
 	_state_machine.init(self)
 	_state_machine.apply_scale(fish_scale)
 
-	current_direction = Vector2.RIGHT.rotated(randf() * TAU)
 	_steering.init(current_direction, fish_scale)
 	_steering.swim_area = swim_area
 	_body_chain.init(fish_body, skeleton, num_points, seg_length)

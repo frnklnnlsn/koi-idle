@@ -14,6 +14,12 @@ var swim_area: SwimArea = null
 @export var max_turn_angle:  float = 0.1
 @export var noise_intensity: float = 100.0
 
+# --- Portrait mode ---
+## When true the fish ignores wander/avoidance and always swims in
+## locked_direction. Used by card portraits so every fish faces the same way.
+@export var lock_heading:     bool    = false
+@export var locked_direction: Vector2 = Vector2.UP
+
 # --- Avoidance ---
 @export var boundary_avoidance_distance: float = 800.0
 @export var boundary_avoidance_strength: float = 1.5
@@ -65,6 +71,14 @@ func begin_entry(direction: Vector2, duration: float) -> void:
 func update(delta: float, head_global: Vector2, seg_length: int,
 			speed: float, time: float) -> Dictionary:
 	_wander_timer += delta
+
+	if lock_heading:
+		current_direction  = locked_direction.normalized()
+		previous_direction = current_direction
+		return {
+			"direction":       current_direction,
+			"new_head_global": head_global + current_direction * seg_length * speed
+		}
 
 	if _entry_active:
 		return _update_entry(head_global, seg_length, speed)
