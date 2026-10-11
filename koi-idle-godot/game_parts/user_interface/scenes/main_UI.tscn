@@ -1,19 +1,19 @@
-[gd_scene load_steps=13 format=3 uid="uid://bd0wbjjmochmp"]
+[gd_scene format=3 uid="uid://bd0wbjjmochmp"]
 
-[ext_resource type="Script" path="res://game_parts/user_interface/scenes/main_ui.gd" id="1_e4xtb"]
-[ext_resource type="Script" path="res://game_parts/user_interface/scenes/toilet_viewport.gd" id="2_11njf"]
+[ext_resource type="Script" uid="uid://dgf83o4r5r7a6" path="res://game_parts/user_interface/scenes/main_ui.gd" id="1_e4xtb"]
+[ext_resource type="Script" uid="uid://bq831txj0eiec" path="res://game_parts/user_interface/scenes/toilet_viewport.gd" id="2_11njf"]
 [ext_resource type="PackedScene" uid="uid://kg4tm1ni7a1p" path="res://game_parts/user_interface/scenes/shop_interface.tscn" id="2_k8snr"]
 [ext_resource type="PackedScene" uid="uid://ceo0jkwaeceei" path="res://SandBox/FishTestGround/scenes/toilet_area.tscn" id="5_88aja"]
-[ext_resource type="Script" path="res://game_parts/user_interface/scenes/pond_viewport.gd" id="5_e8jla"]
-[ext_resource type="Script" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
+[ext_resource type="Script" uid="uid://carfweae43i2b" path="res://game_parts/user_interface/scenes/pond_viewport.gd" id="5_e8jla"]
+[ext_resource type="Script" uid="uid://dxsqr475l45sd" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
 [ext_resource type="PackedScene" uid="uid://12twcglpbak0" path="res://game_parts/pond_scenes/scenes/fore_ground.tscn" id="7_76rds"]
-[ext_resource type="Script" path="res://SandBox/Composition/component_scripts/fish_display.gd" id="7_k1q3n"]
-[ext_resource type="Script" path="res://SandBox/Composition/component_scripts/fish_factory.gd" id="8_7vram"]
+[ext_resource type="Script" uid="uid://cjgcns45jbxxs" path="res://SandBox/Composition/component_scripts/fish_display.gd" id="7_k1q3n"]
+[ext_resource type="Script" uid="uid://dymb3h81ghrqa" path="res://SandBox/Composition/component_scripts/fish_factory.gd" id="8_7vram"]
 [ext_resource type="PackedScene" uid="uid://r5jvkc4i6dis" path="res://game_parts/pond_scenes/scenes/pond_area.tscn" id="8_xc818"]
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
 
-[node name="Main_UI" type="Control"]
+[node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,7 +22,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_e4xtb")
 
-[node name="ToiletViewportContainer" type="SubViewportContainer" parent="."]
+[node name="ToiletViewportContainer" type="SubViewportContainer" parent="." unique_id=613552841]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -33,27 +33,27 @@ grow_vertical = 2
 stretch = true
 stretch_shrink = 2
 
-[node name="ToiletViewport" type="SubViewport" parent="ToiletViewportContainer"]
+[node name="ToiletViewport" type="SubViewport" parent="ToiletViewportContainer" unique_id=394859592]
 unique_name_in_owner = true
 handle_input_locally = false
 size = Vector2i(640, 360)
 render_target_update_mode = 4
 script = ExtResource("2_11njf")
 
-[node name="Camera2D" type="Camera2D" parent="ToiletViewportContainer/ToiletViewport"]
+[node name="Camera2D" type="Camera2D" parent="ToiletViewportContainer/ToiletViewport" unique_id=102619028]
 
-[node name="FishDisplay" type="Node" parent="ToiletViewportContainer/ToiletViewport"]
+[node name="FishDisplay" type="Node" parent="ToiletViewportContainer/ToiletViewport" unique_id=426772673]
 script = ExtResource("7_k1q3n")
 
-[node name="FishFactory" type="Node" parent="ToiletViewportContainer/ToiletViewport"]
+[node name="FishFactory" type="Node" parent="ToiletViewportContainer/ToiletViewport" unique_id=1078100516]
 script = ExtResource("8_7vram")
 
-[node name="FishContainerToilet" type="Node2D" parent="ToiletViewportContainer/ToiletViewport"]
+[node name="FishContainerToilet" type="Node2D" parent="ToiletViewportContainer/ToiletViewport" unique_id=743049026]
 unique_name_in_owner = true
 
-[node name="ToiletArea" parent="ToiletViewportContainer/ToiletViewport" instance=ExtResource("5_88aja")]
+[node name="ToiletArea" parent="ToiletViewportContainer/ToiletViewport" unique_id=1143554548 instance=ExtResource("5_88aja")]
 
-[node name="PondViewportContainer" type="SubViewportContainer" parent="."]
+[node name="PondViewportContainer" type="SubViewportContainer" parent="." unique_id=1075590828]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -65,28 +65,28 @@ grow_vertical = 2
 stretch = true
 stretch_shrink = 2
 
-[node name="PondViewport" type="SubViewport" parent="PondViewportContainer"]
+[node name="PondViewport" type="SubViewport" parent="PondViewportContainer" unique_id=233101514]
 handle_input_locally = false
 size = Vector2i(640, 360)
 render_target_update_mode = 0
 script = ExtResource("5_e8jla")
 
-[node name="Camera2D" type="Camera2D" parent="PondViewportContainer/PondViewport"]
+[node name="Camera2D" type="Camera2D" parent="PondViewportContainer/PondViewport" unique_id=337218323]
 
-[node name="FishDisplay" type="Node" parent="PondViewportContainer/PondViewport"]
+[node name="FishDisplay" type="Node" parent="PondViewportContainer/PondViewport" unique_id=751578376]
 script = ExtResource("7_k1q3n")
 
-[node name="FishFactory" type="Node" parent="PondViewportContainer/PondViewport"]
+[node name="FishFactory" type="Node" parent="PondViewportContainer/PondViewport" unique_id=2130262571]
 script = ExtResource("8_7vram")
 
-[node name="FishContainerPond" type="Node2D" parent="PondViewportContainer/PondViewport"]
+[node name="FishContainerPond" type="Node2D" parent="PondViewportContainer/PondViewport" unique_id=104662166]
 unique_name_in_owner = true
 
-[node name="ForeGround" parent="PondViewportContainer/PondViewport" instance=ExtResource("7_76rds")]
+[node name="ForeGround" parent="PondViewportContainer/PondViewport" unique_id=592856925 instance=ExtResource("7_76rds")]
 
-[node name="PondArea" parent="PondViewportContainer/PondViewport" instance=ExtResource("8_xc818")]
+[node name="PondArea" parent="PondViewportContainer/PondViewport" unique_id=749628175 instance=ExtResource("8_xc818")]
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=296132464]
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -95,79 +95,79 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="VBoxContainer"]
+[node name="Panel" type="PanelContainer" parent="VBoxContainer" unique_id=1851520356]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel" unique_id=1705738555]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="Button" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1291562547]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "menu"
 
-[node name="net_worth" type="Label" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="net_worth" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1042196326]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 text = "9012384901735"
 
-[node name="capacity" type="Label" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="capacity" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=278064373]
 unique_name_in_owner = true
 layout_mode = 2
 text = "0/20
 "
 
-[node name="Spacer" type="Label" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="Spacer" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=2098116085]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="Flush" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="Flush" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=805965955]
 layout_mode = 2
 text = "Flush
 "
 
-[node name="View" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="View" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1871109062]
 layout_mode = 2
 text = "View
 "
 
-[node name="List" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="List" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1912176699]
 layout_mode = 2
 text = "List
 "
 
-[node name="Shop" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="Shop" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=334377073]
 layout_mode = 2
 text = "shop
 "
 
-[node name="GoFishing" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="GoFishing" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1744781603]
 layout_mode = 2
 text = "Go Fishing
 "
 
-[node name="Temp" type="Button" parent="VBoxContainer/Panel/HBoxContainer2"]
+[node name="Temp" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1918284208]
 layout_mode = 2
 size_flags_horizontal = 10
 text = "Temp"
 script = ExtResource("7_1o2js")
 
-[node name="ListUI" parent="VBoxContainer" instance=ExtResource("11_o70p8")]
+[node name="ListUI" parent="VBoxContainer" unique_id=668367678 instance=ExtResource("11_o70p8")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ShopUI" parent="VBoxContainer" instance=ExtResource("2_k8snr")]
+[node name="ShopUI" parent="VBoxContainer" unique_id=1454927048 instance=ExtResource("2_k8snr")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 
-[node name="FishingUI" parent="VBoxContainer" instance=ExtResource("10_y4jyc")]
+[node name="FishingUI" parent="VBoxContainer" unique_id=1860266520 instance=ExtResource("10_y4jyc")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2

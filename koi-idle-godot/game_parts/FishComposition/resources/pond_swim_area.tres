@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="SwimArea" load_steps=2 format=3]
+
+[ext_resource type="Script" uid="uid://7ms7b0eicd3m" path="res://scripts/swim_area.gd" id="1_swim"]
+
+[resource]
+script = ExtResource("1_swim")
+shape = 0
+center = Vector2(0, 0)
+size = Vector2(100, 100)

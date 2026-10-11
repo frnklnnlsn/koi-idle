@@ -120,8 +120,24 @@ func _get_boundary_radius() -> float:
 	return 700.0
 
 
+## One SwimArea shared by every composition fish in the test ground.
+## Changing it (e.g. from the boundary slider) updates all of them at once.
+var _swim_area: SwimArea = SwimArea.new()
+
+
+func _sync_swim_area() -> void:
+	_swim_area.shape  = SwimArea.Shape.CIRCLE
+	_swim_area.center = boundary_shape.global_position if boundary_shape else Vector2.ZERO
+	_swim_area.size   = Vector2.ONE * _get_boundary_radius()
+
+
 func _apply_boundary_to_fish(fish_node: Node2D) -> void:
-	if fish_node.has_method("set"):
+	if "swim_area" in fish_node:
+		# New composition fish (ProceduralFish2)
+		_sync_swim_area()
+		fish_node.swim_area = _swim_area
+	else:
+		# Old monolithic procedural_fish
 		fish_node.circle_radius = _get_boundary_radius()
 		fish_node.circle_center = boundary_shape.global_position if boundary_shape else Vector2.ZERO
 
@@ -129,8 +145,9 @@ func _apply_boundary_to_fish(fish_node: Node2D) -> void:
 func set_boundary_radius(new_radius: float) -> void:
 	if boundary_shape and boundary_shape.shape is CircleShape2D:
 		boundary_shape.shape.radius = new_radius
+	_swim_area.size = Vector2.ONE * new_radius
 	for fish_node in _fish_nodes:
-		if is_instance_valid(fish_node):
+		if is_instance_valid(fish_node) and not "swim_area" in fish_node:
 			fish_node.circle_radius = new_radius
 
 

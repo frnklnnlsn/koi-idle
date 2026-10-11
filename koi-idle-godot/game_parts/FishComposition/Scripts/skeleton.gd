@@ -3,7 +3,7 @@ extends Line2D
 
 var rotation_offset := PI / 4 
 @onready var koi = $".."
-@onready var fish_body = %"fish body"
+@onready var fish_body = %FishBody
 @export var fish_res: fish_conf
 
 @export var fish_scale: float = 0.05

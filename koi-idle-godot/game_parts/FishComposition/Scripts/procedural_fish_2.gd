@@ -10,8 +10,12 @@
 #   $FishEating        — fish_eating.gd
 #
 # Unique-name node refs (% prefix):
-#   %"fish body"  — Line2D for the visible body
-#   %skeleton     — Line2D for the skeleton / fin anchor
+#   %FishBody     — Line2D for the visible body (carries the noise texture)
+#   %Skeleton     — Line2D for the skeleton / fin anchor
+#
+# Boundary: assign `swim_area` (a SwimArea resource) before or after adding the
+# fish to the tree. Whoever spawns fish owns the SwimArea and can share one
+# resource across every fish in a pond.
 extends Node2D
 
 # ------------------------------------------------------------------ Exports
@@ -24,6 +28,14 @@ extends Node2D
 @export var wavelength:         float   = 0.5
 @export var debug_mode:         bool    = false
 @export var start_in_slow_swim: bool    = false
+
+## Boundary the fish stays inside. Forwarded to FishSteering.
+## Safe to set before the fish enters the tree (stored until _ready).
+@export var swim_area: SwimArea:
+	set(value):
+		swim_area = value
+		if is_node_ready():
+			_steering.swim_area = value
 
 # Speed values — read by state machine and procedural_skeleton
 @export var slow_speed:      float = 0.1
@@ -98,9 +110,9 @@ func _ready() -> void:
 	fish_body.width *= fish_scale
 	skeleton.width  *= fish_scale
 
-	# Seed the Line2Ds with initial positions
-	if start_position == Vector2.ZERO:
-		start_position = Vector2(400, 300)
+	# Seed the Line2Ds with initial positions.
+	# start_position is a LOCAL offset from the node's position (default 0,0),
+	# matching the old procedural_fish so spawners can just set node.position.
 	for i in range(num_points):
 		var offset = i * seg_length
 		var wave_y = sin(offset * wavelength) * amplitude
@@ -113,6 +125,7 @@ func _ready() -> void:
 
 	current_direction = Vector2.RIGHT.rotated(randf() * TAU)
 	_steering.init(current_direction, fish_scale)
+	_steering.swim_area = swim_area
 	_body_chain.init(fish_body, skeleton, num_points, seg_length)
 	_eating.init(fish_body, skeleton, _state_machine, seg_length)
 

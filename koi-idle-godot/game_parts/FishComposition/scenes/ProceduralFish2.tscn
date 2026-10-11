@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://desxqohi2bttl"]
+[gd_scene load_steps=12 format=3 uid="uid://desxqohi2bttl"]
 
 [ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/procedural_fish_2.gd" id="1_uft11"]
 [ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/skeleton.gd" id="2_qm11o"]
@@ -7,23 +7,54 @@
 [ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_steering.gd" id="4_ief5y"]
 [ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_body_chain.gd" id="5_xrqsj"]
 [ext_resource type="Script" path="res://game_parts/FishComposition/Scripts/fish_eating.gd" id="6_hh0d1"]
+[ext_resource type="Resource" path="res://game_parts/FishComposition/resources/pond_swim_area.tres" id="7_swim1"]
+
+[sub_resource type="Gradient" id="Gradient_jsnq5"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.215909, 0.465909, 0.75)
+colors = PackedColorArray(0, 0, 0, 1, 0.858824, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_cht2s"]
+frequency = 0.006
+fractal_type = 2
+fractal_octaves = 1
+fractal_lacunarity = 1.0
+fractal_gain = 1.0
+domain_warp_enabled = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_b0tdw"]
+color_ramp = SubResource("Gradient_jsnq5")
+noise = SubResource("FastNoiseLite_cht2s")
 
 [node name="ProceduralFish2" type="Node2D"]
 script = ExtResource("1_uft11")
+fish_scale = 0.1
+swim_area = ExtResource("7_swim1")
 
 [node name="Skeleton" type="Line2D" parent="."]
 unique_name_in_owner = true
+joint_mode = 1
+end_cap_mode = 2
 script = ExtResource("2_qm11o")
+fish_scale = 0.15
+ellipse_color = Color(1, 0.498039, 0.890196, 1)
 
 [node name="FishBody" type="Line2D" parent="."]
 unique_name_in_owner = true
+width = 100.0
 width_curve = ExtResource("3_q4o3n")
+texture = SubResource("NoiseTexture2D_b0tdw")
+texture_mode = 2
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
 
 [node name="FishStateMachine" type="Node" parent="."]
 script = ExtResource("3_db1mi")
 
 [node name="FishSteering" type="Node" parent="."]
 script = ExtResource("4_ief5y")
+boundary_avoidance_distance = 30.0
 
 [node name="FishBodyChain" type="Node" parent="."]
 script = ExtResource("5_xrqsj")
