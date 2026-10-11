@@ -86,11 +86,24 @@ func _x_start(_growth_rate: float) -> float:
 # --- Stat distribution ---
 
 func _create_right_skewed_array(rank_array: Array) -> Array:
+	var vw := value_weights(rank_array)
+	var weighted: Array = []
+	for k in vw["values"].size():
+		for j in range(vw["weights"][k]):
+			weighted.append(vw["values"][k])
+	return weighted
+
+
+## Every raw value a rank can roll, and its weight (how many lottery tickets it
+## gets). Static so charts can read the real odds without the autoload running,
+## e.g. the shop's value chart and its editor preview.
+static func value_weights(rank_array: Array) -> Dictionary:
 	var start: int = rank_array[0]
 	var end: int = rank_array[1]
 	var peak: int = rank_array[2]
 	var decay: float = rank_array[3]
-	var weighted: Array = []
+	var values := PackedInt32Array()
+	var weights := PackedInt32Array()
 
 	for i in range(start, end + 1):
 		var weight: int
@@ -101,11 +114,10 @@ func _create_right_skewed_array(rank_array: Array) -> Array:
 			var dist: float = i - peak
 			weight = int(100 * exp(-decay * dist))
 
-		weight = max(weight, 1)
-		for j in range(weight):
-			weighted.append(i)
+		values.append(i)
+		weights.append(max(weight, 1))
 
-	return weighted
+	return {"values": values, "weights": weights}
 
 
 # --- Visuals ---

@@ -1,10 +1,10 @@
 [gd_scene load_steps=10 format=3 uid="uid://kg4tm1ni7a1p"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/shop_ui.gd" id="1_t4rps"]
-[ext_resource type="PackedScene" uid="uid://4vwbflnmb4sg" path="res://SandBox/graph_test/bellcurve.tscn" id="2_0bsfi"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/fish_value_chart.tscn" id="2_0bsfi"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_card.gd" id="2_elyan"]
-[ext_resource type="PackedScene" uid="uid://bqirbbsed5kfc" path="res://SandBox/graph_test/growth_curve.tscn" id="4_kd6vj"]
-[ext_resource type="PackedScene" uid="uid://divpetnns07be" path="res://game_parts/user_interface/scenes/histogram.tscn" id="4_saxld"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="4_kd6vj"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_saxld"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bpk44"]
 

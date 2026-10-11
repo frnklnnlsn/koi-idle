@@ -23,6 +23,10 @@ extends RefCounted
 ##   on_click: Callable         func(hits: Array[TauPlot.SampleHit]) -> void
 ##   stacked: bool              bar charts only
 ##   lookahead: float           live charts only: X padding in data units (default 1.0)
+##   markers: Dictionary        line charts only: name -> Vector2, highlighted points
+##                              drawn on top (e.g. "where this fish sits on the curve")
+##   marker_color: Color        colour for markers and their guide lines
+##   marker_drops: bool         dashed line from each marker down to y = 0 (default true)
 
 const Overlay := TauXYSeriesBinding.PaneOverlayType
 
@@ -30,9 +34,12 @@ const Overlay := TauXYSeriesBinding.PaneOverlayType
 ## Line chart. `series` maps series name -> Y values (same length as x).
 static func line(plot: TauPlot, title: String, x: PackedFloat64Array,
 		series: Dictionary, opts := {}) -> void:
+	if not opts.get("markers", {}).is_empty():
+		_line_with_markers(plot, title, x, series, opts)
+		return
 	var dataset := TauPlot.Dataset.make_shared_x_continuous(
 		_names(series), x, _values(series))
-	_plot(plot, title, dataset, TauLineConfig.new(), Overlay.LINE, false, opts)
+	_plot(plot, title, dataset, [TauLineConfig.new()], [Overlay.LINE], false, opts)
 
 
 ## Bar chart. `series` maps series name -> one value per category.
@@ -44,7 +51,7 @@ static func bar(plot: TauPlot, title: String, categories: PackedStringArray,
 	# NOTE: check the enum name against TauBarConfig docs if this errors.
 	cfg.mode = TauBarConfig.BarMode.STACKED if opts.get("stacked", false) \
 		else TauBarConfig.BarMode.GROUPED
-	_plot(plot, title, dataset, cfg, Overlay.BAR, true, opts)
+	_plot(plot, title, dataset, [cfg], [Overlay.BAR], true, opts)
 
 
 ## Scatter chart. `series` maps series name -> [x_values, y_values].
@@ -56,7 +63,7 @@ static func scatter(plot: TauPlot, title: String, series: Dictionary, opts := {}
 		xs.append(PackedFloat64Array(series[key][0]))
 		ys.append(PackedFloat64Array(series[key][1]))
 	var dataset := TauPlot.Dataset.make_per_series_x_continuous(_names(series), xs, ys)
-	_plot(plot, title, dataset, TauScatterConfig.new(), Overlay.SCATTER, false, opts)
+	_plot(plot, title, dataset, [TauScatterConfig.new()], [Overlay.SCATTER], false, opts)
 
 
 ## Live streaming chart. Returns a LiveChart; call push() to add samples.
@@ -80,7 +87,7 @@ static func live(plot: TauPlot, title: String, series_names: PackedStringArray,
 		overlay = TauLineConfig.new()
 		overlay_type = Overlay.LINE
 
-	_plot(plot, title, dataset, overlay, overlay_type, false, opts, true)
+	_plot(plot, title, dataset, [overlay], [overlay_type], false, opts, true)
 	return LiveChart.new(dataset)
 
 
@@ -98,8 +105,63 @@ class LiveChart extends RefCounted:
 
 # --- Internals ---------------------------------------------------------------
 
+## Line chart plus highlighted marker points. Markers have their own X values,
+## so this uses a per-series-X dataset with a line overlay and a scatter overlay
+## sharing one pane. Series order: lines, marker guide lines, marker points.
+static func _line_with_markers(plot: TauPlot, title: String, x: PackedFloat64Array,
+		series: Dictionary, opts: Dictionary) -> void:
+	var markers: Dictionary = opts["markers"]
+	var marker_color: Color = opts.get("marker_color", Color(1.0, 0.85, 0.2))
+	var drops: bool = opts.get("marker_drops", true)
+
+	var palette: Array[Color] = []
+	palette.assign(opts.get("colors", TauXYStyle.new().series_colors))
+
+	var names := _names(series)
+	var ys := _values(series)
+	var xs: Array[PackedFloat64Array] = []
+	var types := []
+	var colors: Array[Color] = []
+	var dashes: Array[int] = []
+	for i in names.size():
+		xs.append(x)
+		types.append(Overlay.LINE)
+		colors.append(palette[i % palette.size()])
+		dashes.append(0)
+
+	if drops:
+		for m in markers:
+			var p: Vector2 = markers[m]
+			names.append("%s (guide)" % m)
+			xs.append(PackedFloat64Array([p.x, p.x]))
+			ys.append(PackedFloat64Array([0.0, p.y]))
+			types.append(Overlay.LINE)
+			colors.append(marker_color)
+			dashes.append(6)
+
+	for m in markers:
+		var p: Vector2 = markers[m]
+		names.append(str(m))
+		xs.append(PackedFloat64Array([p.x]))
+		ys.append(PackedFloat64Array([p.y]))
+		types.append(Overlay.SCATTER)
+		colors.append(marker_color)
+
+	var dataset := TauPlot.Dataset.make_per_series_x_continuous(names, xs, ys)
+	var line_cfg := TauLineConfig.new()
+	line_cfg.style.dash_lengths_px = dashes
+
+	var o := opts.duplicate()
+	o["colors"] = colors
+	if not o.has("legend"):
+		o["legend"] = series.size() > 1
+	_plot(plot, title, dataset, [line_cfg, TauScatterConfig.new()], types, false, o)
+
+
+## overlays: one config per overlay type used in the pane.
+## overlay_types: one entry per series, or a single entry shared by all series.
 static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
-		overlay: TauPaneOverlayConfig, overlay_type, categorical: bool,
+		overlays: Array, overlay_types: Array, categorical: bool,
 		opts: Dictionary, is_live := false) -> void:
 	# X axis
 	var x_axis := TauAxisConfig.new()
@@ -124,7 +186,7 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 	# Pane
 	var pane := TauPaneConfig.new()
 	pane.y_left_axis = y_axis
-	pane.overlays = [overlay]
+	pane.overlays.assign(overlays)
 	if opts.get("grid", true):
 		var grid := TauGridLineConfig.new()
 		grid.y_major_enabled = true
@@ -135,7 +197,9 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 	config.x_axis = x_axis
 	config.panes = [pane]
 	if opts.has("colors"):
-		config.style.series_colors = opts["colors"]
+		var colors: Array[Color] = []
+		colors.assign(opts["colors"])
+		config.style.series_colors = colors
 
 	# One binding per series, all into the single pane
 	var bindings: Array[TauXYSeriesBinding] = []
@@ -143,7 +207,7 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 		var b := TauXYSeriesBinding.new()
 		b.series_id = dataset.get_series_id_by_index(i)
 		b.pane_index = 0
-		b.overlay_type = overlay_type
+		b.overlay_type = overlay_types[i] if overlay_types.size() > 1 else overlay_types[0]
 		b.y_axis_id = TauPlot.AxisId.LEFT
 		bindings.append(b)
 
