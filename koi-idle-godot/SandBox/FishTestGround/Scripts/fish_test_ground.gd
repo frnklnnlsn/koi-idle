@@ -5,7 +5,7 @@ extends Control
 # --- Scene references ---
 @onready var fish_container:   Node2D       = %FishContainer
 @onready var shadow_container: Node2D       = %ShadowContainer
-@onready var boundary_shape:   CollisionShape2D = %BoundaryShape
+@onready var boundary_shape: CollisionShape2D = $SubViewportContainer/SubViewport/ToiletArea/%BoundaryShape
 @onready var camera:           Camera2D     = %Camera2D
 @onready var debug_panel                    = %DebugPanel
 
@@ -126,9 +126,14 @@ var _swim_area: SwimArea = SwimArea.new()
 
 
 func _sync_swim_area() -> void:
-	_swim_area.shape  = SwimArea.Shape.CIRCLE
 	_swim_area.center = boundary_shape.global_position if boundary_shape else Vector2.ZERO
-	_swim_area.size   = Vector2.ONE * _get_boundary_radius()
+	if boundary_shape and boundary_shape.shape is CapsuleShape2D:
+		var cap: CapsuleShape2D = boundary_shape.shape
+		_swim_area.shape = SwimArea.Shape.ELLIPSE
+		_swim_area.size  = Vector2(cap.radius, cap.height * 0.5)
+	else:
+		_swim_area.shape = SwimArea.Shape.CIRCLE
+		_swim_area.size  = Vector2.ONE * _get_boundary_radius()
 
 
 func _apply_boundary_to_fish(fish_node: Node2D) -> void:

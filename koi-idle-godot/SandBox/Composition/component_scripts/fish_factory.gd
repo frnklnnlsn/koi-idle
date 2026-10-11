@@ -1,13 +1,13 @@
 class_name FishFactory
 extends Node
 
-const FISH_SCENE = preload("res://game_parts/fish_gallery/scenes/procedural_fish.tscn")
+const FISH_SCENE = preload("res://game_parts/FishComposition/scenes/ProceduralFish2.tscn")
 const BODY_SCRIPT = preload("res://game_parts/user_interface/scripts/modifiers/fish_card_modifier.gd")
 
 func build(fish_res) -> Node:
 	var scene = FISH_SCENE.instantiate()
 	scene.fish_res = fish_res
-	var line_body = scene.get_node("body")
+	var line_body = scene.get_node("%FishBody")
 	_duplicate_texture(line_body)
 	var instance = BODY_SCRIPT.new()
 	line_body.add_child(instance)

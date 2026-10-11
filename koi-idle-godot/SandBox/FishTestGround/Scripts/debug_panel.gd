@@ -379,13 +379,6 @@ func _on_toggle_panel() -> void:
 # ------------------------------------------------------------------ Test helper
 
 func _make_test_fish_conf() -> fish_conf:
-	var conf       = fish_conf.new()
-	conf.seed      = randi()
-	conf.frequency = randf_range(0.1, 0.5)
-	conf.noise_type_index = randi() % 4
-	conf.offsets   = PackedFloat32Array([0.0, 1.0])
-	conf.colors    = PackedColorArray([
-		Color(randf(), randf(), randf()),
-		Color(randf(), randf(), randf())
-	])
+	var conf: fish_conf = FishGenerator.fish_res.duplicate(true)
+	FishGenerator._apply_visuals(conf)
 	return conf
