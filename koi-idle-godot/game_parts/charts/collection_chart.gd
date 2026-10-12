@@ -101,4 +101,6 @@ func _on_plot_clicked(hits: Array) -> void:
 		return
 	var i: int = hits[0].sample_index
 	if i >= 0 and i < _sorted.size():
-		bar_clicked.emit(_sorted[i], i)
+		# Deferred: the shop redraws this chart in response, and rebuilding a
+		# TauPlot from inside its own click signal breaks TauPlot mid-click.
+		bar_clicked.emit.call_deferred(_sorted[i], i)

@@ -11,6 +11,12 @@ var _display:     FishDisplay
 var _is_flushing: bool  = false
 var _fish_cache:  Array = []
 
+## The toilet's own boundary, shared by every toilet fish. The flush shrinks
+## this one resource, so all toilet fish follow it without touching the pond's.
+const _BASE_AREA: SwimArea = preload("res://game_parts/FishComposition/resources/pond_swim_area.tres")
+var _swim_area: SwimArea = _BASE_AREA.duplicate()
+var _base_avoidance: float = -1.0   # fish's normal avoidance distance, read on first flush
+
 @onready var fish_container_toilet: Node2D = %FishContainerToilet
 
 
@@ -41,6 +47,7 @@ func _rebuild_fish_cache() -> void:
 	for child in fish_container_toilet.get_children():
 		if child.is_in_group("fish"):
 			_fish_cache.append(child)
+			child.swim_area = _swim_area
 
 
 # ------------------------------------------------------------------ Flush
@@ -68,37 +75,25 @@ func _play_flush_animation() -> void:
 		for i in batch_size:
 			var fish = queued.pop_front()
 			if is_instance_valid(fish):
-				fish.state_locked  = true
-				fish.current_state = 3
-				fish.current_speed = fish.fast_speed
-				fish._apply_state_wave_params(3)
+				fish.force_state(fish.FishState.FAST_SWIM)
 		await get_tree().process_frame
 
-	# ② Snapshot starting values from first valid fish
-	var first        = _fish_cache[0]
-	var start_radius:    float   = first.circle_radius
-	var start_center:    Vector2 = first.circle_center
-	var start_avoidance: float   = first.boundary_avoidance_distance
+	# ② Starting values: the toilet's boundary and the fish's avoidance distance
+	var start_radius: float   = _swim_area.size.x
+	var start_center: Vector2 = _swim_area.center
+	if _base_avoidance < 0.0:
+		for fish in _fish_cache:
+			if is_instance_valid(fish):
+				_base_avoidance = fish.boundary_avoidance_distance
+				break
 
-	# ③ Use a single tween to drive a 0→1 progress value,
-	#    then apply it to all fish each step — keeps everything in sync
-	var progress := 0.0
-	var tween    := create_tween()
+	# ③ One tween drives 0→1 progress; each step shrinks the shared boundary
+	#    toward the drain, so every fish follows in sync.
+	var tween := create_tween()
 	tween.set_ease(Tween.EASE_IN)
 	tween.set_trans(Tween.TRANS_QUAD)
-	tween.tween_property(self, "flush_final_radius", flush_final_radius, flush_duration)\
-		.from(start_radius)  # dummy — we use the step callback below
-
-	# Reset — we'll drive fish props manually via the tween's step signal
-	tween.kill()
-
-	# Actually use a method tween so we get a callback each frame
-	tween = create_tween()
-	tween.set_ease(Tween.EASE_IN)
-	tween.set_trans(Tween.TRANS_QUAD)
-	tween.tween_method(_apply_flush_progress.bind(start_radius, start_center, start_avoidance),
+	tween.tween_method(_apply_flush_progress.bind(start_radius, start_center, _base_avoidance),
 		0.0, 1.0, flush_duration)
-
 	await tween.finished
 
 	# ④ Hold at final state
@@ -106,15 +101,14 @@ func _play_flush_animation() -> void:
 
 
 func _apply_flush_progress(t: float, start_radius: float, start_center: Vector2, start_avoidance: float) -> void:
-	var r: float   = lerp(start_radius,    flush_final_radius,       t)
-	var c: Vector2 = start_center.lerp(flush_drain_point,            t)
-	var a: float   = lerp(start_avoidance, flush_final_radius * 0.5, t)
-
+	_swim_area.size   = Vector2.ONE * lerpf(start_radius, flush_final_radius, t)
+	_swim_area.center = start_center.lerp(flush_drain_point, t)
+	var a := lerpf(start_avoidance, flush_final_radius * 0.5, t)
 	for fish in _fish_cache:
 		if is_instance_valid(fish):
-			fish.circle_radius               = r
-			fish.circle_center               = c
 			fish.boundary_avoidance_distance = a
+
+
 # ------------------------------------------------------------------ Clear
 
 func Clear() -> void:
@@ -122,3 +116,6 @@ func Clear() -> void:
 		if is_instance_valid(fish):
 			fish.queue_free()
 	_fish_cache.clear()
+	# Reset the boundary so the next batch of toilet fish gets the full bowl.
+	_swim_area.size   = _BASE_AREA.size
+	_swim_area.center = _BASE_AREA.center

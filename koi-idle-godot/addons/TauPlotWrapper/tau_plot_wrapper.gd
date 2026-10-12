@@ -220,7 +220,11 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 			plot.sample_clicked.connect(cb)
 
 	plot.plot_xy(dataset, config, bindings)
-
+	# TauPlot lays the new plot out on the next frame. On frames with no physics
+	# step (the game running faster than the physics rate) Godot hasn't sized
+	# the plot's inner panes by then, so that layout is skipped and the chart
+	# stays blank. Queue one more refresh after Godot has sized everything.
+	plot.queue_refresh.call_deferred()
 
 static func _names(series: Dictionary) -> PackedStringArray:
 	return PackedStringArray(series.keys())

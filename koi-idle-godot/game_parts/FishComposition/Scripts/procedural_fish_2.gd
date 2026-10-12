@@ -99,6 +99,11 @@ var acceleration_duration: float:
 var deceleration_duration: float:
 	get: return _state_machine.deceleration_duration
 
+## How far from the swim_area edge the fish starts turning away.
+var boundary_avoidance_distance: float:
+	get: return _steering.boundary_avoidance_distance
+	set(value): _steering.boundary_avoidance_distance = value
+
 
 # ------------------------------------------------------------------ Ready
 
@@ -262,6 +267,11 @@ func lock_to_state(state: int) -> void:
 
 func unlock_state() -> void:
 	_state_machine.unlock_state()
+
+
+## Jump straight into a state and hold it (no ACCEL/DECEL ramp).
+func force_state(state: int) -> void:
+	_state_machine.force_state(state)
 
 
 func begin_entry(direction: Vector2, duration: float) -> void:

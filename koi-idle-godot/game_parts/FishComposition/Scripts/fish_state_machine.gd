@@ -108,6 +108,15 @@ func lock_to_state(state: int) -> void:
 	set_state(state)
 
 
+## Jump straight into a state and hold it, skipping the ACCEL/DECEL bridge
+## states set_state() would add. Used by scripted moments like the flush.
+func force_state(state: int) -> void:
+	state_locked  = true
+	current_state = state
+	state_timer   = 0.0
+	state_changed.emit(current_state, get_wave_params(current_state))
+
+
 func unlock_state() -> void:
 	state_locked = false
 	state_timer  = 0.0

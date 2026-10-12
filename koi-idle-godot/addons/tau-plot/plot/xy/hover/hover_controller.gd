@@ -209,6 +209,11 @@ class HoverController extends RefCounted:
 	func _on_pane_input(p_pane_index: int, p_event: InputEvent, p_local_pos: Vector2) -> void:
 		if not _enabled:
 			return
+		# A freshly built plot computes its layout on the next frame, but its
+		# panes already receive input. Skip hit testing until the layout exists,
+		# otherwise get_pane_rect() indexes an empty pane_layouts array.
+		if _layout == null or not _layout.has_pane_layouts():
+			return
 
 		# Mouse exited the pane.
 		if p_event == null:
