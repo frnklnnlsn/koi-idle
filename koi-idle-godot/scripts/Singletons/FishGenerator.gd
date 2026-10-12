@@ -35,15 +35,20 @@ func generate_fish(num: int, rank: int) -> void:
 	var fish_array: Array = []
 
 	for i in range(num):
-		var value: float = _value_for_rank(rank)
-		var fish: fish_conf = _build_fish(value, rank)
-		_apply_visuals(fish)
-		fish_array.append(fish)
+		fish_array.append(make_fish(rank))
 
 	new_fish.emit(fish_array)
 
 
 # --- Fish construction ---
+
+## One complete fish of `rank` (stats and visuals) without emitting anything or
+## charging for it. generate_fish() uses it, and so do the dev tools.
+func make_fish(rank: int) -> fish_conf:
+	var fish: fish_conf = _build_fish(_value_for_rank(rank), rank)
+	_apply_visuals(fish)
+	return fish
+
 
 func _value_for_rank(rank: int) -> float:
 	var distribution: Array = _create_right_skewed_array(RANK_RANGES[rank])

@@ -92,15 +92,17 @@ func _apply_growth_to_retired_fish(extra_seconds: float) -> void:
 
 
 ## Growth while the game was closed, capped at MAX_OFFLINE_HOURS of real time.
-func apply_offline_growth() -> void:
+## Returns the real seconds of growth applied.
+func apply_offline_growth() -> float:
 	var last_timestamp := SaveManager.load_timestamp()
 	if last_timestamp < 1577836800.0:
-		return
+		return 0.0
 	var now := Time.get_unix_time_from_system()
 	var seconds_away := clampf(now - last_timestamp, 0.0, MAX_OFFLINE_HOURS * 3600.0)
 	if seconds_away <= 0.0:
-		return
+		return 0.0
 	_apply_growth_to_retired_fish(seconds_away)
+	return seconds_away
 
 
 func _on_fish_caught(fish_list: Array) -> void:

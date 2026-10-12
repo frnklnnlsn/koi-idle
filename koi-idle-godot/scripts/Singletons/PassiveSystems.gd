@@ -8,6 +8,11 @@ const SAVE_INTERVAL: float = 5.0
 var _save_timer: float = 0.0
 ## Coins per gram of fish when a catch is valued.
 var fishing_multiplier: float = 10.0
+## Longest absence that still earns offline income, in real seconds.
+const MAX_OFFLINE_SECONDS: float = 8.0 * 60.0 * 60.0
+## What the last offline catch-up paid: {"seconds": away time used, "coins": earned}.
+## Read it to show a "while you were away" message.
+var last_offline := {"seconds": 0.0, "coins": 0.0}
 
 func _ready() -> void:
 	_load_from_save()
@@ -41,20 +46,19 @@ func _recalculate_income_from_save(save_data: SaveData) -> void:
 			income += fish.income
 
 func _apply_offline_earnings() -> void:
+	last_offline = {"seconds": 0.0, "coins": 0.0}
 	var last_timestamp := SaveManager.load_timestamp()
-
 	if last_timestamp < 1577836800.0:
 		return
 
 	var now := Time.get_unix_time_from_system()
-	var seconds_away := now - last_timestamp
-	seconds_away = clampf(seconds_away, 0.0, 8.0 * 60.0 * 60.0)  # min 0, max 8 hours
-
+	var seconds_away := clampf(now - last_timestamp, 0.0, MAX_OFFLINE_SECONDS)
 	if seconds_away <= 0.0:
 		return
 
 	var earnings := income * seconds_away
 	net_worth += earnings
+	last_offline = {"seconds": seconds_away, "coins": earnings}
 
 func _process(delta: float) -> void:
 	net_worth += income * delta

@@ -30,7 +30,6 @@ func save_shop_fish(list_of_shop_fish:Array)-> void:
 	if list_of_shop_fish:
 		var save_data = SaveManager.load_saved_data() 
 		save_data.list_of_shop_fish.append_array(list_of_shop_fish)
-		print("list of shop fish: " + str(save_data.list_of_shop_fish))
 		SaveManager.save_current_data(save_data) 
 
 ### takes an array of fish to remove from the list of shop fish, will be passed when sell, sell all
@@ -66,7 +65,6 @@ func save_work_fish(list_of_work_fish:Array)-> void:
 	if list_of_work_fish:
 		var save_data = SaveManager.load_saved_data() #should return the save data resource
 		save_data.list_of_work_fish.append_array(list_of_work_fish)
-		print("list of work fish: " + str(save_data.list_of_work_fish))
 		SaveManager.save_current_data(save_data) 
 
 func remove_work_fish(remove_work_fish:Array)->void:
