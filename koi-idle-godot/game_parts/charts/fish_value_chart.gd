@@ -4,7 +4,7 @@
 # (set_fish_value / clear_fish_value) so ShopGraphManager needs no changes.
 #
 # The curve comes straight from FishGenerator's real odds, so if you retune
-# RANK_RANGES the chart follows automatically.
+# the rank table the chart follows automatically.
 class_name FishValueChart
 extends KoiChart
 
@@ -18,8 +18,8 @@ var _fish_value: float = -1.0   # -1 = no marker
 
 ## data: {"rank": int, "fish_value": float (-1 for no marker)}
 static func draw(p: TauPlot, data: Dictionary) -> void:
-	var rank: int = clampi(data.get("rank", 0), 0, _GEN.RANK_RANGES.size() - 1)
-	var vw := _GEN.value_weights(_GEN.RANK_RANGES[rank])
+	var rank: int = clampi(data.get("rank", 0), 0, Ranks.max_rank())
+	var vw := _GEN.value_weights(Ranks.get_rank(rank))
 	var raw: PackedInt32Array = vw["values"]
 	var weights: PackedInt32Array = vw["weights"]
 
@@ -45,7 +45,7 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 		var i := clampi(roundi(fish_value / _GEN.FISH_BASE_VALUE) - raw[0], 0, raw.size() - 1)
 		opts["markers"] = {"This fish": Vector2(fish_value, chance[i])}
 
-	TauCharts.line(p, "Value odds · Rank %d" % rank, xs, {"Odds": chance}, opts)
+	TauCharts.line(p, "Value odds · %s" % Ranks.get_rank(rank).display_name, xs, {"Odds": chance}, opts)
 
 
 static func sample_data() -> Dictionary:
@@ -55,8 +55,8 @@ static func sample_data() -> Dictionary:
 ## Which rank a sell value belongs to (first match; rank edges overlap by one).
 static func rank_for_value(value: float) -> int:
 	var raw := roundi(value / _GEN.FISH_BASE_VALUE)
-	for r in _GEN.RANK_RANGES.size():
-		if raw >= _GEN.RANK_RANGES[r][0] and raw <= _GEN.RANK_RANGES[r][1]:
+	for r in Ranks.count():
+		if raw >= Ranks.get_rank(r).value_min and raw <= Ranks.get_rank(r).value_max:
 			return r
 	return 0
 

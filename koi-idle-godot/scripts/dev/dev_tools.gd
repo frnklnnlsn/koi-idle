@@ -33,6 +33,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == TOGGLE_KEY:
 		_panel.visible = not _panel.visible
 		if _panel.visible:
+			_rank.max_value = Ranks.max_rank()   # follow the rank table
 			_update_info()
 		get_viewport().set_input_as_handled()
 
@@ -65,7 +66,7 @@ func _spawn_shop() -> void:
 	var rank := int(_rank.value)
 	var n := int(_count.value)
 	FishGenerator.generate_fish(n, rank)                      # shop + save + charge...
-	PassiveSystems.net_worth += FishGenerator.FISH_COST[rank] * n   # ...refunded
+	PassiveSystems.net_worth += Ranks.get_rank(rank).cost * n   # ...refunded
 	PassiveSystems._flush_to_save()
 	_say("Added %d rank %d fish to the shop (free)" % [n, rank])
 
@@ -149,7 +150,7 @@ func _update_info() -> void:
 	for f in data.list_of_retired_fish:
 		ranks[f.rank] = ranks.get(f.rank, 0) + 1
 	var pond_ranks := []
-	for r in range(FishGenerator.FISH_COST.size()):
+	for r in range(Ranks.count()):
 		pond_ranks.append("R%d:%d" % [r, ranks.get(r, 0)])
 	_info.text = "\n".join([
 		"Money  $%s   Income  $%s/s" % [_commas(PassiveSystems.net_worth), _commas(PassiveSystems.income)],
@@ -220,7 +221,7 @@ func _build_ui() -> void:
 	box.add_child(pick)
 	pick.add_child(_label("Rank"))
 	_rank = SpinBox.new()
-	_rank.max_value = FishGenerator.FISH_COST.size() - 1
+	_rank.max_value = Ranks.max_rank()
 	pick.add_child(_rank)
 	pick.add_child(_label("  Count"))
 	_count = SpinBox.new()

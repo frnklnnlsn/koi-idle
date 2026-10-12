@@ -135,7 +135,7 @@ func _on_button_pressed() -> void:
 func _on_buy_max_pressed() -> void:
 	FishHandler.calculate_total_fish()
 	var remainder: int = FishHandler.capacity - FishHandler.total_fish
-	var cost: int = FishGenerator.FISH_COST[rank]
+	var cost: int = Ranks.get_rank(rank).cost
 	var can_buy: int = min(remainder, int(PassiveSystems.net_worth / cost))
 	if can_buy > 0:
 		FishGenerator.generate_fish(can_buy, rank)

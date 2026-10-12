@@ -20,20 +20,11 @@ extends RefCounted
 
 const CHAIN_BONUS: float = 1.5
 
-## Seconds until a bite, as [min, max], indexed by the rank being fished for.
-## Short for testing; raise these to make higher ranks take longer.
-const BITE_SECONDS: Array[Vector2] = [
-	Vector2(1.0, 2.0),   # rank 0
-	Vector2(1.5, 3.0),   # rank 1
-	Vector2(2.0, 4.0),   # rank 2
-	Vector2(2.5, 5.0),   # rank 3
-]
+# Bite times per rank live in the rank table (FishRank.bite_seconds).
 
 ## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
 ## worth, so a player stuck without a rank 0 can always turn the pond into cash.
 const POND_SALE_RATE: float = 0.5
-
-const _GEN := preload("res://scripts/Singletons/FishGenerator.gd")
 
 ## Coins per gram when a fish is valued. Set from PassiveSystems.fishing_multiplier.
 var coins_per_gram: float = 10.0
@@ -44,7 +35,7 @@ var chain: Array = []
 
 
 static func max_rank() -> int:
-	return _GEN.RANK_RANGES.size() - 1
+	return Ranks.max_rank()
 
 
 func is_empty() -> bool:
@@ -73,7 +64,7 @@ func candidates(pond_fish: Array) -> Array:
 
 
 func bite_range() -> Vector2:
-	return BITE_SECONDS[clampi(target_rank(), 0, BITE_SECONDS.size() - 1)]
+	return Ranks.get_rank(target_rank()).bite_seconds
 
 
 func roll_bite_time() -> float:

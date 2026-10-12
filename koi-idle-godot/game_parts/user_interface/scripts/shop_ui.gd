@@ -25,6 +25,7 @@ var _last_known_net_worth: float = -1.0
 # --- Lifecycle ---
 
 func _ready() -> void:
+	_fill_rank_dropdown()
 	_init_managers()
 	_connect_signals()
 	await _populate(FishHandler.list_of_shop_fish)
@@ -34,6 +35,13 @@ func _process(_delta: float) -> void:
 	if PassiveSystems.net_worth != _last_known_net_worth:
 		_last_known_net_worth = PassiveSystems.net_worth
 		_refresh_affordability()
+
+## One dropdown entry per rank in the rank table, so new ranks show up here.
+func _fill_rank_dropdown() -> void:
+	class_button.clear()
+	for i in Ranks.count():
+		class_button.add_item(Ranks.get_rank(i).display_name, i)
+
 
 func _init_managers() -> void:
 	renderer      = FishViewportRenderer.new()
@@ -137,17 +145,17 @@ func _on_qnty_line_text_submitted(t: String) -> void:
 
 func _on_class_button_item_selected(i: int) -> void:
 	rank = i
-	rank_cost_label.text = "Cost: %d" % FishGenerator.FISH_COST[rank]
+	rank_cost_label.text = "Cost: %d" % Ranks.get_rank(rank).cost
 
 func _on_button_pressed() -> void:
-	if PassiveSystems.net_worth < FishGenerator.FISH_COST[rank]:
+	if PassiveSystems.net_worth < Ranks.get_rank(rank).cost:
 		return
 	FishGenerator.generate_fish(number_of_fish, rank)
 
 func _on_buy_max_pressed() -> void:
 	FishHandler.calculate_total_fish()
 	var remainder: int = FishHandler.capacity - FishHandler.total_fish
-	var cost: int = FishGenerator.FISH_COST[rank]
+	var cost: int = Ranks.get_rank(rank).cost
 	var can_buy: int = min(remainder, int(PassiveSystems.net_worth / cost))
 	if can_buy > 0:
 		FishGenerator.generate_fish(can_buy, rank)
@@ -155,18 +163,18 @@ func _on_buy_max_pressed() -> void:
 
 func _refresh_affordability() -> void:
 	# Clamp rank down to highest affordable
-	while rank > 0 and PassiveSystems.net_worth < FishGenerator.FISH_COST[rank]:
+	while rank > 0 and PassiveSystems.net_worth < Ranks.get_rank(rank).cost:
 		rank -= 1
 	class_button.selected = rank
-	rank_cost_label.text = "Cost: %d" % FishGenerator.FISH_COST[rank]
+	rank_cost_label.text = "Cost: %d" % Ranks.get_rank(rank).cost
 
 	# Disable ranks you can't afford
-	for i in FishGenerator.FISH_COST.size():
-		var cost: int = FishGenerator.FISH_COST[i]
+	for i in Ranks.count():
+		var cost: int = Ranks.get_rank(i).cost
 		class_button.set_item_disabled(i, PassiveSystems.net_worth < cost)
 
 	# Block buying if you can't afford current rank
-	var can_afford: bool = PassiveSystems.net_worth >= FishGenerator.FISH_COST[rank]
+	var can_afford: bool = PassiveSystems.net_worth >= Ranks.get_rank(rank).cost
 	buy_button.disabled = not can_afford
 	buy_max_button.disabled = not can_afford
 

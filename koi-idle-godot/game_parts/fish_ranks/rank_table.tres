@@ -1,0 +1,52 @@
+[gd_resource type="Resource" script_class="RankTable" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/ranks/rank_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://scripts/ranks/fish_rank.gd" id="2_rank"]
+
+[sub_resource type="Resource" id="Rank_0"]
+script = ExtResource("2_rank")
+display_name = "Rank 0"
+cost = 1
+value_min = 1
+value_max = 100
+value_peak = 10
+value_decay = 0.8
+bite_seconds = Vector2(1.0, 2.0)
+color = Color(0.75, 0.75, 0.75, 1)
+
+[sub_resource type="Resource" id="Rank_1"]
+script = ExtResource("2_rank")
+display_name = "Rank 1"
+cost = 100
+value_min = 100
+value_max = 200
+value_peak = 110
+value_decay = 0.8
+bite_seconds = Vector2(1.5, 3.0)
+color = Color(0.4, 0.8, 0.4, 1)
+
+[sub_resource type="Resource" id="Rank_2"]
+script = ExtResource("2_rank")
+display_name = "Rank 2"
+cost = 1000
+value_min = 200
+value_max = 300
+value_peak = 210
+value_decay = 0.8
+bite_seconds = Vector2(2.0, 4.0)
+color = Color(0.35, 0.6, 1.0, 1)
+
+[sub_resource type="Resource" id="Rank_3"]
+script = ExtResource("2_rank")
+display_name = "Rank 3"
+cost = 10000
+value_min = 300
+value_max = 400
+value_peak = 310
+value_decay = 0.8
+bite_seconds = Vector2(2.5, 5.0)
+color = Color(0.75, 0.45, 1.0, 1)
+
+[resource]
+script = ExtResource("1_table")
+ranks = Array[ExtResource("2_rank")]([SubResource("Rank_0"), SubResource("Rank_1"), SubResource("Rank_2"), SubResource("Rank_3")])

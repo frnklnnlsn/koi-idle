@@ -10,8 +10,6 @@ const FISH_BASE_VALUE: float = 0.1
 const FISH_BASE_MASS: float = 0.5
 const FISH_BASE_INCOME: float = 1.0
 
-const FISH_COST: Array = [1, 100, 1000, 10000]
-
 var selected_pallet: PackedColorArray = PackedColorArray([
 	Color(1.0, 0.0, 0.0),   # Red
 	Color(0.0, 0.0, 0.0),   # Black
@@ -20,13 +18,8 @@ var selected_pallet: PackedColorArray = PackedColorArray([
 	Color(0.96, 0.96, 0.86) # Beige
 ])
 
-# --- Rank ranges [start_value, end_value, peak_position, decay_rate] ---
-const RANK_RANGES: Array = [
-	[1,   100, 10,  0.8], # Rank 0
-	[100, 200, 110, 0.8], # Rank 1
-	[200, 300, 310, 0.8], # Rank 2
-	[300, 400, 410, 0.8], # Rank 3
-]
+# Per-rank numbers (cost, value range, odds) live in the rank table:
+# game_parts/fish_ranks/rank_table.tres, read through Ranks.
 
 
 # --- Public ---
@@ -51,7 +44,7 @@ func make_fish(rank: int) -> fish_conf:
 
 
 func _value_for_rank(rank: int) -> float:
-	var distribution: Array = _create_right_skewed_array(RANK_RANGES[rank])
+	var distribution: Array = _create_right_skewed_array(Ranks.get_rank(rank))
 	return distribution[randi_range(0, distribution.size() - 1)]
 
 func _build_fish(value: float, rank: int) -> fish_conf:
@@ -59,7 +52,7 @@ func _build_fish(value: float, rank: int) -> fish_conf:
 
 	fish.ID = _generate_id(15)
 	fish.rank = rank
-	fish.cost = FISH_COST[rank]
+	fish.cost = Ranks.get_rank(rank).cost
 	fish.value = value * FISH_BASE_VALUE
 	fish.mass = value * FISH_BASE_MASS
 	fish.income = value * FISH_BASE_INCOME
@@ -91,8 +84,8 @@ func _x_start(_growth_rate: float) -> float:
 
 # --- Stat distribution ---
 
-func _create_right_skewed_array(rank_array: Array) -> Array:
-	var vw := value_weights(rank_array)
+func _create_right_skewed_array(rank_def: FishRank) -> Array:
+	var vw := value_weights(rank_def)
 	var weighted: Array = []
 	for k in vw["values"].size():
 		for j in range(vw["weights"][k]):
@@ -103,11 +96,11 @@ func _create_right_skewed_array(rank_array: Array) -> Array:
 ## Every raw value a rank can roll, and its weight (how many lottery tickets it
 ## gets). Static so charts can read the real odds without the autoload running,
 ## e.g. the shop's value chart and its editor preview.
-static func value_weights(rank_array: Array) -> Dictionary:
-	var start: int = rank_array[0]
-	var end: int = rank_array[1]
-	var peak: int = rank_array[2]
-	var decay: float = rank_array[3]
+static func value_weights(rank_def: FishRank) -> Dictionary:
+	var start: int = rank_def.value_min
+	var end: int = rank_def.value_max
+	var peak: int = rank_def.value_peak
+	var decay: float = rank_def.value_decay
 	var values := PackedInt32Array()
 	var weights := PackedInt32Array()
 

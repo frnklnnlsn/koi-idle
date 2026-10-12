@@ -5,7 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://kg4tm1ni7a1p" path="res://game_parts/user_interface/scenes/shop_interface.tscn" id="2_k8snr"]
 [ext_resource type="PackedScene" uid="uid://ceo0jkwaeceei" path="res://SandBox/FishTestGround/scenes/toilet_area.tscn" id="5_88aja"]
 [ext_resource type="Script" uid="uid://carfweae43i2b" path="res://game_parts/user_interface/scenes/pond_viewport.gd" id="5_e8jla"]
-[ext_resource type="Script" uid="uid://dxsqr475l45sd" path="res://game_parts/user_interface/scenes/ResetSave.gd" id="7_1o2js"]
 [ext_resource type="PackedScene" uid="uid://12twcglpbak0" path="res://game_parts/pond_scenes/scenes/fore_ground.tscn" id="7_76rds"]
 [ext_resource type="Script" uid="uid://cjgcns45jbxxs" path="res://SandBox/Composition/component_scripts/fish_display.gd" id="7_k1q3n"]
 [ext_resource type="Script" uid="uid://dymb3h81ghrqa" path="res://SandBox/Composition/component_scripts/fish_factory.gd" id="8_7vram"]
@@ -148,12 +147,6 @@ layout_mode = 2
 text = "Go Fishing
 "
 
-[node name="Temp" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1918284208]
-layout_mode = 2
-size_flags_horizontal = 10
-text = "Temp"
-script = ExtResource("7_1o2js")
-
 [node name="ListUI" parent="VBoxContainer" unique_id=668367678 instance=ExtResource("11_o70p8")]
 unique_name_in_owner = true
 visible = false
@@ -178,4 +171,3 @@ size_flags_vertical = 6
 [connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/List" to="." method="_on_list_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Shop" to="." method="_on_shop_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/GoFishing" to="." method="_on_go_fishing_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Temp" to="VBoxContainer/Panel/HBoxContainer2/Temp" method="_on_pressed"]
