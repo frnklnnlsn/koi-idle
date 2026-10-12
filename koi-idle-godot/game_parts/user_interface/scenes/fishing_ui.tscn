@@ -103,6 +103,12 @@ layout_mode = 2
 text = "Leave On
 "
 
+[node name="SellPondButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Sell every fish in the pond at a discount. Asks you to confirm first."
+text = "Sell Pond"
+
 [node name="FishingTimer" type="Timer" parent="."]
 unique_name_in_owner = true
 
@@ -110,3 +116,4 @@ unique_name_in_owner = true
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/KeepButton" to="." method="_on_keep_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ReleaseButton" to="." method="_on_release_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/LeaveOnButton" to="." method="_on_leave_on_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/SellPondButton" to="." method="_on_sell_pond_pressed"]

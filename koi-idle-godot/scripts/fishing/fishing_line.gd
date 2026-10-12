@@ -29,6 +29,10 @@ const BITE_SECONDS: Array[Vector2] = [
 	Vector2(2.5, 5.0),   # rank 3
 ]
 
+## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
+## worth, so a player stuck without a rank 0 can always turn the pond into cash.
+const POND_SALE_RATE: float = 0.5
+
 const _GEN := preload("res://scripts/Singletons/FishGenerator.gd")
 
 ## Coins per gram when a fish is valued. Set from PassiveSystems.fishing_multiplier.
@@ -103,3 +107,12 @@ func value_if_separate() -> float:
 	for f in chain:
 		v += worth(f)
 	return v
+
+
+## What Sell Pond pays for every fish in the pond, after the discount.
+func pond_sale_value(pond_fish: Array) -> float:
+	var v := 0.0
+	for f in pond_fish:
+		if f is fish_conf:
+			v += worth(f)
+	return v * POND_SALE_RATE

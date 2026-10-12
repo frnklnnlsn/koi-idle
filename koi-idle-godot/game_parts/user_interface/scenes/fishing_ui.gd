@@ -6,6 +6,7 @@
 #   Keep      cash in the whole chain (snowball bonus), all its fish leave the pond
 #   Release   let everything on the line go; the fish stay in the pond
 #   Leave On  keep the new catch on the line as bait for the next rank up
+#   Sell Pond fail-safe: sell every pond fish at a discount (click twice to confirm)
 extends Control
 
 @onready var fishing_status: RichTextLabel = %FishingStatus
@@ -18,10 +19,16 @@ extends Control
 @onready var release_button: Button        = %ReleaseButton
 @onready var leave_on_button: Button       = %LeaveOnButton
 @onready var fishing_timer:  Timer         = $FishingTimer
+@onready var sell_pond_button: Button      = %SellPondButton
+
+## Seconds the Sell Pond confirmation stays armed before it resets.
+const SELL_CONFIRM_SECONDS := 4.0
 
 var line := FishingLine.new()
 var _waiting     := false   # cast is out, waiting for a bite
 var _just_caught := false   # a fresh catch: choose Keep / Release / Leave On
+var _sell_armed  := false   # Sell Pond clicked once; next click within SELL_CONFIRM_SECONDS sells
+var _sell_arm_id := 0       # so an old timeout can't disarm a newer confirmation
 
 
 func _ready() -> void:
@@ -32,9 +39,26 @@ func _ready() -> void:
 	line.coins_per_gram = PassiveSystems.fishing_multiplier
 	# The pond changes under us (flushes, growth, catches): keep the hints current.
 	FishGrowthManager.growth_updated.connect(_refresh)
-	visibility_changed.connect(_refresh)
-	_set_status("Cast for a rank 0 fish")
+	visibility_changed.connect(_on_visibility_changed)
+	_set_idle_status()
 	_refresh()
+
+
+func _on_visibility_changed() -> void:
+	if visible and line.is_empty() and not _waiting:
+		_set_idle_status()
+	_refresh()
+
+
+## The status shown with an empty line, depending on what the pond holds.
+func _set_idle_status() -> void:
+	var pond := _pond_fish()
+	if pond.is_empty():
+		_set_status("The pond is empty. Flush some fish into it first.")
+	elif line.candidates(pond).is_empty():
+		_set_status("No rank 0 fish in the pond. Sell Pond to cash out.")
+	else:
+		_set_status("Cast for a rank 0 fish")
 
 
 func _process(_delta: float) -> void:
@@ -112,6 +136,32 @@ func _on_leave_on_pressed() -> void:
 	_refresh()
 
 
+func _on_sell_pond_pressed() -> void:
+	var pond := _pond_fish()
+	if _waiting or pond.is_empty():
+		return
+	if not _sell_armed:
+		# First click: show exactly what will happen and wait for a second click.
+		_sell_armed = true
+		_sell_arm_id += 1
+		var my_id := _sell_arm_id
+		_refresh()
+		await get_tree().create_timer(SELL_CONFIRM_SECONDS).timeout
+		if _sell_armed and _sell_arm_id == my_id:
+			_sell_armed = false
+			_refresh()
+		return
+	# Second click: sell everything, including anything on the line.
+	_sell_armed = false
+	var paid := line.pond_sale_value(pond)
+	line.clear()
+	_just_caught = false
+	PassiveSystems.pay_catch(paid)
+	DisplayManager.fish_caught.emit(pond.duplicate())   # removes them all from the pond
+	_set_status("Sold %d pond fish for $%s" % [pond.size(), _commas(floori(paid))])
+	_refresh()
+
+
 # --- Display ------------------------------------------------------------------
 
 func _refresh() -> void:
@@ -146,6 +196,16 @@ func _refresh() -> void:
 	keep_button.disabled = _waiting or line.is_empty()
 	release_button.disabled = _waiting or line.is_empty()
 	leave_on_button.disabled = not _just_caught
+
+	var pond := _pond_fish()
+	sell_pond_button.disabled = _waiting or pond.is_empty()
+	if pond.is_empty():
+		_sell_armed = false
+		sell_pond_button.text = "Sell Pond"
+	elif _sell_armed:
+		sell_pond_button.text = "Confirm: sell %d fish for $%s?" % [pond.size(), _commas(floori(line.pond_sale_value(pond)))]
+	else:
+		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
 
 
 func _set_status(bbcode: String) -> void:
