@@ -13,16 +13,16 @@
 			"tasks": [
 				"d2ac99ed-33d8-4821-8b8a-201961107e0f",
 				"631f981b-bdbd-4891-9dc4-2ef0fc0ebee0",
-				"752cf15b-2702-41b2-99ea-068b315ae7e0"
+				"752cf15b-2702-41b2-99ea-068b315ae7e0",
+				"40ebe9e5-747f-4af8-8bc1-a61ddfbf1812",
+				"82037116-8bb3-418a-a608-2b938a76e1d2",
+				"c5804be5-47cf-41e4-b9bd-8aaefddad9c4"
 			]
 		},
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
-			"tasks": [
-				"82037116-8bb3-418a-a608-2b938a76e1d2",
-				"40ebe9e5-747f-4af8-8bc1-a61ddfbf1812"
-			]
+			"tasks": []
 		},
 		{
 			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
@@ -48,11 +48,11 @@
 			"steps": [
 				{
 					"details": "Composition",
-					"done": false
+					"done": true
 				},
 				{
 					"details": "Procedural Body",
-					"done": false
+					"done": true
 				},
 				{
 					"details": "New Designs",
@@ -130,7 +130,7 @@
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": [
 				{
-					"details": "Flush Logic",
+					"details": "Flush Logic Tweaking\n",
 					"done": true
 				},
 				{
@@ -146,6 +146,13 @@
 					"done": false
 				}
 			]
+		},
+		{
+			"uuid": "c5804be5-47cf-41e4-b9bd-8aaefddad9c4",
+			"title": "Fish body instantiate delay",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
 		}
 	],
 	"layout": {
