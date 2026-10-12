@@ -200,14 +200,29 @@ func _build_ui() -> void:
 		margin.add_theme_constant_override("margin_" + side, 8)
 	_panel.add_child(margin)
 
-	var box := VBoxContainer.new()
-	box.custom_minimum_size.x = 330
-	margin.add_child(box)
+	var outer := VBoxContainer.new()
+	margin.add_child(outer)
 
 	var title := Label.new()
 	title.text = "Developer tools  (F1)"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(title)
+	outer.add_child(title)
+
+	# Tabs keep each tool on its own page so the panel doesn't get cluttered.
+	var tabs := TabContainer.new()
+	outer.add_child(tabs)
+
+	var box := VBoxContainer.new()
+	box.name = "Game"
+	box.custom_minimum_size.x = 330
+	tabs.add_child(box)
+	# The Economy tab is tall; scroll it so it fits a 720p window.
+	var econ_scroll := ScrollContainer.new()
+	econ_scroll.name = "Economy"
+	econ_scroll.custom_minimum_size = Vector2(545, 560)
+	econ_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tabs.add_child(econ_scroll)
+	econ_scroll.add_child(preload("res://scripts/dev/economy_tab.gd").new())
 
 	_info = Label.new()
 	box.add_child(_info)

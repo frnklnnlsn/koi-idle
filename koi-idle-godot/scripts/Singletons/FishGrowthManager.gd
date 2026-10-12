@@ -58,21 +58,13 @@ static func pond_hours(fish: fish_conf) -> float:
 	return fish.age * TIME_SCALE / 3600.0
 
 
-## Mass on a fish's curve after `hours` in the pond.
+## Mass on a fish's curve after `hours` in the pond (see GrowthModel).
 static func mass_at(base: float, k: float, growth_rate: float, mid_point: float, hours: float) -> float:
-	if k <= base:
-		return base
-	var s0 := _s(0.0, growth_rate, mid_point)
-	var span := maxf(1.0 - s0, 0.000001)
-	return base + (k - base) * (_s(hours, growth_rate, mid_point) - s0) / span
+	return GrowthModel.mass_at(base, k, growth_rate, mid_point, hours)
 
 
 static func mass_for(fish: fish_conf, hours: float) -> float:
-	return mass_at(fish.y_start, float(fish.carrying_capacity), fish.growth_rate, fish.mid_point, hours)
-
-
-static func _s(hours: float, r: float, mid: float) -> float:
-	return 1.0 / (1.0 + exp(-r * (hours - mid)))
+	return GrowthModel.mass_at(fish.y_start, float(fish.carrying_capacity), fish.growth_rate, fish.mid_point, hours)
 
 
 # --- Ticking ---------------------------------------------------------------

@@ -74,6 +74,7 @@ func _process(_delta: float) -> void:
 # --- Buttons ------------------------------------------------------------------
 
 func _on_fishing_button_pressed() -> void:
+	line.coins_per_gram = PassiveSystems.fishing_multiplier   # follows Economy tab changes
 	if _waiting or _just_caught:
 		return
 	if not line.can_climb() or line.candidates(_pond_fish()).is_empty():

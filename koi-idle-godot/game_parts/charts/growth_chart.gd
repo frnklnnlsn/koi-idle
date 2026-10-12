@@ -5,7 +5,6 @@
 class_name GrowthChart
 extends KoiChart
 
-const _GROWTH := preload("res://scripts/Singletons/FishGrowthManager.gd")
 const _DEFAULT := {"base": 5.0, "growth_rate": 0.5, "carrying_capacity": 100.0, "mid_point": 12.0, "hours": -1.0, "mass": -1.0}
 
 var _data: Dictionary = _DEFAULT.duplicate()
@@ -15,7 +14,7 @@ var _data: Dictionary = _DEFAULT.duplicate()
 
 ## data: {"base", "growth_rate", "carrying_capacity", "mid_point",
 ##        "hours" + "mass" for the "Now" marker (-1 = no marker)}
-## Uses FishGrowthManager's curve, so the chart always matches real growth.
+## Uses GrowthModel (the same curve FishGrowthManager applies), so the chart always matches real growth.
 static func draw(p: TauPlot, data: Dictionary) -> void:
 	var base: float = data.get("base", 5.0)
 	var r: float = max(data.get("growth_rate", 0.5), 0.0001)
@@ -34,7 +33,7 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 	for i in steps + 1:
 		var h := x_max * i / steps
 		xs.append(h)
-		mass.append(_GROWTH.mass_at(base, k, r, mp, h))
+		mass.append(GrowthModel.mass_at(base, k, r, mp, h))
 
 	var opts := {"x_title": "Hours in pond", "y_title": "Mass", "include_zero": true}
 	if hours_now >= 0.0:
@@ -78,7 +77,7 @@ func clear_fish_growth() -> void:
 ## Show a dot at the fish's current mass (pond view).
 func set_progress_marker(fish_res) -> void:
 	if fish_res:
-		_data["hours"] = _GROWTH.pond_hours(fish_res)
+		_data["hours"] = fish_res.age * FishGrowthManager.TIME_SCALE / 3600.0
 		_data["mass"] = fish_res.mass
 		_redraw()
 

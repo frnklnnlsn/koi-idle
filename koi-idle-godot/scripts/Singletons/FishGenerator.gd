@@ -9,6 +9,8 @@ signal new_fish(fish_array: Array)
 const FISH_BASE_VALUE: float = 0.1
 const FISH_BASE_MASS: float = 0.5
 const FISH_BASE_INCOME: float = 1.0
+## Wide value ranges are sampled at this many steps (see value_weights).
+const VALUE_SAMPLES: float = 100.0
 
 var selected_pallet: PackedColorArray = PackedColorArray([
 	Color(1.0, 0.0, 0.0),   # Red
@@ -20,6 +22,15 @@ var selected_pallet: PackedColorArray = PackedColorArray([
 
 # Per-rank numbers (cost, value range, odds) live in the rank table:
 # game_parts/fish_ranks/rank_table.tres, read through Ranks.
+
+
+## One random source for every roll, so the economy simulator can replay the
+## exact same rules with its own seeded generator.
+var _rng := RandomNumberGenerator.new()
+
+
+func _init() -> void:
+	_rng.randomize()
 
 
 # --- Public ---
@@ -44,8 +55,7 @@ func make_fish(rank: int) -> fish_conf:
 
 
 func _value_for_rank(rank: int) -> float:
-	var distribution: Array = _create_right_skewed_array(Ranks.get_rank(rank))
-	return distribution[randi_range(0, distribution.size() - 1)]
+	return roll_raw(Ranks.get_rank(rank), _rng)
 
 func _build_fish(value: float, rank: int) -> fish_conf:
 	var fish: fish_conf = fish_res.duplicate(true)
@@ -57,26 +67,42 @@ func _build_fish(value: float, rank: int) -> fish_conf:
 	fish.mass = value * FISH_BASE_MASS
 	fish.income = value * FISH_BASE_INCOME
 
-	fish.growth_rate = _growth_rate()
-	fish.carrying_capacity = _carrying_capacity(fish.mass)
-	fish.mid_point = _mid_point()
+	var growth := roll_growth(fish.mass, _rng)
+	fish.growth_rate = growth["growth_rate"]
+	fish.carrying_capacity = growth["carrying_capacity"]
+	fish.mid_point = growth["mid_point"]
 	fish.x_start = _x_start(fish.growth_rate)
 	fish.y_start = fish.mass
 
 	return fish
 
 
-# --- Growth parameters ---
+# --- Rolls (static, so the economy simulator uses exactly the same rules) ---
 
-func _growth_rate() -> float:
-	return randf_range(0.3, 1.5)
+## A raw value for a new fish of `rank_def`, picked by the rank's odds.
+static func roll_raw(rank_def: FishRank, rng: RandomNumberGenerator) -> int:
+	var vw := value_weights(rank_def)
+	var weights: PackedInt32Array = vw["weights"]
+	var total := 0
+	for w in weights:
+		total += w
+	var ticket := rng.randi_range(0, total - 1)
+	for i in weights.size():
+		ticket -= weights[i]
+		if ticket < 0:
+			return vw["values"][i]
+	return vw["values"][-1]
 
-func _mid_point() -> float:
-	return randf_range(6.0, 48.0) # hours after entering the pond when growth is fastest
 
-func _carrying_capacity(mass: float) -> int:
-	# Always leave room to grow: at least one whole unit above the base mass.
-	return maxi(int(mass * randi_range(1, 100)), ceili(mass) + 1)
+## Pond growth stats for a fish of base `mass`.
+static func roll_growth(mass: float, rng: RandomNumberGenerator) -> Dictionary:
+	return {
+		"growth_rate": rng.randf_range(0.3, 1.5),
+		# hours after entering the pond when growth is fastest
+		"mid_point": rng.randf_range(6.0, 48.0),
+		# Always leave room to grow: at least one whole unit above the base mass.
+		"carrying_capacity": maxi(int(mass * rng.randi_range(1, 100)), ceili(mass) + 1),
+	}
 
 func _x_start(_growth_rate: float) -> float:
 	return randf_range(-10.0, -4.0) # starts fish on left/early side of S-curve
@@ -96,24 +122,31 @@ func _create_right_skewed_array(rank_def: FishRank) -> Array:
 ## Every raw value a rank can roll, and its weight (how many lottery tickets it
 ## gets). Static so charts can read the real odds without the autoload running,
 ## e.g. the shop's value chart and its editor preview.
+##
+## Ranges up to 100 wide are weighed one value at a time. Wider ranges (big
+## late-game ranks) are sampled at 101 evenly spaced values with the peak and
+## decay measured in those steps, so every rank keeps the same curve shape no
+## matter how large its numbers get.
 static func value_weights(rank_def: FishRank) -> Dictionary:
 	var start: int = rank_def.value_min
-	var end: int = rank_def.value_max
-	var peak: int = rank_def.value_peak
+	var end: int = maxi(rank_def.value_max, start)
 	var decay: float = rank_def.value_decay
+	var step := maxf(float(end - start) / VALUE_SAMPLES, 1.0)
+	var peak_steps := (rank_def.value_peak - start) / step
 	var values := PackedInt32Array()
 	var weights := PackedInt32Array()
 
-	for i in range(start, end + 1):
+	var count := int(round((end - start) / step)) + 1
+	for j in count:
 		var weight: int
-		if i <= peak:
-			var dist: float = peak - i
+		if j <= peak_steps:
+			var dist: float = peak_steps - j
 			weight = int(100 * exp(-pow(dist, 2) / 10.0))
 		else:
-			var dist: float = i - peak
+			var dist: float = j - peak_steps
 			weight = int(100 * exp(-decay * dist))
 
-		values.append(i)
+		values.append(roundi(start + j * step))
 		weights.append(max(weight, 1))
 
 	return {"values": values, "weights": weights}
