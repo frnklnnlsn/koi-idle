@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bkyojeyh7v6v5" path="res://SandBox/ListviewTest/list_ui.gd" id="1_jstvf"]
 [ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_q7idn"]
-[ext_resource type="PackedScene" uid="uid://bqirbbsed5kfc" path="res://SandBox/graph_test/growth_curve.tscn" id="3_60prq"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="3_60prq"]
 [ext_resource type="PackedScene" uid="uid://c83nj3e08njta" path="res://fish_list_row.tscn" id="3_vhpe5"]
-[ext_resource type="PackedScene" uid="uid://divpetnns07be" path="res://game_parts/user_interface/scenes/histogram.tscn" id="4_5oxw5"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_5oxw5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gsvso"]
 

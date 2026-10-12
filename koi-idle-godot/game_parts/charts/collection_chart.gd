@@ -3,13 +3,15 @@
 # Hovering a fish card highlights its bar; clicking a bar emits bar_clicked.
 # Replaces SandBox/graph_test/histogram.gd and keeps its methods and signal.
 class_name CollectionChart
-extends MarginContainer
+extends KoiChart
 
 signal bar_clicked(fish_resource: fish_conf, bar_index: int)
 
 const HIGHLIGHT := Color(1.0, 0.85, 0.2)
 
-@onready var plot: TauPlot = $Plot
+## Shown above the bars. Set per scene in the Inspector (e.g. "Selected fish"
+## in the shop, "Pond fish" in a list).
+@export var chart_title: String = "Fish by value"
 
 var _sorted: Array = []        # fish_conf, sorted by value
 var _hovered: fish_conf = null
@@ -17,7 +19,8 @@ var _hovered: fish_conf = null
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
-## data: {"values": Array[float] sorted ascending, "highlight": int (-1 = none)}
+## data: {"values": Array[float] sorted ascending, "highlight": int (-1 = none),
+##        "title": String (optional)}
 ## The highlighted bar is drawn as its own stacked series so it can be coloured.
 static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var values: Array = data.get("values", [])
@@ -43,7 +46,7 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	}
 	if on_click.is_valid():
 		opts["on_click"] = on_click
-	TauCharts.bar(p, "Selected fish", labels, {"Fish": others, "Hovered": picked}, opts)
+	TauCharts.bar(p, data.get("title", "Fish by value"), labels, {"Fish": others, "Hovered": picked}, opts)
 
 
 static func sample_data() -> Dictionary:
@@ -93,7 +96,7 @@ func _redraw() -> void:
 	var values := []
 	for f in _sorted:
 		values.append(f.value)
-	draw(plot, {"values": values, "highlight": _sorted.find(_hovered)}, _on_plot_clicked)
+	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "title": chart_title}, _on_plot_clicked)
 
 
 func _on_plot_clicked(hits: Array) -> void:

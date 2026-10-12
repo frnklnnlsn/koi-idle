@@ -10,7 +10,17 @@ extends Control
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _process(_delta: float) -> void:
 	capacity_label.text  = "capacity: " + str(FishHandler.total_fish) + "/20"
-	net_worth_label.text = "$: "        + str(PassiveSystems.net_worth)
+	# Whole coins only, rounded down so it never shows money you don't have yet.
+	net_worth_label.text = "$: "        + _with_commas(floori(PassiveSystems.net_worth))
+## 1234567 -> "1,234,567"
+static func _with_commas(n: int) -> String:
+	var digits := str(absi(n))
+	var out := ""
+	while digits.length() > 3:
+		out = "," + digits.right(3) + out
+		digits = digits.left(-3)
+	return ("-" if n < 0 else "") + digits + out
+
 # ── Button handlers ───────────────────────────────────────────────────────────
 func _on_shop_pressed() -> void:
 	shop_ui.visible = not shop_ui.visible
@@ -35,6 +45,7 @@ func _on_flush_pressed() -> void:
 
 	for fish in save_data.list_of_work_fish:
 		if fish.ID not in retired_ids:
+			FishGrowthManager.enter_pond(fish)   # base mass frozen, growth clock starts
 			save_data.list_of_retired_fish.append(fish)
 
 	save_data.list_of_work_fish.clear()

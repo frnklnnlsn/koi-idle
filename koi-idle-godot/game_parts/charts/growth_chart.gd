@@ -3,53 +3,58 @@
 # marker at its current mass. Replaces SandBox/graph_test/growth_curve.gd and
 # keeps its methods so ShopGraphManager needs no changes.
 class_name GrowthChart
-extends MarginContainer
+extends KoiChart
 
-@onready var plot: TauPlot = $Plot
-
-const _DEFAULT := {"growth_rate": 3.0, "carrying_capacity": 100.0, "mid_point": 5.0, "mass": -1.0}
+const _GROWTH := preload("res://scripts/Singletons/FishGrowthManager.gd")
+const _DEFAULT := {"base": 5.0, "growth_rate": 0.5, "carrying_capacity": 100.0, "mid_point": 12.0, "hours": -1.0, "mass": -1.0}
 
 var _data: Dictionary = _DEFAULT.duplicate()
 
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
-## data: {"growth_rate", "carrying_capacity", "mid_point", "mass" (-1 = no marker)}
+## data: {"base", "growth_rate", "carrying_capacity", "mid_point",
+##        "hours" + "mass" for the "Now" marker (-1 = no marker)}
+## Uses FishGrowthManager's curve, so the chart always matches real growth.
 static func draw(p: TauPlot, data: Dictionary) -> void:
-	var r: float = max(data.get("growth_rate", 3.0), 0.0001)
-	var k: float = max(float(data.get("carrying_capacity", 100.0)), 1.0)
-	var mp: float = data.get("mid_point", 5.0)
+	var base: float = data.get("base", 5.0)
+	var r: float = max(data.get("growth_rate", 0.5), 0.0001)
+	var k: float = max(float(data.get("carrying_capacity", 100.0)), base + 1.0)
+	var mp: float = data.get("mid_point", 12.0)
+	var hours_now: float = data.get("hours", -1.0)
 
-	# Same visible range as the old graph: from 0 to where the fish is ~99% grown.
+	# From entering the pond until the fish is ~99% grown (or past "now").
 	var x_max: float = max((mp + log(99.0) / r) * 1.05, mp * 1.5)
+	if hours_now > 0.0:
+		x_max = max(x_max, hours_now * 1.05)
+
 	var xs := PackedFloat64Array()
 	var mass := PackedFloat64Array()
 	var steps := 100
 	for i in steps + 1:
-		var x := x_max * i / steps
-		xs.append(x)
-		mass.append(k / (1.0 + exp(-r * (x - mp))))
+		var h := x_max * i / steps
+		xs.append(h)
+		mass.append(_GROWTH.mass_at(base, k, r, mp, h))
 
-	var opts := {"x_title": "Hours", "y_title": "Mass", "include_zero": true}
-
-	var current: float = data.get("mass", -1.0)
-	if current >= 0.0:
-		var m := clampf(current, k * 0.001, k * 0.999)
-		var x_now := mp + log(m / (k - m)) / r   # inverse of the curve
-		opts["markers"] = {"Now": Vector2(clampf(x_now, 0.0, x_max), current)}
+	var opts := {"x_title": "Hours in pond", "y_title": "Mass", "include_zero": true}
+	if hours_now >= 0.0:
+		opts["markers"] = {"Now": Vector2(hours_now, data.get("mass", base))}
 
 	TauCharts.line(p, "Growth", xs, {"Mass": mass}, opts)
 
 
 static func sample_data() -> Dictionary:
-	return {"growth_rate": 0.6, "carrying_capacity": 40, "mid_point": 12.0, "mass": 9.0}
+	return {"base": 6.0, "growth_rate": 0.5, "carrying_capacity": 450, "mid_point": 20.0, "hours": 14.0, "mass": 40.0}
 
 
 static func data_for(fish) -> Dictionary:
 	return {
+		# Fish not yet in the pond haven't recorded a base; their mass is it.
+		"base": fish.y_start if fish.y_start > 0.0 else fish.mass,
 		"growth_rate": fish.growth_rate,
 		"carrying_capacity": fish.carrying_capacity,
 		"mid_point": fish.mid_point,
+		"hours": -1.0,
 		"mass": -1.0,
 	}
 
@@ -73,11 +78,13 @@ func clear_fish_growth() -> void:
 ## Show a dot at the fish's current mass (pond view).
 func set_progress_marker(fish_res) -> void:
 	if fish_res:
+		_data["hours"] = _GROWTH.pond_hours(fish_res)
 		_data["mass"] = fish_res.mass
 		_redraw()
 
 
 func clear_progress_marker() -> void:
+	_data["hours"] = -1.0
 	_data["mass"] = -1.0
 	_redraw()
 

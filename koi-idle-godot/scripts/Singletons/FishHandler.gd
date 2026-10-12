@@ -86,6 +86,6 @@ func flush_to_retired(fish_list: Array) -> void:
 		push_error("Could not load save data in flush_to_retired")
 		return
 	for fish in fish_list:
-		PassiveSystems.retire_fish(fish)
+		FishGrowthManager.enter_pond(fish)
 		save_data.list_of_retired_fish.append(fish)
 	SaveManager.save_current_data(save_data)

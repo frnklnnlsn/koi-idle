@@ -60,6 +60,7 @@ func Flush() -> void:
 	await _play_flush_animation()
 	Clear()
 	_is_flushing = false
+	DisplayManager.is_flushing = false   # shared flag: the pond waits on it
 	DisplayManager.flush_completed.emit()
 
 

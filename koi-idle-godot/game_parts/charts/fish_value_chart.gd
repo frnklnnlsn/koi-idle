@@ -6,11 +6,9 @@
 # The curve comes straight from FishGenerator's real odds, so if you retune
 # RANK_RANGES the chart follows automatically.
 class_name FishValueChart
-extends MarginContainer
+extends KoiChart
 
 const _GEN := preload("res://scripts/Singletons/FishGenerator.gd")
-
-@onready var plot: TauPlot = $Plot
 
 var _rank: int = 0
 var _fish_value: float = -1.0   # -1 = no marker

@@ -74,10 +74,11 @@ func _growth_rate() -> float:
 	return randf_range(0.3, 1.5)
 
 func _mid_point() -> float:
-	return randf_range(6.0, 48.0) # hours until 50% of carrying capacity
+	return randf_range(6.0, 48.0) # hours after entering the pond when growth is fastest
 
 func _carrying_capacity(mass: float) -> int:
-	return int(mass * randi_range(1, 100))
+	# Always leave room to grow: at least one whole unit above the base mass.
+	return maxi(int(mass * randi_range(1, 100)), ceili(mass) + 1)
 
 func _x_start(_growth_rate: float) -> float:
 	return randf_range(-10.0, -4.0) # starts fish on left/early side of S-curve

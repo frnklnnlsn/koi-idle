@@ -64,7 +64,11 @@ func _on_fishing_timer_timeout() -> void:
 	var random_index = randi() % save_data.list_of_retired_fish.size()
 	current_fish = save_data.list_of_retired_fish[random_index]
 	fishing_status.text = "[center]Caught!"
-	fish_stats.text = "Mass: " + str(current_fish.mass)
+	# Whole grams, and what keeping it is worth.
+	fish_stats.text = "Mass: %sg   Worth: $%s" % [
+		_with_commas(roundi(current_fish.mass)),
+		_with_commas(floori(current_fish.mass * PassiveSystems.fishing_multiplier)),
+	]
 	fishing_button.disabled = false
 	_set_action_buttons_disabled(false)
 
@@ -73,3 +77,13 @@ func _reset_ui() -> void:
 	fishing_status.parse_bbcode("")
 	fish_stats.text = ""
 	_set_action_buttons_disabled(true)
+
+
+## 1234567 -> "1,234,567"
+static func _with_commas(n: int) -> String:
+	var digits := str(absi(n))
+	var out := ""
+	while digits.length() > 3:
+		out = "," + digits.right(3) + out
+		digits = digits.left(-3)
+	return ("-" if n < 0 else "") + digits + out
