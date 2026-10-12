@@ -6,6 +6,7 @@ var net_worth: float = 0.0
 
 const SAVE_INTERVAL: float = 5.0
 var _save_timer: float = 0.0
+## Coins per gram of fish when a catch is valued.
 var fishing_multiplier: float = 10.0
 
 func _ready() -> void:
@@ -13,11 +14,11 @@ func _ready() -> void:
 	FishGenerator.new_fish.connect(for_new_fish)
 	FishHandler.keep_fish.connect(_on_keep_fish)
 	DisplayManager.flush_fish.connect(reset_income)
-	DisplayManager.fish_caught.connect(_on_fish_caught)  # add this
 
-func _on_fish_caught(fish_list: Array) -> void:
-	for fish in fish_list:
-		net_worth += fish.mass * fishing_multiplier
+## Pay out a kept catch. The fishing UI works out the amount (a whole chain is
+## paid once, with its bonus), so catching fish no longer pays per fish here.
+func pay_catch(amount: float) -> void:
+	net_worth += amount
 	_flush_to_save()
 
 func _load_from_save() -> void:
