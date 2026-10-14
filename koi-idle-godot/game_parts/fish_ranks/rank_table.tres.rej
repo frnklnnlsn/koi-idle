@@ -1,0 +1,8 @@
+diff a/koi-idle-godot/game_parts/fish_ranks/rank_table.tres b/koi-idle-godot/game_parts/fish_ranks/rank_table.tres	(rejected hunks)
+@@ -49,5 +49,5 @@ color = Color(0.75, 0.45, 1.0, 1)
+ 
+ [resource]
+ script = ExtResource("1_table")
+-coins_per_gram = 10.0
++catch_return = 1.0
+ ranks = Array[ExtResource("2_rank")]([SubResource("Rank_0"), SubResource("Rank_1"), SubResource("Rank_2"), SubResource("Rank_3")])

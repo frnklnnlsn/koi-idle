@@ -6,11 +6,8 @@ var net_worth: float = 0.0
 
 const SAVE_INTERVAL: float = 5.0
 var _save_timer: float = 0.0
-## Coins per gram of fish when a catch is valued. Lives in the rank table
-## (coins_per_gram) so the Economy tab can tune and save it.
-var fishing_multiplier: float:
-	get: return Ranks.table().coins_per_gram
-	set(value): Ranks.table().coins_per_gram = value
+# What caught fish pay is set by the rank table (catch_return) and each
+# rank's price; see FishingLine.catch_value.
 ## Longest absence that still earns offline income, in real seconds.
 const MAX_OFFLINE_SECONDS: float = 8.0 * 60.0 * 60.0
 ## What the last offline catch-up paid: {"seconds": away time used, "coins": earned}.

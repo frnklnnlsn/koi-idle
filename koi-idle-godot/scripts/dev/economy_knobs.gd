@@ -13,6 +13,10 @@ extends Resource
 @export var rank0_cost: int = 1
 ## Each rank's fish earn this many times the previous rank's.
 @export var income_growth: float = 4.0
+## Width of every rank's bell curves (income, starting size, growth
+## potential), as a share of the average: 0.25 = most fish within ±25%.
+## Each rank's own spreads can be changed in the rank table afterwards.
+@export_range(0.0, 1.0, 0.01) var roll_spread: float = 0.25
 
 @export_group("Pacing targets (passive income)")
 ## Minutes from the first rank 0 fish to the first rank 1 fish.
@@ -26,11 +30,14 @@ extends Resource
 @export_group("Fishing")
 ## How much faster you want a fishing player to reach the top rank than a
 ## passive one (2 = in half the time). The Economy tab shows the speed-up the
-## simulation actually gets next to this target; tune coins per gram and bait
-## slots to close the gap.
+## simulation actually gets next to this target; tune catch return and bait
+## per upgrade to close the gap.
 @export var fishing_speedup: float = 2.0
-## Coins per gram when a fish is kept (fishing strength).
-@export var coins_per_gram: float = 10.0
+## What a kept fish pays relative to its price: 1.0 = an average fish at its
+## starting mass pays back exactly what it cost (more if bigger or grown).
+@export var catch_return: float = 1.0
+## Share of new fish that are fast growers (see the rank table's Pond growth).
+@export_range(0.0, 1.0, 0.005) var fast_grower_chance: float = 0.05
 ## Bite time for rank 0 as (min, max) seconds; each rank multiplies it.
 @export var bite_base: Vector2 = Vector2(1.0, 2.0)
 @export var bite_growth: float = 1.25
@@ -44,8 +51,14 @@ extends Resource
 ## Share of the toilet the player must be able to restock with a better rank
 ## before flushing.
 @export_range(0.05, 1.0, 0.05) var restock_fraction: float = 0.25
-## Rank 0 fish the fishing player keeps in the toilet as future bait.
-@export_range(0, 20) var bait_slots: int = 2
+## Bait flush: each time the fishing player upgrades, after flushing its
+## earners it buys this many rank 0 fish and flushes them straight into the
+## pond, so every fishing chain has a rank 0 to start from. They never take
+## an income slot; they only cost their (small) price.
+@export_range(0, 100) var bait_per_upgrade: int = 5
+## How long the fishing player leaves a fish in the pond before it will catch
+## it, in minutes. Longer = bigger fish = bigger payouts, but later.
+@export var grow_minutes: float = 0.0
 
 
 func stretch_for(rank: int) -> float:

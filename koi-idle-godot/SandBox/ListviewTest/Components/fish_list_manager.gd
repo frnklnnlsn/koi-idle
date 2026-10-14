@@ -6,6 +6,7 @@ extends Node
 
 signal row_hovered(fish: fish_conf)
 signal row_clicked(fish: fish_conf)
+signal row_unhovered(fish: fish_conf)
 signal rows_changed
 
 var vbox: VBoxContainer
@@ -75,6 +76,8 @@ func _connect_row_signals(row: Control) -> void:
 		row.row_hovered.connect(_on_row_hovered)
 	if row.has_signal("row_clicked"):
 		row.row_clicked.connect(_on_row_clicked)
+	if row.has_signal("row_unhovered"):
+		row.row_unhovered.connect(func(f): row_unhovered.emit(f))
 
 func _on_row_hovered(fish: fish_conf) -> void:
 	row_hovered.emit(fish)

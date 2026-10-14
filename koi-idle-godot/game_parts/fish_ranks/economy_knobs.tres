@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EconomyKnobs" format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/economy_knobs.gd" id="1_67aoh"]
+
+[resource]
+script = ExtResource("1_67aoh")
+rank_count = 7
+rank0_income = 1.0
+rank0_cost = 100
+income_growth = 10.0
+roll_spread = 0.8
+first_rank_minutes = 10.0
+stretch = PackedFloat32Array(1, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5)
+catch_return = 1.5
+fast_grower_chance = 0.25

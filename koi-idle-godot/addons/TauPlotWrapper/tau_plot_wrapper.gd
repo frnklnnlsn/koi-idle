@@ -27,6 +27,15 @@ extends RefCounted
 ##                              drawn on top (e.g. "where this fish sits on the curve")
 ##   marker_color: Color        colour for markers and their guide lines
 ##   marker_drops: bool         dashed line from each marker down to y = 0 (default true)
+##   y_log / x_log: bool        logarithmic axis (values must be > 0)
+##   x_range / y_range: Vector2 fixed axis range (min, max) instead of fitting the data
+##   x_format: Callable         like y_format, for the X axis tick labels
+##   minimal: bool              only the title, the data and the axis lines with major
+##                              tick marks: no axis titles, numbers, grid, legend or
+##                              minor ticks
+##   circles: bool              scatter only: every series drawn as round dots
+##   hover_nearest: bool        hover/click picks the single nearest point (default:
+##                              line charts pick every series at the cursor's X)
 
 const Overlay := TauXYSeriesBinding.PaneOverlayType
 
@@ -63,7 +72,10 @@ static func scatter(plot: TauPlot, title: String, series: Dictionary, opts := {}
 		xs.append(PackedFloat64Array(series[key][0]))
 		ys.append(PackedFloat64Array(series[key][1]))
 	var dataset := TauPlot.Dataset.make_per_series_x_continuous(_names(series), xs, ys)
-	_plot(plot, title, dataset, [TauScatterConfig.new()], [Overlay.SCATTER], false, opts)
+	var cfg := TauScatterConfig.new()
+	if opts.get("circles", false):
+		cfg.style.marker_shapes = [TauScatterStyle.MarkerShape.CIRCLE]
+	_plot(plot, title, dataset, [cfg], [Overlay.SCATTER], false, opts)
 
 
 ## Live streaming chart. Returns a LiveChart; call push() to add samples.
@@ -163,6 +175,14 @@ static func _line_with_markers(plot: TauPlot, title: String, x: PackedFloat64Arr
 static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 		overlays: Array, overlay_types: Array, categorical: bool,
 		opts: Dictionary, is_live := false) -> void:
+	if opts.get("minimal", false):
+		opts = opts.duplicate()
+		opts["x_title"] = ""
+		opts["y_title"] = ""
+		opts["x_format"] = _blank
+		opts["y_format"] = _blank
+		opts["grid"] = false
+		opts["legend"] = false
 	# X axis
 	var x_axis := TauAxisConfig.new()
 	x_axis.title = opts.get("x_title", "")
@@ -170,6 +190,15 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 		x_axis.type = TauAxisConfig.Type.CATEGORICAL
 	else:
 		x_axis.include_zero_in_domain = false
+	if opts.get("x_log", false):
+		x_axis.scale = TauAxisConfig.Scale.LOGARITHMIC
+	if opts.has("x_range"):
+		var xr: Vector2 = opts["x_range"]
+		x_axis.range_override_enabled = true
+		x_axis.min_override = xr.x
+		x_axis.max_override = xr.y
+	if opts.has("x_format"):
+		x_axis.format_tick_label = opts["x_format"]
 	if is_live:
 		# Padding ahead of the data means fewer axis recomputes per second.
 		x_axis.domain_padding_mode = TauAxisConfig.DomainPaddingMode.DATA_UNITS
@@ -182,6 +211,14 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 	y_axis.include_zero_in_domain = opts.get("include_zero", categorical)
 	if opts.has("y_format"):
 		y_axis.format_tick_label = opts["y_format"]
+	if opts.get("y_log", false):
+		y_axis.scale = TauAxisConfig.Scale.LOGARITHMIC
+		y_axis.include_zero_in_domain = false
+	if opts.has("y_range"):
+		var yr: Vector2 = opts["y_range"]
+		y_axis.range_override_enabled = true
+		y_axis.min_override = yr.x
+		y_axis.max_override = yr.y
 
 	# Pane
 	var pane := TauPaneConfig.new()
@@ -200,6 +237,8 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 		var colors: Array[Color] = []
 		colors.assign(opts["colors"])
 		config.style.series_colors = colors
+	if opts.get("minimal", false):
+		config.style.minor_tick_length_ratio = 0.0   # major ticks only
 
 	# One binding per series, all into the single pane
 	var bindings: Array[TauXYSeriesBinding] = []
@@ -214,6 +253,10 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 	# Plot node
 	plot.title = title
 	plot.legend_enabled = opts.get("legend", dataset.get_series_count() > 1)
+	if opts.has("hover_nearest"):
+		var hc := TauHoverConfig.new()
+		hc.hover_mode = TauHoverConfig.HoverMode.NEAREST if opts["hover_nearest"] else TauHoverConfig.HoverMode.AUTO
+		plot.hover_config = hc
 	if opts.has("on_click"):
 		var cb: Callable = opts["on_click"]
 		if not plot.sample_clicked.is_connected(cb):
@@ -225,6 +268,11 @@ static func _plot(plot: TauPlot, title: String, dataset: TauPlot.Dataset,
 	# the plot's inner panes by then, so that layout is skipped and the chart
 	# stays blank. Queue one more refresh after Godot has sized everything.
 	plot.queue_refresh.call_deferred()
+
+
+static func _blank(_label: String) -> String:
+	return ""
+
 
 static func _names(series: Dictionary) -> PackedStringArray:
 	return PackedStringArray(series.keys())

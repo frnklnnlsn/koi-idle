@@ -78,6 +78,8 @@ func _play_flush_animation() -> void:
 			if is_instance_valid(fish):
 				fish.force_state(fish.FishState.FAST_SWIM)
 		await get_tree().process_frame
+		if not is_inside_tree():   # scene reloaded mid-flush
+			return
 
 	# ② Starting values: the toilet's boundary and the fish's avoidance distance
 	var start_radius: float   = _swim_area.size.x
@@ -98,7 +100,8 @@ func _play_flush_animation() -> void:
 	await tween.finished
 
 	# ④ Hold at final state
-	await get_tree().create_timer(flush_hold_duration).timeout
+	if is_inside_tree():
+		await get_tree().create_timer(flush_hold_duration).timeout
 
 
 func _apply_flush_progress(t: float, start_radius: float, start_center: Vector2, start_avoidance: float) -> void:

@@ -14,7 +14,7 @@ signal save_reset
 const SAVE_PATH := "user://savegame.tres"
 const TEMP_PATH := "user://savegame.tmp.tres"
 const TIMESTAMP_PATH := "user://timestamp.cfg"
-const STARTING_COINS := 10.0
+const STARTING_COINS := 500.0
 
 var _data: SaveData
 
@@ -92,7 +92,23 @@ func reset_save_data(starting_net_worth: float = STARTING_COINS, reload_scene: b
 	DisplayManager.is_flushing = false
 	save_reset.emit()
 	if reload_scene and get_tree().current_scene != null:
-		get_tree().reload_current_scene.call_deferred()
+		reload_scene_once()
+
+
+var _reload_queued := false
+
+## Reload the current scene at the end of the frame, once, however many
+## systems ask for it in the same frame (two reloads at once crash Godot).
+func reload_scene_once() -> void:
+	if _reload_queued:
+		return
+	_reload_queued = true
+	_do_reload.call_deferred()
+
+
+func _do_reload() -> void:
+	_reload_queued = false
+	get_tree().reload_current_scene()
 
 
 func _fresh(starting_net_worth: float) -> SaveData:

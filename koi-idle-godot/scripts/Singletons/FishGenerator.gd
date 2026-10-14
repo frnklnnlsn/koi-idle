@@ -6,11 +6,12 @@ signal new_fish(fish_array: Array)
 @onready var fish_res: fish_conf = preload("res://themes/base_fish.tres")
 
 # --- Constants ---
+# Fish stats are now rolled per stat from the rank table (FishStats). The three
+# FISH_BASE_* scales below are only read once, to convert rank tables saved
+# before that change (Ranks._check).
 const FISH_BASE_VALUE: float = 0.1
-const FISH_BASE_MASS: float = 0.5
-const FISH_BASE_INCOME: float = 1.0
-## Wide value ranges are sampled at this many steps (see value_weights).
-const VALUE_SAMPLES: float = 100.0
+const FISH_BASE_MASS: float = 0.005
+const FISH_BASE_INCOME: float = 0.01
 
 var selected_pallet: PackedColorArray = PackedColorArray([
 	Color(1.0, 0.0, 0.0),   # Red
@@ -20,7 +21,7 @@ var selected_pallet: PackedColorArray = PackedColorArray([
 	Color(0.96, 0.96, 0.86) # Beige
 ])
 
-# Per-rank numbers (cost, value range, odds) live in the rank table:
+# Per-rank numbers (cost, stat averages and spreads) live in the rank table:
 # game_parts/fish_ranks/rank_table.tres, read through Ranks.
 
 
@@ -49,28 +50,31 @@ func generate_fish(num: int, rank: int) -> void:
 ## One complete fish of `rank` (stats and visuals) without emitting anything or
 ## charging for it. generate_fish() uses it, and so do the dev tools.
 func make_fish(rank: int) -> fish_conf:
-	var fish: fish_conf = _build_fish(_value_for_rank(rank), rank)
+	var fish: fish_conf = _build_fish(rank)
 	_apply_visuals(fish)
 	return fish
 
 
-func _value_for_rank(rank: int) -> float:
-	return roll_raw(Ranks.get_rank(rank), _rng)
-
-func _build_fish(value: float, rank: int) -> fish_conf:
+func _build_fish(rank: int) -> fish_conf:
 	var fish: fish_conf = fish_res.duplicate(true)
+	var rank_def := Ranks.get_rank(rank)
 
 	fish.ID = _generate_id(15)
 	fish.rank = rank
-	fish.cost = Ranks.get_rank(rank).cost
-	fish.value = value * FISH_BASE_VALUE
-	fish.mass = value * FISH_BASE_MASS
-	fish.income = value * FISH_BASE_INCOME
+	fish.cost = rank_def.cost
 
-	var growth := roll_growth(fish.mass, _rng)
+	var stats := roll_stats(rank_def, _rng)
+	fish.income = stats["income"]
+	fish.income_z = stats["income_z"]
+	fish.mass = stats["mass"]
+	fish.mass_z = stats["mass_z"]
+	fish.value = fish.income   # what the shop's value charts sort and show
+
+	var growth := roll_growth(fish.mass, rank_def, _rng)
 	fish.growth_rate = growth["growth_rate"]
 	fish.carrying_capacity = growth["carrying_capacity"]
 	fish.mid_point = growth["mid_point"]
+	fish.size_z = growth["size_z"]
 	fish.x_start = _x_start(fish.growth_rate)
 	fish.y_start = fish.mass
 
@@ -79,77 +83,49 @@ func _build_fish(value: float, rank: int) -> fish_conf:
 
 # --- Rolls (static, so the economy simulator uses exactly the same rules) ---
 
-## A raw value for a new fish of `rank_def`, picked by the rank's odds.
-static func roll_raw(rank_def: FishRank, rng: RandomNumberGenerator) -> int:
-	var vw := value_weights(rank_def)
-	var weights: PackedInt32Array = vw["weights"]
-	var total := 0
-	for w in weights:
-		total += w
-	var ticket := rng.randi_range(0, total - 1)
-	for i in weights.size():
-		ticket -= weights[i]
-		if ticket < 0:
-			return vw["values"][i]
-	return vw["values"][-1]
-
-
-## Pond growth stats for a fish of base `mass`.
-static func roll_growth(mass: float, rng: RandomNumberGenerator) -> Dictionary:
+## Income and starting mass for a new fish of `rank_def`: two independent
+## bell-curve rolls (see FishStats). z = how lucky each roll was.
+static func roll_stats(rank_def: FishRank, rng: RandomNumberGenerator) -> Dictionary:
+	var iz := FishStats.roll_z(rng)
+	var mz := FishStats.roll_z(rng)
 	return {
-		"growth_rate": rng.randf_range(0.3, 1.5),
+		"income": FishStats.value_from_z(rank_def.income_avg, rank_def.income_spread, iz),
+		"income_z": iz,
+		"mass": FishStats.value_from_z(rank_def.mass_avg, rank_def.mass_spread, mz),
+		"mass_z": mz,
+	}
+
+
+## Pond growth for a fish of starting `mass`. Its growth potential (how many
+## times its starting mass it can reach) is its own bell-curve roll from the
+## rank (size_avg / size_spread). Most fish are slow, big growers; a few
+## (table.fast_grower_chance) are fast growers that peak right after entering
+## the pond but only reach fast_size_factor of that potential.
+## `table` defaults to the game's.
+static func roll_growth(mass: float, rank_def: FishRank, rng: RandomNumberGenerator, table: RankTable = null) -> Dictionary:
+	if table == null:
+		table = Ranks.table()
+	var sz := FishStats.roll_z(rng)
+	var fast := rng.randf() < table.fast_grower_chance
+	var rate: Vector2 = table.fast_rate if fast else table.normal_rate
+	var peak: Vector2 = table.fast_peak_hours if fast else table.normal_peak_hours
+	var times := FishStats.value_from_z(rank_def.size_avg, rank_def.size_spread, sz)
+	if fast:
+		times *= table.fast_size_factor
+	return {
+		"growth_rate": rng.randf_range(rate.x, rate.y),
 		# hours after entering the pond when growth is fastest
-		"mid_point": rng.randf_range(6.0, 48.0),
-		# Always leave room to grow: at least one whole unit above the base mass.
-		"carrying_capacity": maxi(int(mass * rng.randi_range(1, 100)), ceili(mass) + 1),
+		"mid_point": rng.randf_range(peak.x, peak.y),
+		# Always some room to grow: at least 10% above the starting mass.
+		"carrying_capacity": mass * maxf(times, 1.1),
+		"size_z": sz,
+		"fast": fast,
 	}
 
 func _x_start(_growth_rate: float) -> float:
 	return randf_range(-10.0, -4.0) # starts fish on left/early side of S-curve
 
 
-# --- Stat distribution ---
-
-func _create_right_skewed_array(rank_def: FishRank) -> Array:
-	var vw := value_weights(rank_def)
-	var weighted: Array = []
-	for k in vw["values"].size():
-		for j in range(vw["weights"][k]):
-			weighted.append(vw["values"][k])
-	return weighted
-
-
-## Every raw value a rank can roll, and its weight (how many lottery tickets it
-## gets). Static so charts can read the real odds without the autoload running,
-## e.g. the shop's value chart and its editor preview.
-##
-## Ranges up to 100 wide are weighed one value at a time. Wider ranges (big
-## late-game ranks) are sampled at 101 evenly spaced values with the peak and
-## decay measured in those steps, so every rank keeps the same curve shape no
-## matter how large its numbers get.
-static func value_weights(rank_def: FishRank) -> Dictionary:
-	var start: int = rank_def.value_min
-	var end: int = maxi(rank_def.value_max, start)
-	var decay: float = rank_def.value_decay
-	var step := maxf(float(end - start) / VALUE_SAMPLES, 1.0)
-	var peak_steps := (rank_def.value_peak - start) / step
-	var values := PackedInt32Array()
-	var weights := PackedInt32Array()
-
-	var count := int(round((end - start) / step)) + 1
-	for j in count:
-		var weight: int
-		if j <= peak_steps:
-			var dist: float = peak_steps - j
-			weight = int(100 * exp(-pow(dist, 2) / 10.0))
-		else:
-			var dist: float = j - peak_steps
-			weight = int(100 * exp(-decay * dist))
-
-		values.append(roundi(start + j * step))
-		weights.append(max(weight, 1))
-
-	return {"values": values, "weights": weights}
 
 
 # --- Visuals ---

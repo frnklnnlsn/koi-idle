@@ -3,21 +3,23 @@ extends Control
 
 # ── Scene references ──────────────────────────────────────────────────────────
 @onready var fish_list_vbox: VBoxContainer = %FishListVBox
-@onready var name_label:     Label = %fish_name
-@onready var rank_label:     Label = %fish_rank
-@onready var cost_label:     Label = %fish_cost
-@onready var sell_label:     Label = %fish_sell
-@onready var distribution_graph   = %BellcurveList
+@onready var name_label:     Label = get_node_or_null("%fish_name")
+@onready var rank_label:     Label = get_node_or_null("%fish_rank")
+@onready var cost_label:     Label = get_node_or_null("%fish_cost")
+@onready var sell_label:     Label = get_node_or_null("%fish_sell")
+@onready var distribution_graph   = get_node_or_null("%BellcurveList")
 @onready var growth_curve         = %GrowthcurveList
 @onready var histogram_graph      = %HistogramList
-@onready var preview_viewport: SubViewport = %PreviewViewport
-@onready var v_separator_3: VSeparator = %VSeparator3
+@onready var preview_viewport: SubViewport = get_node_or_null("%PreviewViewport")
+@onready var v_separator_3: VSeparator = get_node_or_null("%VSeparator3")
 
-# Headings — static text, toggled for visibility only, never written to
-@onready var income_heading: Label = %IncomeLabelHeading
-@onready var mass_heading:   Label = %MassLabelHeading
-@onready var rank_heading:   Label = %RankLabelHeading
-@onready var id_heading:     Label = %IDLabelHeading
+# Headings — static text, toggled for visibility only, never written to.
+# These (and the detail labels above) are optional: not every list layout has
+# them, so they may be null.
+@onready var income_heading: Label = get_node_or_null("%IncomeLabelHeading")
+@onready var mass_heading:   Label = get_node_or_null("%MassLabelHeading")
+@onready var rank_heading:   Label = get_node_or_null("%RankLabelHeading")
+@onready var id_heading:     Label = get_node_or_null("%IDLabelHeading")
 
 # ── Internal ──────────────────────────────────────────────────────────────────
 var _list_manager:  FishListManager
@@ -53,6 +55,10 @@ func _ready() -> void:
 
 	_list_manager.row_hovered.connect(_on_row_hovered)
 	_list_manager.row_clicked.connect(_on_row_clicked)
+	_list_manager.row_unhovered.connect(_on_row_unhovered)
+	# Clicking a curve on the growth chart selects that fish's row.
+	if growth_curve and growth_curve.has_signal("fish_clicked"):
+		growth_curve.fish_clicked.connect(_select_from_chart)
 	FishHandler.keep_fish.connect(_on_fish_list_updated)
 	_update_label_visibility()
 
@@ -109,6 +115,21 @@ func _on_row_hovered(fish: fish_conf) -> void:
 	_graph_manager.update_for_fish(fish)
 	_label_display.show(fish)
 	_update_label_visibility()
+
+## Moving off a row: the charts and details go back to the selected fish.
+func _on_row_unhovered(_fish: fish_conf) -> void:
+	if _selected_fish:
+		_graph_manager.update_for_fish(_selected_fish)
+		_label_display.show(_selected_fish)
+
+
+func _select_from_chart(fish: fish_conf) -> void:
+	if fish == _selected_fish:
+		return
+	_on_row_clicked(fish)
+	if _selected_row:
+		_selected_row.select()
+
 
 func _on_row_clicked(fish: fish_conf) -> void:
 	if _selected_fish == fish:

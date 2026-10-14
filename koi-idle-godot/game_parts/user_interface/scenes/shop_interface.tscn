@@ -1,7 +1,7 @@
 [gd_scene load_steps=10 format=3 uid="uid://kg4tm1ni7a1p"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/shop_ui.gd" id="1_t4rps"]
-[ext_resource type="PackedScene" path="res://game_parts/charts/fish_value_chart.tscn" id="2_0bsfi"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/fish_scatter_chart.tscn" id="2_0bsfi"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_card.gd" id="2_elyan"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="4_kd6vj"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_saxld"]

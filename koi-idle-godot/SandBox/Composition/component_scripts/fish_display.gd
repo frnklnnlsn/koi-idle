@@ -3,7 +3,9 @@ extends Node
 
 var factory: FishFactory
 
-func _init(fish_factory: FishFactory):
+## The factory is optional so the scene can also hold this script as a plain
+## node (main_UI does); code creates working ones with FishDisplay.new(factory).
+func _init(fish_factory: FishFactory = null):
 	factory = fish_factory
 
 func display_all(fish_list: Array, container: Node):

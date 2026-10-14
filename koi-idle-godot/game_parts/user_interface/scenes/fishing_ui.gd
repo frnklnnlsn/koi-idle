@@ -36,7 +36,6 @@ func _ready() -> void:
 	fishing_status.visible_ratio = 1.0
 	fishing_timer.one_shot = true
 	fishing_timer.timeout.connect(_on_fishing_timer_timeout)
-	line.coins_per_gram = PassiveSystems.fishing_multiplier
 	# The pond changes under us (flushes, growth, catches): keep the hints current.
 	FishGrowthManager.growth_updated.connect(_refresh)
 	visibility_changed.connect(_on_visibility_changed)
@@ -74,7 +73,6 @@ func _process(_delta: float) -> void:
 # --- Buttons ------------------------------------------------------------------
 
 func _on_fishing_button_pressed() -> void:
-	line.coins_per_gram = PassiveSystems.fishing_multiplier   # follows Economy tab changes
 	if _waiting or _just_caught:
 		return
 	if not line.can_climb() or line.candidates(_pond_fish()).is_empty():
@@ -148,7 +146,7 @@ func _on_sell_pond_pressed() -> void:
 		var my_id := _sell_arm_id
 		_refresh()
 		await get_tree().create_timer(SELL_CONFIRM_SECONDS).timeout
-		if _sell_armed and _sell_arm_id == my_id:
+		if is_inside_tree() and _sell_armed and _sell_arm_id == my_id:
 			_sell_armed = false
 			_refresh()
 		return
@@ -179,6 +177,8 @@ func _refresh() -> void:
 		var text := "Keep now: $%s" % _commas(floori(line.value()))
 		if line.chain.size() > 1:
 			text += "   (separately $%s)" % _commas(floori(line.value_if_separate()))
+		else:
+			text += "   (shop price $%s)" % _commas(Ranks.get_rank(line.top().rank).cost)
 		fish_stats.text = text
 
 	# Bite timer: a range for the rank you'd catch next, or ∞ if nothing can bite.

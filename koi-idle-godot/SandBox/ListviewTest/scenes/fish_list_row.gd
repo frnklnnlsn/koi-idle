@@ -3,6 +3,7 @@ extends PanelContainer
 
 signal row_hovered(fish: fish_conf)
 signal row_clicked(fish: fish_conf)
+signal row_unhovered(fish: fish_conf)
 
 var fish_resource: fish_conf = null
 
@@ -65,6 +66,8 @@ func _on_mouse_exited() -> void:
 			add_theme_stylebox_override("panel", normal_color)
 		else:
 			remove_theme_stylebox_override("panel")
+	if fish_resource:
+		row_unhovered.emit(fish_resource)
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton \
@@ -73,6 +76,13 @@ func _on_gui_input(event: InputEvent) -> void:
 		if fish_resource:
 			_selected = !_selected
 			row_clicked.emit(fish_resource)
+
+## Mark this row selected without a click (e.g. picked on a chart).
+func select() -> void:
+	_selected = true
+	if selected_color:
+		add_theme_stylebox_override("panel", selected_color)
+
 
 func deselect() -> void:
 	_selected = false

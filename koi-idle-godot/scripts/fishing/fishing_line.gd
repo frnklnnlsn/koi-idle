@@ -13,6 +13,10 @@
 #   value = worth(first)
 #   value = (value + worth(next)) * CHAIN_BONUS     for every later catch
 #
+# A single fish's worth is its shop price, scaled by how heavy it is compared
+# with an average fish of its rank at starting mass (see catch_value):
+#   worth = price × catch_return × mass / average starting mass of its rank
+#
 # so climbing never loses what the bait was worth, and longer chains pay off
 # more than keeping the same fish one by one.
 class_name FishingLine
@@ -25,9 +29,6 @@ const CHAIN_BONUS: float = 1.5
 ## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
 ## worth, so a player stuck without a rank 0 can always turn the pond into cash.
 const POND_SALE_RATE: float = 0.5
-
-## Coins per gram when a fish is valued. Set from PassiveSystems.fishing_multiplier.
-var coins_per_gram: float = 10.0
 
 ## Fish on the line, bait first, newest last. Masses are as they were when
 ## hooked; a fish out of the water stops growing.
@@ -81,7 +82,18 @@ func clear() -> void:
 
 
 func worth(fish: fish_conf) -> float:
-	return fish.mass * coins_per_gram
+	return catch_value(Ranks.get_rank(fish.rank), fish.mass, Ranks.table().catch_return)
+
+
+## What a caught fish of `rank_def` weighing `mass` pays when kept on its own.
+## An average fish at its starting mass pays price × catch_return.
+static func catch_value(rank_def: FishRank, mass: float, catch_return: float) -> float:
+	return rank_def.cost * catch_return * mass / avg_start_mass(rank_def)
+
+
+## The average starting mass of a new fish of `rank_def`.
+static func avg_start_mass(rank_def: FishRank) -> float:
+	return maxf(rank_def.mass_avg, 0.0001)
 
 
 ## What Keep pays for the whole chain.

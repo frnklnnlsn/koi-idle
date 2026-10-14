@@ -49,9 +49,17 @@ func _populate(fish_array: Array) -> void:
 		card.hovered.connect(_on_card_hovered)
 		card.unhovered.connect(_on_card_unhovered)
 		card.selected_deselected.connect(_on_card_selected)
+		# Cards arrive one by one; stop if the scene was reloaded meanwhile
+		# (Apply / new save), or we'd keep working on a freed shop.
+		if not is_inside_tree():
+			return
 		await get_tree().create_timer(0.1).timeout
+		if not is_inside_tree():
+			return
 
 	await get_tree().process_frame
+	if not is_inside_tree():
+		return
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 
 

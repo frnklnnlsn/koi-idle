@@ -37,10 +37,12 @@ func _process(_delta: float) -> void:
 		_refresh_affordability()
 
 ## One dropdown entry per rank in the rank table, so new ranks show up here.
+## Each entry shows the rank's price, e.g. "Rank 1  ($100)".
 func _fill_rank_dropdown() -> void:
 	class_button.clear()
 	for i in Ranks.count():
-		class_button.add_item(Ranks.get_rank(i).display_name, i)
+		var r := Ranks.get_rank(i)
+		class_button.add_item("%s  ($%s)" % [r.display_name, FishLabelDisplay.num(r.cost)], i)
 
 
 func _init_managers() -> void:
@@ -52,12 +54,17 @@ func _init_managers() -> void:
 	add_child(card_manager)
 	add_child(graph_manager)
 	add_child(label_display)
+	label_display.clear()
 
 func _connect_signals() -> void:
 	FishGenerator.new_fish.connect(_on_new_fish)
 	FishHandler.keep_fish.connect(_on_keep)
 	sell.connect(_on_sell)
 	%Histogram.bar_clicked.connect(_on_bar_clicked)
+	# Clicking a dot (scatter) or a curve (growth) selects that fish too.
+	for chart in [%bellcurve, %Growth_curve]:
+		if chart.has_signal("fish_clicked"):
+			chart.fish_clicked.connect(func(f): _on_bar_clicked(f, -1))
 
 
 # --- Population ---
@@ -68,9 +75,17 @@ func _populate(fish_array: Array) -> void:
 		card.hovered.connect(_on_card_hovered)
 		card.unhovered.connect(_on_card_unhovered)
 		card.selected_deselected.connect(_on_card_selected)
+		# Cards arrive one by one; stop if the scene was reloaded meanwhile
+		# (Apply / new save), or we'd keep working on a freed shop.
+		if not is_inside_tree():
+			return
 		await get_tree().create_timer(0.1).timeout
+		if not is_inside_tree():
+			return
 
 	await get_tree().process_frame
+	if not is_inside_tree():
+		return
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 
 
@@ -85,6 +100,9 @@ func _on_card_unhovered(_fish: fish_conf) -> void:
 	renderer.clear_viewport(fish_viewport)
 	if selected_fish:
 		renderer.place_fish_in_viewport(fish_viewport, selected_fish)
+	label_display.show(selected_fish)   # back to the selected fish (or blank)
+	if selected_fish:
+		graph_manager.update_for_fish(selected_fish)
 
 func _on_card_selected(fish: fish_conf) -> void:
 	selected_fish = null if selected_fish == fish else fish
@@ -118,6 +136,7 @@ func _after_transaction() -> void:
 	selected_fish = null
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 	graph_manager.clear_hover()
+	label_display.clear()
 	_refresh_affordability()
 
 
@@ -179,5 +198,8 @@ func _refresh_affordability() -> void:
 	buy_max_button.disabled = not can_afford
 
 func _on_new_fish(arr: Array) -> void:
+	if not is_inside_tree():
+		return
 	await _populate(arr)
-	_refresh_affordability()
+	if is_inside_tree():
+		_refresh_affordability()

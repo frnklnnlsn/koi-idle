@@ -12,15 +12,24 @@ func _init(dist, growth, hist):
 	histogram_graph = hist
 
 func update_for_fish(fish: fish_conf):
-	if distribution_graph: distribution_graph.set_fish_value(fish.value)
+	if distribution_graph:
+		if distribution_graph.has_method("set_fish"):
+			distribution_graph.set_fish(fish)
+		else:
+			distribution_graph.set_fish_value(fish.value)
 	if growth_curve:
 		growth_curve.set_fish_growth(fish)
 		if is_pond:                             # ← ADD THIS
 			growth_curve.set_progress_marker(fish)
 	if histogram_graph: histogram_graph.set_fish_card_hover(fish)
 
+## The current set of fish (shop batch, pond, ...). Charts that compare fish
+## (scatter, all growth curves, histogram) show all of them.
 func refresh_histogram(fish_array: Array):
 	if histogram_graph: histogram_graph.set_fish_collection(fish_array)
+	for chart in [distribution_graph, growth_curve]:
+		if chart and chart.has_method("set_fish_collection"):
+			chart.set_fish_collection(fish_array)
 
 func clear_hover():
 	if histogram_graph: histogram_graph.clear_fish_card_hover()

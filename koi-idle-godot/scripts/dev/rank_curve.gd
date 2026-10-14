@@ -2,22 +2,22 @@
 # Builds a full set of ranks from EconomyKnobs, and fits rank prices so the
 # simulated passive player reaches each rank on the target schedule.
 #
-# Every rank's value roll has the same shape as rank 0 (rarely low, usually a
-# bit above the peak, occasionally a big tail), scaled so its average income is
-# rank0_income × income_growth^rank. Prices start from a rough estimate and
-# Fit refines them against the simulator.
+# Each rank's fish earn rank0_income × income_growth^rank on average. Starting
+# mass and growth potential are separate rolls (see FishStats); they keep the
+# current table's values where a rank already exists. Every stat gets the
+# knobs' roll spread. Prices start from a rough estimate and Fit refines them
+# against the simulator.
 class_name RankCurve
 extends RefCounted
 
 const _GEN := preload("res://scripts/Singletons/FishGenerator.gd")
 
-# Shape of the rank 0 roll relative to its average raw value (17.5):
-# min 1, peak 10, max 100.
-const MIN_RATIO := 1.0 / 17.5
-const PEAK_RATIO := 10.0 / 17.5
-const MAX_RATIO := 100.0 / 17.5
-const DECAY := 0.8
-const START_MONEY := 10.0
+## Defaults for ranks that don't exist yet: rank 0's average starting mass
+## (grams), how much heavier each rank starts, and average growth potential.
+const MASS_RANK0 := 10.0
+const MASS_GROWTH := 1.5
+const SIZE_AVG := 50.0
+const START_MONEY := 500.0
 const CAPACITY := 20
 
 
@@ -35,14 +35,15 @@ static func generate(knobs: EconomyKnobs, previous: Array = []) -> Array[FishRan
 		if n < previous.size():
 			r.display_name = previous[n].display_name
 			r.color = previous[n].color
+			r.mass_avg = previous[n].mass_avg
+			r.size_avg = previous[n].size_avg
 		else:
 			r.display_name = "Rank %d" % n
 			r.color = Color.from_hsv(fmod(0.33 + n * 0.13, 1.0), 0.5, 0.95)
-		var avg_raw := target_income(knobs, n) / _GEN.FISH_BASE_INCOME
-		r.value_min = maxi(1, roundi(avg_raw * MIN_RATIO))
-		r.value_peak = maxi(r.value_min, roundi(avg_raw * PEAK_RATIO))
-		r.value_max = maxi(r.value_peak + 1, roundi(avg_raw * MAX_RATIO))
-		r.value_decay = DECAY
+			r.mass_avg = MASS_RANK0 * pow(MASS_GROWTH, n)
+			r.size_avg = SIZE_AVG
+		r.income_avg = target_income(knobs, n)
+		set_spread(r, knobs.roll_spread)
 		r.bite_seconds = knobs.bite_base * pow(knobs.bite_growth, n)
 		if n == 0:
 			r.cost = knobs.rank0_cost
@@ -60,17 +61,38 @@ static func make_sim(knobs: EconomyKnobs, ranks: Array) -> EconomySim:
 	sim.ranks = ranks
 	sim.capacity = CAPACITY
 	sim.start_money = START_MONEY
-	sim.coins_per_gram = knobs.coins_per_gram
+	sim.catch_return = knobs.catch_return
+	var growth: RankTable = Ranks.table().duplicate()   # game's growth settings...
+	growth.fast_grower_chance = knobs.fast_grower_chance  # ...with the knob's chance
+	sim.growth_table = growth
 	sim.chain_bonus = FishingLine.CHAIN_BONUS
 	sim.pond_time_scale = knobs.pond_time_scale
 	sim.fish_every_seconds = knobs.fish_every_minutes * 60.0
 	sim.restock_fraction = knobs.restock_fraction
-	sim.bait_slots = knobs.bait_slots
+	sim.bait_per_upgrade = knobs.bait_per_upgrade
+	sim.min_grow_seconds = knobs.grow_minutes * 60.0
 	var total := 0.0
 	for n in range(1, ranks.size()):
 		total += knobs.target_gap(n)
 	sim.max_seconds = maxf(total * 4.0, 3600.0)
 	return sim
+
+
+## Sets a rank's average income per fish.
+static func set_income(r: FishRank, income: float) -> void:
+	r.income_avg = maxf(income, 0.0)
+
+
+## The same bell width for all three of a rank's stats.
+static func set_spread(r: FishRank, spread: float) -> void:
+	r.income_spread = spread
+	r.mass_spread = spread
+	r.size_spread = spread
+
+
+## Average income per second of a fish of this rank.
+static func avg_income(r: FishRank) -> float:
+	return r.income_avg
 
 
 ## Set prices (rank 1 and up) so the simulated passive player first reaches

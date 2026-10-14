@@ -18,7 +18,7 @@ signal growth_updated
 const UPDATE_INTERVAL: float = 5.0
 const MAX_OFFLINE_HOURS: float = 8.0
 ## Pond hours per real second. 1.0 = real time, 3600.0 = 1 second is 1 hour (debug).
-const TIME_SCALE: float = 3600.0
+const TIME_SCALE: float = 1.0
 
 var _timer: float = 0.0
 

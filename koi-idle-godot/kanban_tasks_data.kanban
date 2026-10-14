@@ -22,7 +22,9 @@
 		{
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
-			"tasks": []
+			"tasks": [
+				"752c2c71-4974-4987-b38c-ede0d1959edf"
+			]
 		},
 		{
 			"uuid": "fef30c3d-a4f5-4ce3-875d-2aa0de3c6b59",
@@ -150,6 +152,13 @@
 		{
 			"uuid": "c5804be5-47cf-41e4-b9bd-8aaefddad9c4",
 			"title": "Fish body instantiate delay",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "752c2c71-4974-4987-b38c-ede0d1959edf",
+			"title": "New task",
 			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []

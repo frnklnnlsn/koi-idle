@@ -1,43 +1,76 @@
-[gd_resource type="Resource" script_class="RankTable" format=3 uid="uid://dfb7r338cu75y"]
+[gd_resource type="Resource" script_class="RankTable" format=3]
 
-[ext_resource type="Script" uid="uid://yg31a5aonwta" path="res://scripts/ranks/rank_table.gd" id="1_table"]
-[ext_resource type="Script" uid="uid://btsfj62mokmil" path="res://scripts/ranks/fish_rank.gd" id="2_rank"]
+[ext_resource type="Script" path="res://scripts/ranks/rank_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://scripts/ranks/fish_rank.gd" id="2_rank"]
 
-[sub_resource type="Resource" id="Rank_0"]
+[sub_resource type="Resource" id="Resource_6nebn"]
 script = ExtResource("2_rank")
+cost = 100
+value_max = 294
+value_peak = 86
+value_spread = 0.8
 color = Color(0.75, 0.75, 0.75, 1)
 
-[sub_resource type="Resource" id="Rank_1"]
+[sub_resource type="Resource" id="Resource_aljlg"]
 script = ExtResource("2_rank")
 display_name = "Rank 1"
-cost = 100
-value_min = 100
-value_max = 200
-value_peak = 110
-bite_seconds = Vector2(1.5, 3)
+cost = 6150
+value_max = 2944
+value_peak = 866
+value_spread = 0.8
+bite_seconds = Vector2(1.25, 2.5)
 color = Color(0.4, 0.8, 0.4, 1)
 
-[sub_resource type="Resource" id="Rank_2"]
+[sub_resource type="Resource" id="Resource_dr6dp"]
 script = ExtResource("2_rank")
 display_name = "Rank 2"
-cost = 1000
-value_min = 200
-value_max = 300
-value_peak = 210
-bite_seconds = Vector2(2, 4)
+cost = 80900
+value_max = 29439
+value_peak = 8659
+value_spread = 0.8
+bite_seconds = Vector2(1.5625, 3.125)
 color = Color(0.35, 0.6, 1, 1)
 
-[sub_resource type="Resource" id="Rank_3"]
+[sub_resource type="Resource" id="Resource_sgclh"]
 script = ExtResource("2_rank")
 display_name = "Rank 3"
-cost = 10000
-value_min = 300
-value_max = 400
-value_peak = 310
-bite_seconds = Vector2(2.5, 5)
+cost = 1710000
+value_max = 294399
+value_peak = 86588
+value_spread = 0.8
+bite_seconds = Vector2(1.953125, 3.90625)
 color = Color(0.75, 0.45, 1, 1)
+
+[sub_resource type="Resource" id="Resource_cf4pf"]
+script = ExtResource("2_rank")
+display_name = "Rank 4"
+cost = 29000000
+value_max = 2944004
+value_peak = 865884
+value_spread = 0.8
+bite_seconds = Vector2(2.4414063, 4.8828125)
+
+[sub_resource type="Resource" id="Resource_fyqg0"]
+script = ExtResource("2_rank")
+display_name = "Rank 5"
+cost = 810000000
+value_max = 29440051
+value_peak = 8658839
+value_spread = 0.8
+bite_seconds = Vector2(3.0517578, 6.1035156)
+
+[sub_resource type="Resource" id="Resource_r3jia"]
+script = ExtResource("2_rank")
+display_name = "Rank 6"
+cost = 7980000000
+value_max = 294400550
+value_peak = 86588397
+value_spread = 0.8
+bite_seconds = Vector2(3.8146973, 7.6293945)
+color = Color(0.95, 0.78849995, 0.475, 1)
 
 [resource]
 script = ExtResource("1_table")
-coins_per_gram = 10.0
-ranks = Array[ExtResource("2_rank")]([SubResource("Rank_0"), SubResource("Rank_1"), SubResource("Rank_2"), SubResource("Rank_3")])
+ranks = Array[ExtResource("2_rank")]([SubResource("Resource_6nebn"), SubResource("Resource_aljlg"), SubResource("Resource_dr6dp"), SubResource("Resource_sgclh"), SubResource("Resource_cf4pf"), SubResource("Resource_fyqg0"), SubResource("Resource_r3jia")])
+catch_return = 1.5
+fast_grower_chance = 0.25

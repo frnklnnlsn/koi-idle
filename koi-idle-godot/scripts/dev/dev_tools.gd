@@ -153,7 +153,7 @@ func _update_info() -> void:
 	for r in range(Ranks.count()):
 		pond_ranks.append("R%d:%d" % [r, ranks.get(r, 0)])
 	_info.text = "\n".join([
-		"Money  $%s   Income  $%s/s" % [_commas(PassiveSystems.net_worth), _commas(PassiveSystems.income)],
+		"Money  $%s   Income  $%s/s" % [FishLabelDisplay.num(PassiveSystems.net_worth), FishLabelDisplay.num(PassiveSystems.income)],
 		"Shop %d   Toilet %d   Pond %d  (%s)" % [data.list_of_shop_fish.size(), data.list_of_work_fish.size(), data.list_of_retired_fish.size(), " ".join(pond_ranks)],
 		"Pond time: 1 real second = %s pond hour%s" % [_commas(FishGrowthManager.TIME_SCALE / 3600.0), "" if FishGrowthManager.TIME_SCALE == 3600.0 else "s"],
 		"Reset on launch: %s" % ("ON" if DevSettings.RESET_SAVE_ON_LAUNCH else "off"),

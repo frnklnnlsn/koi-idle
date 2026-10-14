@@ -1,5 +1,6 @@
 # collection_chart.gd
-# Shop chart: one bar per fish in the current selection, sorted by sell value.
+# Shop chart: one bar per fish in the current selection, sorted by the stat
+# picked in the corner tabs: income, starting size or max size.
 # Hovering a fish card highlights its bar; clicking a bar emits bar_clicked.
 # Replaces SandBox/graph_test/histogram.gd and keeps its methods and signal.
 class_name CollectionChart
@@ -10,11 +11,16 @@ signal bar_clicked(fish_resource: fish_conf, bar_index: int)
 const HIGHLIGHT := Color(1.0, 0.85, 0.2)
 
 ## Shown above the bars. Set per scene in the Inspector (e.g. "Selected fish"
-## in the shop, "Pond fish" in a list).
-@export var chart_title: String = "Fish by value"
+## in the shop, "Pond fish" in a list). Empty = name the current stat.
+@export var chart_title: String = ""
 
-var _sorted: Array = []        # fish_conf, sorted by value
+## [tab label, axis title]
+const STATS := [["Income", "Income /s"], ["Size", "Starting mass (g)"], ["Max size", "Max mass (g)"]]
+
+var _fish: Array = []          # fish_conf, as given
+var _sorted: Array = []        # fish_conf, sorted by the current stat
 var _hovered: fish_conf = null
+var _stat := 0
 
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
@@ -39,9 +45,9 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 		picked.append(values[i] if i == highlight else 0.0)
 
 	var opts := {
-		"y_title": "Sell value",
+		"y_title": data.get("y_title", "Income /s"),
 		"stacked": true,
-		"legend": false,
+		"minimal": true,
 		"colors": [TauXYStyle.DEFAULT_SERIES_COLOR, HIGHLIGHT],
 	}
 	if on_click.is_valid():
@@ -56,21 +62,26 @@ static func sample_data() -> Dictionary:
 # --- Shop API (same names as the old histogram) ------------------------------
 
 func _ready() -> void:
+	var names := PackedStringArray()
+	for s in STATS:
+		names.append(s[0])
+	add_tabs(names, _on_stat)
 	_redraw()
 
 
 func set_fish_collection(fish_array: Array) -> void:
-	_sorted = fish_array.filter(func(f): return f is fish_conf)
-	_sorted.sort_custom(func(a, b): return a.value < b.value)
+	_fish = fish_array.filter(func(f): return f is fish_conf)
+	_sort()
 	_redraw()
 
 
 func add_fish_to_histogram(fish_res: fish_conf) -> void:
 	if fish_res:
-		set_fish_collection(_sorted + [fish_res])
+		set_fish_collection(_fish + [fish_res])
 
 
 func clear_histogram() -> void:
+	_fish.clear()
 	_sorted.clear()
 	_hovered = null
 	_redraw()
@@ -90,13 +101,34 @@ func get_hovered_fish() -> fish_conf:
 	return _hovered
 
 
+## The value a fish shows for stat tab `stat`.
+static func stat_value(f: fish_conf, stat: int) -> float:
+	match stat:
+		1: return f.y_start if f.y_start > 0.0 else f.mass   # starting mass
+		2: return f.carrying_capacity                         # max mass
+		_: return f.income
+
+
+func _on_stat(i: int) -> void:
+	_stat = i
+	_sort()
+	_redraw()
+
+
+func _sort() -> void:
+	_sorted = _fish.duplicate()
+	_sorted.sort_custom(func(a, b): return stat_value(a, _stat) < stat_value(b, _stat))
+
+
 func _redraw() -> void:
 	if not plot:
 		return
 	var values := []
 	for f in _sorted:
-		values.append(f.value)
-	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "title": chart_title}, _on_plot_clicked)
+		values.append(stat_value(f, _stat))
+	var title := chart_title if chart_title != "" else "By " + String(STATS[_stat][0]).to_lower()
+	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "title": title,
+		"y_title": STATS[_stat][1]}, _on_plot_clicked)
 
 
 func _on_plot_clicked(hits: Array) -> void:
