@@ -6,6 +6,10 @@ signal selected_deselected(fish_resource:fish_conf)
 var fish_resource:fish_conf
 
 var focused:bool = false
+## True while the keyboard cursor is on this card.
+var is_cursor := false
+var _number: Label
+var _cursor_frame: Panel
 
 
 func _ready() -> void:
@@ -55,4 +59,38 @@ func _on_card_button_mouse_entered():
 
 func _on_card_button_mouse_exited():
 	unhovered.emit(fish_resource)
-	self.set_scale(Vector2(1,1))
+	self.set_scale(Vector2(1.5, 1.5) if is_cursor else Vector2(1, 1))
+
+
+## The small number in the corner, used by keyboard commands like ":3,7d".
+func set_number(n: int) -> void:
+	if _number == null:
+		_number = Label.new()
+		_number.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_number.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_number.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		_number.add_theme_font_size_override("font_size", 11)
+		_number.add_theme_color_override("font_color", Color(1, 1, 1, 0.75))
+		_number.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		_number.add_theme_constant_override("outline_size", 3)
+		add_child(_number)
+	_number.text = str(n)
+
+
+## Keyboard cursor on / off: same enlarged look as mouse hover, plus a frame.
+func set_cursor(on: bool) -> void:
+	is_cursor = on
+	set_scale(Vector2(1.5, 1.5) if on else Vector2(1, 1))
+	z_index = 1 if on else 0
+	if on and _cursor_frame == null:
+		var style := StyleBoxFlat.new()
+		style.draw_center = false
+		style.border_color = Color(1.0, 0.85, 0.2)
+		style.set_border_width_all(2)
+		style.set_corner_radius_all(3)
+		_cursor_frame = Panel.new()
+		_cursor_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_cursor_frame.add_theme_stylebox_override("panel", style)
+		add_child(_cursor_frame)
+	if _cursor_frame:
+		_cursor_frame.visible = on

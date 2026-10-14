@@ -3,6 +3,7 @@ extends Node
 #var list_of_work_fish:Array 
 #var lsit_of_retired_fish:Array
 var list_of_shop_fish:Array
+## Toilet capacity: most fish you can keep earning at once.
 var capacity = 20
 var total_fish:int
 
@@ -24,6 +25,21 @@ func calculate_total_fish():
 	var list_shop_size = save_data.list_of_shop_fish.size()
 	var list_work_size = save_data.list_of_work_fish.size()
 	total_fish = list_shop_size + list_work_size
+
+## Fish kept in the toilet right now.
+func work_count() -> int:
+	return SaveManager.load_saved_data().list_of_work_fish.size()
+
+
+## Free toilet slots (how many more fish can be kept).
+func toilet_space() -> int:
+	return maxi(capacity - work_count(), 0)
+
+
+## Free slots in the shop's buy pool (rank table: shop_pool_size).
+func pool_space() -> int:
+	return maxi(Ranks.table().shop_pool_size - SaveManager.load_saved_data().list_of_shop_fish.size(), 0)
+
 
 ### takes an array of fish_res, (can search through for same res)
 func save_shop_fish(list_of_shop_fish:Array)-> void:

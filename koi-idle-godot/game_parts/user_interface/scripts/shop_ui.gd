@@ -22,6 +22,8 @@ var rank:           int = 0
 var number_of_fish: int = 1
 
 var _last_known_net_worth: float = -1.0
+## Keyboard cursor: index of the card it's on (cards counted left to right).
+var _cursor := 0
 # --- Lifecycle ---
 
 func _ready() -> void:
@@ -75,6 +77,7 @@ func _populate(fish_array: Array) -> void:
 		card.hovered.connect(_on_card_hovered)
 		card.unhovered.connect(_on_card_unhovered)
 		card.selected_deselected.connect(_on_card_selected)
+		_renumber()
 		# Cards arrive one by one; stop if the scene was reloaded meanwhile
 		# (Apply / new save), or we'd keep working on a freed shop.
 		if not is_inside_tree():
@@ -92,6 +95,11 @@ func _populate(fish_array: Array) -> void:
 # --- Card events ---
 
 func _on_card_hovered(fish: fish_conf) -> void:
+	# Mouse, keys and chart clicks all move the keyboard cursor to this fish.
+	var i := _cards().map(func(c): return c.fish_resource).find(fish)
+	if i >= 0 and i != _cursor:
+		_cursor = i
+		_show_cursor()
 	renderer.place_fish_in_viewport(fish_viewport, fish)
 	graph_manager.update_for_fish(fish)
 	label_display.show(fish)
@@ -132,6 +140,7 @@ func _on_sell(list: Array) -> void:
 	FishHandler.remove_shop_fish(list)
 
 func _after_transaction() -> void:
+	_renumber.call_deferred()   # after the removed cards are gone
 	renderer.clear_viewport(fish_viewport)
 	selected_fish = null
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
@@ -147,10 +156,10 @@ func _after_transaction() -> void:
 
 func _on_keep_pressed() -> void:
 	if selected_fish:
-		FishHandler.keep_fish.emit([selected_fish])
+		_keep([selected_fish])
 
 func _on_keep_all_pressed() -> void:
-	FishHandler.keep_fish.emit(card_manager.temp_fish_array.duplicate())
+	_keep(_cards().map(func(c): return c.fish_resource))
 
 func _on_sell_pressed() -> void:
 	if selected_fish:
@@ -167,17 +176,139 @@ func _on_class_button_item_selected(i: int) -> void:
 	rank_cost_label.text = "Cost: %d" % Ranks.get_rank(rank).cost
 
 func _on_button_pressed() -> void:
-	if PassiveSystems.net_worth < Ranks.get_rank(rank).cost:
-		return
-	FishGenerator.generate_fish(number_of_fish, rank)
+	_buy(number_of_fish)
 
 func _on_buy_max_pressed() -> void:
-	FishHandler.calculate_total_fish()
-	var remainder: int = FishHandler.capacity - FishHandler.total_fish
-	var cost: int = Ranks.get_rank(rank).cost
-	var can_buy: int = min(remainder, int(PassiveSystems.net_worth / cost))
-	if can_buy > 0:
-		FishGenerator.generate_fish(can_buy, rank)
+	_buy(Ranks.table().shop_pool_size)
+
+
+# --- Keep / recycle / buy, shared by buttons and keys ---------------------------
+
+## Keeps as many of `list` as the toilet has room for, in order.
+## Returns how many were kept.
+func _keep(list: Array) -> int:
+	var room := FishHandler.toilet_space()
+	var kept := list.slice(0, room)
+	if not kept.is_empty():
+		FishHandler.keep_fish.emit(kept)
+	return kept.size()
+
+
+## Buys up to `n` fish of the current rank, limited by the pool and money.
+## Returns how many were bought.
+func _buy(n: int) -> int:
+	var cost: float = Ranks.get_rank(rank).cost
+	var can: int = mini(n, FishHandler.pool_space())
+	if cost > 0.0:
+		can = mini(can, int(PassiveSystems.net_worth / cost))
+	if can > 0:
+		FishGenerator.generate_fish(can, rank)
+	return can
+
+
+# --- Keyboard (see CommandLine and VimKeys) -------------------------------------
+
+## The cards in screen order, left to right (ignores ones being removed).
+func _cards() -> Array:
+	return fish_card_hbox.get_children().filter(
+		func(c): return not c.is_queued_for_deletion() and c.get("fish_resource") != null)
+
+
+## Number the cards 1.. left to right and put the cursor back on one.
+func _renumber() -> void:
+	if not is_inside_tree():
+		return
+	var cards := _cards()
+	for i in cards.size():
+		cards[i].set_number(i + 1)
+	_show_cursor()
+
+
+func _show_cursor() -> void:
+	var cards := _cards()
+	_cursor = clampi(_cursor, 0, maxi(cards.size() - 1, 0))
+	for i in cards.size():
+		cards[i].set_cursor(i == _cursor)
+
+
+func _move_cursor_to(i: int) -> void:
+	var cards := _cards()
+	if cards.is_empty():
+		return
+	_cursor = clampi(i, 0, cards.size() - 1)
+	_show_cursor()
+	var fish: fish_conf = cards[_cursor].fish_resource
+	selected_fish = fish
+	_on_card_hovered(fish)
+
+
+## Runs a keyboard command; returns the message for the command bar.
+func run_command(cmd: Dictionary) -> String:
+	var cards := _cards()
+	match cmd["cmd"]:
+		"move":
+			_move_cursor_to(_cursor + cmd["by"])
+			return ""
+		"first":
+			_move_cursor_to(0)
+			return ""
+		"last":
+			_move_cursor_to(cards.size() - 1)
+			return ""
+		"keep", "recycle":
+			var picked := _pick(cmd, cards)
+			if picked.is_empty():
+				return "No fish there"
+			var fish: Array = picked.map(func(c): return c.fish_resource)
+			if cmd["cmd"] == "keep":
+				var kept := _keep(fish)
+				if kept == 0:
+					return "Toilet full (%d/%d)" % [FishHandler.work_count(), FishHandler.capacity]
+				var note := "" if kept == fish.size() else "  (toilet full, %d left)" % (fish.size() - kept)
+				return "Kept %d fish%s" % [kept, note]
+			var refund := 0.0
+			for f in fish:
+				refund += PassiveSystems.recycle_refund(f)
+			sell.emit(fish)
+			return "Recycled %d fish for $%s" % [fish.size(), FishLabelDisplay.num(refund)]
+		"buy", "fill":
+			var want: int = cmd.get("count", 1) if cmd["cmd"] == "buy" else Ranks.table().shop_pool_size
+			var got := _buy(want)
+			if got == 0:
+				return "Pool full" if FishHandler.pool_space() == 0 else "Can't afford a %s" % Ranks.get_rank(rank).display_name
+			return "Bought %d %s fish" % [got, Ranks.get_rank(rank).display_name]
+		"rank":
+			var to: int = cmd["to"] if cmd.has("to") else rank + cmd["by"]
+			to = clampi(to, 0, Ranks.max_rank())
+			if PassiveSystems.net_worth < Ranks.get_rank(to).cost:
+				return "Can't afford %s yet" % Ranks.get_rank(to).display_name
+			rank = to
+			_refresh_affordability()
+			return "%s selected" % Ranks.get_rank(rank).display_name
+	return ""
+
+
+## The cards a keep / recycle command covers: a count from the cursor, the
+## cursor to the end, a numbered range (1-based), or all.
+func _pick(cmd: Dictionary, cards: Array) -> Array:
+	if cards.is_empty():
+		return []
+	if cmd.get("all", false):
+		return cards
+	if cmd.has("from"):
+		var a := clampi(int(cmd["from"]) - 1, 0, cards.size())
+		var b := clampi(int(cmd["to"]), 0, cards.size())
+		return cards.slice(a, b)
+	if cmd.get("to_end", false):
+		return cards.slice(_cursor)
+	return cards.slice(_cursor, _cursor + int(cmd.get("count", 1)))
+
+
+func command_status() -> String:
+	var r := Ranks.get_rank(rank)
+	return "%s $%s · pool %d/%d · toilet %d/%d" % [r.display_name, FishLabelDisplay.num(r.cost),
+		Ranks.table().shop_pool_size - FishHandler.pool_space(), Ranks.table().shop_pool_size,
+		FishHandler.work_count(), FishHandler.capacity]
 
 
 func _refresh_affordability() -> void:

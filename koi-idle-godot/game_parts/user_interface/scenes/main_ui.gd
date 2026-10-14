@@ -7,9 +7,18 @@ extends Control
 @onready var pond:            SubViewportContainer = %PondViewportContainer
 @onready var fishing_ui: Control = %FishingUI
 
+var command_line: CommandLine
+
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
+func _ready() -> void:
+	# Keyboard command bar along the bottom; keys drive the shop while it's open.
+	command_line = CommandLine.new()
+	command_line.target_provider = func(): return shop_ui if shop_ui.visible else null
+	add_child(command_line)
+
+
 func _process(_delta: float) -> void:
-	capacity_label.text  = "capacity: " + str(FishHandler.total_fish) + "/20"
+	capacity_label.text  = "toilet: %d/%d" % [FishHandler.work_count(), FishHandler.capacity]
 	# Whole coins only, rounded down so it never shows money you don't have yet.
 	net_worth_label.text = "$: "        + _with_commas(floori(PassiveSystems.net_worth))
 ## 1234567 -> "1,234,567"

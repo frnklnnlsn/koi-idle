@@ -113,10 +113,14 @@ func for_sell_fish(fish_res_array: Array) -> void:
 		remove_fish(fish)
 	_debug_print()
 
+## Recycling a shop fish refunds its price minus the rank table's recycle fee.
 func remove_fish(fish_res: fish_conf) -> void:
 	if fish_res:
-		#income -= fish_res.income
-		net_worth += fish_res.cost
+		net_worth += recycle_refund(fish_res)
+
+
+static func recycle_refund(fish_res: fish_conf) -> float:
+	return fish_res.cost * (1.0 - Ranks.table().recycle_fee)
 
 func _debug_print() -> void:
 	#print("income: %.2f | net_worth: %.2f" % [income, net_worth])

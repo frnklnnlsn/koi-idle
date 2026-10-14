@@ -37,7 +37,7 @@ func show(fish: fish_conf) -> void:
 	# Selling in the shop refunds the price; keeping it, then catching it from
 	# the pond later, pays its catch value (more once it has grown).
 	var catch_now := FishingLine.catch_value(rank_def, fish.mass, Ranks.table().catch_return)
-	_put(sell_value_label, "$%s refund   (catch $%s)" % [num(fish.cost), num(catch_now)])
+	_put(sell_value_label, "$%s recycle   (catch $%s)" % [num(PassiveSystems.recycle_refund(fish)), num(catch_now)])
 
 
 ## Empty panel, shown before any fish is hovered.

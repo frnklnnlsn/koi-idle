@@ -11,6 +11,13 @@ extends Resource
 ## fish pays more as it grows in the pond.
 @export var catch_return: float = 1.0
 
+@export_group("Shop")
+## Most fish the shop can hold for screening at once (the buy pool).
+@export_range(1, 200) var shop_pool_size: int = 20
+## Share of the price kept back when you recycle (sell) a fish from the shop.
+## 0.1 = you get 90% back.
+@export_range(0.0, 1.0, 0.01) var recycle_fee: float = 0.1
+
 @export_group("Pond growth")
 ## Each fish rolls one of two growth types when it's made.
 ##
