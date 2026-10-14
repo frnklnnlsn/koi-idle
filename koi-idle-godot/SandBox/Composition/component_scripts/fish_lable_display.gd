@@ -40,6 +40,26 @@ func show(fish: fish_conf) -> void:
 	_put(sell_value_label, "$%s recycle   (catch $%s)" % [num(PassiveSystems.recycle_refund(fish)), num(catch_now)])
 
 
+## Everything about a fish as a few lines of text (the terminal's info area).
+static func describe(fish: fish_conf) -> String:
+	if fish == null:
+		return ""
+	var rank_def := Ranks.get_rank(fish.rank)
+	var start := fish.y_start if fish.y_start > 0.0 else fish.mass
+	var potential := fish.carrying_capacity / maxf(start, 0.0001)
+	var cz := FishStats.fish_combined_z(fish)
+	var lines := [
+		"%s · %s (%s overall)%s" % [rank_def.display_name, FishStats.tier_name(cz),
+			FishStats.rarity_label(cz), "   · fast grower!" if is_fast_grower(fish) else ""],
+		"Income  $%s/s %s   pays for itself in %s" % [num(fish.income), _rarity(fish.income_z),
+			duration(fish.cost / fish.income) if fish.income > 0.0 else "—"],
+		"Size    %sg %s   grows ×%s %s" % [num(fish.mass), _rarity(fish.mass_z), num(potential), _rarity(fish.size_z)],
+		"Price   $%s   recycle $%s   catch now $%s" % [num(fish.cost), num(PassiveSystems.recycle_refund(fish)),
+			num(FishingLine.catch_value(rank_def, fish.mass, Ranks.table().catch_return))],
+	]
+	return "\n".join(lines)
+
+
 ## Empty panel, shown before any fish is hovered.
 func clear() -> void:
 	for l in [fish_name_label, fish_rank_label, fish_cost_label, fish_income_label, sell_value_label]:

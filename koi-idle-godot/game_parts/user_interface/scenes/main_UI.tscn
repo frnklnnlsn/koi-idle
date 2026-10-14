@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://r5jvkc4i6dis" path="res://game_parts/pond_scenes/scenes/pond_area.tscn" id="8_xc818"]
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/command_line.tscn" id="12_cmdl"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -165,6 +166,10 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 size_flags_vertical = 6
+
+[node name="CommandLine" parent="." instance=ExtResource("12_cmdl")]
+unique_name_in_owner = true
+layout_mode = 1
 
 [connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Flush" to="." method="_on_flush_pressed"]
 [connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/View" to="." method="_on_view_pressed"]

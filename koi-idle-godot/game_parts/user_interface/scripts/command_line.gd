@@ -1,14 +1,18 @@
 # command_line.gd
-# The keyboard command bar along the bottom of the screen, vim style.
+# The keyboard terminal along the bottom of the screen, vim style.
+# Layout and style live in command_line.tscn; resize or restyle it there (or
+# on the CommandLine node in main_UI). The main layout stops above it.
 #
-#   left    what you've typed so far ("3d"), or the ":" command line
-#   middle  the result of the last command ("Kept 3 fish")
-#   right   the active screen's status (rank, pool, toilet)
+#   Info     details of the fish under the cursor (several lines)
+#   Prompt   what you've typed so far ("3d"), or ":" for the command line
+#   Message  the result of the last command ("Kept 3 fish")
+#   Status   the active screen's status (rank, pool, toilet)
 #
 # Keys go to whichever screen `target_provider` returns (the shop while it's
 # open). That screen implements:
 #   run_command(cmd: Dictionary) -> String   do it, return a message
 #   command_status() -> String               short status for the right side
+#   command_info() -> String                 text for the Info area
 # See VimKeys for the key list.
 class_name CommandLine
 extends PanelContainer
@@ -21,49 +25,22 @@ var target_provider: Callable
 
 var _keys := VimKeys.new()
 var _last: Dictionary = {}
-var _prompt: Label
-var _ex: LineEdit
-var _message: Label
-var _status: Label
+@onready var _info: Label = %Info
+@onready var _prompt: Label = %Prompt
+@onready var _ex: LineEdit = %Ex
+@onready var _message: Label = %Message
+@onready var _status: Label = %Status
 
 
 func _ready() -> void:
-	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	grow_vertical = Control.GROW_DIRECTION_BEGIN
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.09, 0.11, 0.92)
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 2
-	style.content_margin_bottom = 2
-	add_theme_stylebox_override("panel", style)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	add_child(row)
-	_prompt = _label(Color(1.0, 0.85, 0.3))
-	_prompt.custom_minimum_size.x = 40
-	row.add_child(_prompt)
-	_ex = LineEdit.new()
-	_ex.visible = false
-	_ex.custom_minimum_size.x = 180
-	_ex.flat = true
-	_ex.placeholder_text = "3,7d   %y   b 5   rank 2"
 	_ex.text_submitted.connect(_on_ex_submitted)
 	_ex.gui_input.connect(_on_ex_input)
-	row.add_child(_ex)
-	_message = _label(Color(0.85, 0.88, 0.95))
-	_message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_message.clip_text = true
-	row.add_child(_message)
-	_status = _label(Color(0.6, 0.65, 0.75))
-	row.add_child(_status)
 
 
 func _process(_delta: float) -> void:
 	var target = _target()
 	_status.text = target.command_status() if target else "open the shop to use keys"
+	_info.text = target.command_info() if target and target.has_method("command_info") else ""
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -147,10 +124,3 @@ func _target():
 		return null
 	var t = target_provider.call()
 	return t if t and t.is_visible_in_tree() else null
-
-
-func _label(color: Color) -> Label:
-	var l := Label.new()
-	l.add_theme_color_override("font_color", color)
-	l.add_theme_font_size_override("font_size", 14)
-	return l

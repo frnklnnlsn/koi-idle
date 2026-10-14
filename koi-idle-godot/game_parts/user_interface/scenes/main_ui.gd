@@ -7,14 +7,22 @@ extends Control
 @onready var pond:            SubViewportContainer = %PondViewportContainer
 @onready var fishing_ui: Control = %FishingUI
 
-var command_line: CommandLine
+## The keyboard terminal along the bottom (command_line.tscn); style and size
+## it in the editor. The rest of the UI is kept above it.
+@onready var command_line: CommandLine = %CommandLine
+@onready var _main_column: VBoxContainer = $VBoxContainer
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	# Keyboard command bar along the bottom; keys drive the shop while it's open.
-	command_line = CommandLine.new()
+	# Keys drive the shop while it's open.
 	command_line.target_provider = func(): return shop_ui if shop_ui.visible else null
-	add_child(command_line)
+	command_line.resized.connect(_fit_above_terminal)
+	_fit_above_terminal()
+
+
+## Stop the main column at the top of the terminal, however tall it is.
+func _fit_above_terminal() -> void:
+	_main_column.offset_bottom = -command_line.size.y if command_line.visible else 0.0
 
 
 func _process(_delta: float) -> void:

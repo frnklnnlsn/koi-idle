@@ -1,33 +1,29 @@
 # shop_ui.gd
+# The shop: a pool of fish cards to screen, and the three charts. Buying,
+# keeping and recycling are done with keys through the terminal (see
+# CommandLine / VimKeys); the selected fish's details show there too.
 extends Control
 
 signal sell(fish_resource_array: Array)
 
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
-@onready var fish_viewport:     SubViewport   = %FishViewport
-@onready var display_fish_card: Control       = %display_fish_card
-@onready var rank_cost_label: Label = %RankCostLabel
-@onready var class_button: OptionButton = %class_button
-@onready var buy_button: Button = %BuyButton
-@onready var buy_max_button: Button = %BuyMaxButton
 
 
 var card_manager:  FishCardManager
 var renderer:      FishViewportRenderer
 var graph_manager: ShopGraphManager
-var label_display: FishLabelDisplay
 
 var selected_fish: fish_conf = null
 var rank:           int = 0
-var number_of_fish: int = 1
 
 var _last_known_net_worth: float = -1.0
 ## Keyboard cursor: index of the card it's on (cards counted left to right).
 var _cursor := 0
+## The fish whose details the terminal shows (hovered, else selected).
+var _shown_fish: fish_conf = null
 # --- Lifecycle ---
 
 func _ready() -> void:
-	_fill_rank_dropdown()
 	_init_managers()
 	_connect_signals()
 	await _populate(FishHandler.list_of_shop_fish)
@@ -38,25 +34,13 @@ func _process(_delta: float) -> void:
 		_last_known_net_worth = PassiveSystems.net_worth
 		_refresh_affordability()
 
-## One dropdown entry per rank in the rank table, so new ranks show up here.
-## Each entry shows the rank's price, e.g. "Rank 1  ($100)".
-func _fill_rank_dropdown() -> void:
-	class_button.clear()
-	for i in Ranks.count():
-		var r := Ranks.get_rank(i)
-		class_button.add_item("%s  ($%s)" % [r.display_name, FishLabelDisplay.num(r.cost)], i)
-
-
 func _init_managers() -> void:
 	renderer      = FishViewportRenderer.new()
 	card_manager  = FishCardManager.new(fish_card_hbox)
 	graph_manager = ShopGraphManager.new(%bellcurve, %Growth_curve, %Histogram)
-	label_display = FishLabelDisplay.new(%fish_name, %fish_rank, %fish_cost, %fish_income, %"sell value")
 	add_child(renderer)
 	add_child(card_manager)
 	add_child(graph_manager)
-	add_child(label_display)
-	label_display.clear()
 
 func _connect_signals() -> void:
 	FishGenerator.new_fish.connect(_on_new_fish)
@@ -100,15 +84,11 @@ func _on_card_hovered(fish: fish_conf) -> void:
 	if i >= 0 and i != _cursor:
 		_cursor = i
 		_show_cursor()
-	renderer.place_fish_in_viewport(fish_viewport, fish)
+	_shown_fish = fish
 	graph_manager.update_for_fish(fish)
-	label_display.show(fish)
 
 func _on_card_unhovered(_fish: fish_conf) -> void:
-	renderer.clear_viewport(fish_viewport)
-	if selected_fish:
-		renderer.place_fish_in_viewport(fish_viewport, selected_fish)
-	label_display.show(selected_fish)   # back to the selected fish (or blank)
+	_shown_fish = selected_fish   # back to the selected fish (or nothing)
 	if selected_fish:
 		graph_manager.update_for_fish(selected_fish)
 
@@ -141,48 +121,15 @@ func _on_sell(list: Array) -> void:
 
 func _after_transaction() -> void:
 	_renumber.call_deferred()   # after the removed cards are gone
-	renderer.clear_viewport(fish_viewport)
 	selected_fish = null
+	_shown_fish = null
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 	graph_manager.clear_hover()
-	label_display.clear()
 	_refresh_affordability()
+	_select_cursor.call_deferred()   # the next fish under the cursor
 
 
-# --- Signal receivers --
-
-
-# --- Button handlers ---
-
-func _on_keep_pressed() -> void:
-	if selected_fish:
-		_keep([selected_fish])
-
-func _on_keep_all_pressed() -> void:
-	_keep(_cards().map(func(c): return c.fish_resource))
-
-func _on_sell_pressed() -> void:
-	if selected_fish:
-		sell.emit([selected_fish])
-
-func _on_sell_all_pressed() -> void:
-	sell.emit(card_manager.temp_fish_array.duplicate())
-
-func _on_qnty_line_text_submitted(t: String) -> void:
-	number_of_fish = int(t)
-
-func _on_class_button_item_selected(i: int) -> void:
-	rank = i
-	rank_cost_label.text = "Cost: %d" % Ranks.get_rank(rank).cost
-
-func _on_button_pressed() -> void:
-	_buy(number_of_fish)
-
-func _on_buy_max_pressed() -> void:
-	_buy(Ranks.table().shop_pool_size)
-
-
-# --- Keep / recycle / buy, shared by buttons and keys ---------------------------
+# --- Keep / recycle / buy ---------------------------
 
 ## Keeps as many of `list` as the toilet has room for, in order.
 ## Returns how many were kept.
@@ -222,6 +169,9 @@ func _renumber() -> void:
 	for i in cards.size():
 		cards[i].set_number(i + 1)
 	_show_cursor()
+	# Nothing picked yet (e.g. the pool just filled): show the cursor's fish.
+	if _shown_fish == null and not cards.is_empty():
+		_move_cursor_to(_cursor)
 
 
 func _show_cursor() -> void:
@@ -304,6 +254,18 @@ func _pick(cmd: Dictionary, cards: Array) -> Array:
 	return cards.slice(_cursor, _cursor + int(cmd.get("count", 1)))
 
 
+## After cards change, show the fish now under the cursor.
+func _select_cursor() -> void:
+	var cards := _cards()
+	if cards.is_empty() or not is_inside_tree():
+		return
+	_move_cursor_to(_cursor)
+
+
+func command_info() -> String:
+	return FishLabelDisplay.describe(_shown_fish)
+
+
 func command_status() -> String:
 	var r := Ranks.get_rank(rank)
 	return "%s $%s · pool %d/%d · toilet %d/%d" % [r.display_name, FishLabelDisplay.num(r.cost),
@@ -311,22 +273,10 @@ func command_status() -> String:
 		FishHandler.work_count(), FishHandler.capacity]
 
 
+## Drops the selected rank to the best one you can afford.
 func _refresh_affordability() -> void:
-	# Clamp rank down to highest affordable
 	while rank > 0 and PassiveSystems.net_worth < Ranks.get_rank(rank).cost:
 		rank -= 1
-	class_button.selected = rank
-	rank_cost_label.text = "Cost: %d" % Ranks.get_rank(rank).cost
-
-	# Disable ranks you can't afford
-	for i in Ranks.count():
-		var cost: int = Ranks.get_rank(i).cost
-		class_button.set_item_disabled(i, PassiveSystems.net_worth < cost)
-
-	# Block buying if you can't afford current rank
-	var can_afford: bool = PassiveSystems.net_worth >= Ranks.get_rank(rank).cost
-	buy_button.disabled = not can_afford
-	buy_max_button.disabled = not can_afford
 
 func _on_new_fish(arr: Array) -> void:
 	if not is_inside_tree():
