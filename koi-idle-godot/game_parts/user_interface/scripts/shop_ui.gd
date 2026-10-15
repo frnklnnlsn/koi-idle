@@ -7,6 +7,9 @@ extends Control
 signal sell(fish_resource_array: Array)
 
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
+## Empty space above the cards, sized so the cards' bottom edge sits on the
+## screen's horizontal middle line (see _place_cards).
+@onready var _top_spacer: Control = %TopSpacer
 
 
 var card_manager:  FishCardManager
@@ -24,6 +27,9 @@ var _shown_fish: fish_conf = null
 # --- Lifecycle ---
 
 func _ready() -> void:
+	resized.connect(_place_cards)
+	visibility_changed.connect(_place_cards)
+	get_viewport().size_changed.connect(_place_cards)
 	_init_managers()
 	_connect_signals()
 	await _populate(FishHandler.list_of_shop_fish)
@@ -169,6 +175,8 @@ func _renumber() -> void:
 	for i in cards.size():
 		cards[i].set_number(i + 1)
 	_show_cursor()
+	if cards.size() <= 2:
+		_place_cards()   # first cards in: measure the real card position
 	# Nothing picked yet (e.g. the pool just filled): show the cursor's fish.
 	if _shown_fish == null and not cards.is_empty():
 		_move_cursor_to(_cursor)
@@ -271,6 +279,30 @@ func command_status() -> String:
 	return "%s $%s · pool %d/%d · toilet %d/%d" % [r.display_name, FishLabelDisplay.num(r.cost),
 		Ranks.table().shop_pool_size - FishHandler.pool_space(), Ranks.table().shop_pool_size,
 		FishHandler.work_count(), FishHandler.capacity]
+
+
+## Grows or shrinks the spacer above the cards so their row ends exactly at
+## the middle of the screen; the charts take the space below.
+func _place_cards() -> void:
+	if not is_visible_in_tree():
+		return
+	await get_tree().process_frame   # let containers settle first
+	if not is_inside_tree():
+		return
+	# Measure a card that isn't enlarged by the cursor; with no cards yet,
+	# where one would sit (they're centred in the row).
+	var bottom: float
+	var plain := _cards().filter(func(c): return not c.is_cursor)
+	if not plain.is_empty():
+		# The visible frame ends inside the card's margin.
+		bottom = plain[0].global_position.y + plain[0].size.y - plain[0].get_theme_constant("margin_bottom")
+	else:
+		var row: Control = fish_card_hbox.get_parent()
+		bottom = row.global_position.y + (row.size.y + 100.0) / 2.0 - 10.0
+	var middle := get_viewport().get_visible_rect().size.y / 2.0
+	var h := maxf(_top_spacer.custom_minimum_size.y + middle - bottom, 0.0)
+	if absf(h - _top_spacer.custom_minimum_size.y) > 1.0:
+		_top_spacer.custom_minimum_size.y = h
 
 
 ## Drops the selected rank to the best one you can afford.

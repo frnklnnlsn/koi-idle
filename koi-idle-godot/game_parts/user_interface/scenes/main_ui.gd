@@ -1,6 +1,5 @@
 extends Control
 @onready var net_worth_label: Label               = %net_worth
-@onready var capacity_label:  Label               = %capacity
 @onready var list_ui:         Control             = %ListUI
 @onready var shop_ui:         Control             = %ShopUI
 @onready var toilet:          SubViewportContainer = %ToiletViewportContainer
@@ -11,6 +10,8 @@ extends Control
 ## it in the editor. The rest of the UI is kept above it.
 @onready var command_line: CommandLine = %CommandLine
 @onready var _main_column: VBoxContainer = $VBoxContainer
+## Icon buttons down the left edge (menu, flush, view, list, shop, fishing).
+@onready var _sidebar: Control = %Sidebar
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -20,15 +21,18 @@ func _ready() -> void:
 	_fit_above_terminal()
 
 
-## Stop the main column at the top of the terminal, however tall it is.
+## Stop the main column and the sidebar at the top of the terminal, however
+## tall it is, and start the main column right of the sidebar.
 func _fit_above_terminal() -> void:
-	_main_column.offset_bottom = -command_line.size.y if command_line.visible else 0.0
+	var h := command_line.size.y if command_line.visible else 0.0
+	_main_column.offset_bottom = -h
+	_sidebar.offset_bottom = -h
+	_main_column.offset_left = _sidebar.size.x
 
 
 func _process(_delta: float) -> void:
-	capacity_label.text  = "toilet: %d/%d" % [FishHandler.work_count(), FishHandler.capacity]
 	# Whole coins only, rounded down so it never shows money you don't have yet.
-	net_worth_label.text = "$: "        + _with_commas(floori(PassiveSystems.net_worth))
+	net_worth_label.text = "$ " + _with_commas(floori(PassiveSystems.net_worth))
 ## 1234567 -> "1,234,567"
 static func _with_commas(n: int) -> String:
 	var digits := str(absi(n))

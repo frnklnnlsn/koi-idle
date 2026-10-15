@@ -12,6 +12,26 @@
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/command_line.tscn" id="12_cmdl"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/menu.png" id="13_ic_menu"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/flush.png" id="14_ic_flush"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/view.png" id="15_ic_view"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/list.png" id="16_ic_list"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/shop.png" id="17_ic_shop"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/fishing.png" id="18_ic_fish"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_money"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.1, 0.11, 0.14, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.38, 0.45, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -92,61 +112,27 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 34.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="VBoxContainer" unique_id=1851520356]
-custom_minimum_size = Vector2(0, 15)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/Panel" unique_id=1705738555]
 layout_mode = 2
-
-[node name="Button" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1291562547]
-layout_mode = 2
-theme_override_font_sizes/font_size = 12
-text = "menu"
+alignment = 1
 
 [node name="net_worth" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1042196326]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-text = "9012384901735"
-
-[node name="capacity" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=278064373]
-unique_name_in_owner = true
-layout_mode = 2
-text = "0/20
-"
-
-[node name="Spacer" type="Label" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=2098116085]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-
-[node name="Flush" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=805965955]
-layout_mode = 2
-text = "Flush
-"
-
-[node name="View" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1871109062]
-layout_mode = 2
-text = "View
-"
-
-[node name="List" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1912176699]
-layout_mode = 2
-text = "List
-"
-
-[node name="Shop" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=334377073]
-layout_mode = 2
-text = "shop
-"
-
-[node name="GoFishing" type="Button" parent="VBoxContainer/Panel/HBoxContainer2" unique_id=1744781603]
-layout_mode = 2
-text = "Go Fishing
-"
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_money")
+text = "$ 0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ListUI" parent="VBoxContainer" unique_id=668367678 instance=ExtResource("11_o70p8")]
 unique_name_in_owner = true
@@ -167,12 +153,73 @@ visible = false
 layout_mode = 2
 size_flags_vertical = 6
 
+[node name="Sidebar" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 34.0
+grow_vertical = 2
+
+[node name="Buttons" type="VBoxContainer" parent="Sidebar"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Button" type="Button" parent="Sidebar/Buttons" unique_id=1291562547]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Menu"
+focus_mode = 0
+icon = ExtResource("13_ic_menu")
+icon_alignment = 1
+
+[node name="Flush" type="Button" parent="Sidebar/Buttons" unique_id=805965955]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Flush the toilet into the pond"
+focus_mode = 0
+icon = ExtResource("14_ic_flush")
+icon_alignment = 1
+
+[node name="View" type="Button" parent="Sidebar/Buttons" unique_id=1871109062]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Switch view: toilet / pond"
+focus_mode = 0
+icon = ExtResource("15_ic_view")
+icon_alignment = 1
+
+[node name="List" type="Button" parent="Sidebar/Buttons" unique_id=1912176699]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Fish list"
+focus_mode = 0
+icon = ExtResource("16_ic_list")
+icon_alignment = 1
+
+[node name="Shop" type="Button" parent="Sidebar/Buttons" unique_id=334377073]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Shop"
+focus_mode = 0
+icon = ExtResource("17_ic_shop")
+icon_alignment = 1
+
+[node name="GoFishing" type="Button" parent="Sidebar/Buttons" unique_id=1744781603]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Go fishing"
+focus_mode = 0
+icon = ExtResource("18_ic_fish")
+icon_alignment = 1
+
 [node name="CommandLine" parent="." instance=ExtResource("12_cmdl")]
 unique_name_in_owner = true
 layout_mode = 1
 
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Flush" to="." method="_on_flush_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/View" to="." method="_on_view_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/List" to="." method="_on_list_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/Shop" to="." method="_on_shop_pressed"]
-[connection signal="pressed" from="VBoxContainer/Panel/HBoxContainer2/GoFishing" to="." method="_on_go_fishing_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/Flush" to="." method="_on_flush_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/View" to="." method="_on_view_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/List" to="." method="_on_list_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/Shop" to="." method="_on_shop_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/GoFishing" to="." method="_on_go_fishing_pressed"]

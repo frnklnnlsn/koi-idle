@@ -3,7 +3,8 @@
 # Layout and style live in command_line.tscn; resize or restyle it there (or
 # on the CommandLine node in main_UI). The main layout stops above it.
 #
-#   Info     details of the fish under the cursor (several lines)
+#   Info     details of the fish under the cursor, laid out in `Info.columns`
+#            columns (set it on the Info node; 2 = two lines per column)
 #   Prompt   what you've typed so far ("3d"), or ":" for the command line
 #   Message  the result of the last command ("Kept 3 fish")
 #   Status   the active screen's status (rank, pool, toilet)
@@ -23,9 +24,13 @@ const REPEATABLE := ["keep", "recycle", "buy", "fill"]
 ## Returns the node keys should go to, or null when nothing takes keys.
 var target_provider: Callable
 
+## Look of the fish info lines.
+@export var info_font_size := 14
+@export var info_color := Color(0.85, 0.88, 0.95)
+
 var _keys := VimKeys.new()
 var _last: Dictionary = {}
-@onready var _info: Label = %Info
+@onready var _info: GridContainer = %Info
 @onready var _prompt: Label = %Prompt
 @onready var _ex: LineEdit = %Ex
 @onready var _message: Label = %Message
@@ -39,8 +44,24 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var target = _target()
-	_status.text = target.command_status() if target else "open the shop to use keys"
-	_info.text = target.command_info() if target and target.has_method("command_info") else ""
+	_status.text = target.command_status() if target \
+		else "toilet %d/%d · open the shop to use keys" % [FishHandler.work_count(), FishHandler.capacity]
+	_set_info(target.command_info() if target and target.has_method("command_info") else "")
+
+
+## One label per line of info, flowing across the Info grid's columns.
+func _set_info(text: String) -> void:
+	var lines := text.split("\n", false)
+	while _info.get_child_count() < lines.size():
+		var l := Label.new()
+		l.add_theme_font_size_override("font_size", info_font_size)
+		l.add_theme_color_override("font_color", info_color)
+		_info.add_child(l)
+	for i in _info.get_child_count():
+		var l: Label = _info.get_child(i)
+		l.visible = i < lines.size()
+		if l.visible:
+			l.text = lines[i]
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

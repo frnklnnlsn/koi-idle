@@ -12,12 +12,12 @@ border_width_top = 1
 border_color = Color(0.3, 0.33, 0.4, 1)
 
 [node name="CommandLine" type="PanelContainer"]
-custom_minimum_size = Vector2(0, 130)
+custom_minimum_size = Vector2(0, 72)
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -130.0
+offset_top = -72.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -26,15 +26,15 @@ script = ExtResource("1_cmd")
 
 [node name="VBox" type="VBoxContainer" parent="."]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
-[node name="Info" type="Label" parent="VBox"]
+[node name="Info" type="GridContainer" parent="VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.85, 0.88, 0.95, 1)
-theme_override_font_sizes/font_size = 14
-autowrap_mode = 3
+theme_override_constants/h_separation = 48
+theme_override_constants/v_separation = 0
+columns = 2
 
 [node name="Row" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
