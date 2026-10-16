@@ -20,14 +20,16 @@ const STATS := [["Income", "Income /s"], ["Size", "Starting mass (g)"], ["Max si
 var _fish: Array = []          # fish_conf, as given
 var _sorted: Array = []        # fish_conf, sorted by the current stat
 var _hovered: fish_conf = null
+var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
 var _stat := 0
 
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
 ## data: {"values": Array[float] sorted ascending, "highlight": int (-1 = none),
-##        "title": String (optional)}
-## The highlighted bar is drawn as its own stacked series so it can be coloured.
+##        "picked": Array[int] (box-selected bars), "title": String (optional)}
+## Highlighted and picked bars are drawn as their own stacked series so they
+## can be coloured.
 static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var values: Array = data.get("values", [])
 	if values.is_empty():
@@ -37,22 +39,26 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 
 	var highlight: int = data.get("highlight", -1)
 	var labels := PackedStringArray()
+	var picked_ids: Array = data.get("picked", [])
 	var others := []
+	var boxed := []
 	var picked := []
 	for i in values.size():
 		labels.append(str(i + 1))
-		others.append(0.0 if i == highlight else values[i])
-		picked.append(values[i] if i == highlight else 0.0)
+		var kind := 2 if i == highlight else (1 if i in picked_ids else 0)
+		others.append(values[i] if kind == 0 else 0.0)
+		boxed.append(values[i] if kind == 1 else 0.0)
+		picked.append(values[i] if kind == 2 else 0.0)
 
 	var opts := {
 		"y_title": data.get("y_title", "Income /s"),
 		"stacked": true,
 		"minimal": true,
-		"colors": [TauXYStyle.DEFAULT_SERIES_COLOR, HIGHLIGHT],
+		"colors": [TauXYStyle.DEFAULT_SERIES_COLOR, PICKED_COLOR, HIGHLIGHT],
 	}
 	if on_click.is_valid():
 		opts["on_click"] = on_click
-	TauCharts.bar(p, data.get("title", "Fish by value"), labels, {"Fish": others, "Hovered": picked}, opts)
+	TauCharts.bar(p, data.get("title", "Fish by value"), labels, {"Fish": others, "Picked": boxed, "Hovered": picked}, opts)
 
 
 static func sample_data() -> Dictionary:
@@ -97,6 +103,23 @@ func clear_fish_card_hover() -> void:
 	_redraw()
 
 
+## Box selection: show these fish as picked.
+func set_picked(fish: Array) -> void:
+	if fish == _picked:
+		return
+	_picked = fish.duplicate()
+	_redraw()
+
+
+## Fish whose bar touches `rect` (screen coordinates).
+func fish_in_rect(rect: Rect2) -> Array:
+	var out := []
+	for i in _sorted.size():
+		if rect.intersects(TauCharts.bar_global_rect(plot, i, stat_value(_sorted[i], _stat))):
+			out.append(_sorted[i])
+	return out
+
+
 func get_hovered_fish() -> fish_conf:
 	return _hovered
 
@@ -127,7 +150,11 @@ func _redraw() -> void:
 	for f in _sorted:
 		values.append(stat_value(f, _stat))
 	var title := chart_title if chart_title != "" else "By " + String(STATS[_stat][0]).to_lower()
-	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "title": title,
+	var picked := []
+	for i in _sorted.size():
+		if _sorted[i] in _picked:
+			picked.append(i)
+	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "picked": picked, "title": title,
 		"y_title": STATS[_stat][1]}, _on_plot_clicked)
 
 

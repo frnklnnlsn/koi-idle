@@ -2,6 +2,16 @@
 # The shop: a pool of fish cards to screen, and the three charts. Buying,
 # keeping and recycling are done with keys through the terminal (see
 # CommandLine / VimKeys); the selected fish's details show there too.
+#
+# Mouse:
+#   drag a card up / down         keep / recycle it (the whole selection if the
+#                                 card is selected)
+#   drag a box on empty space     select the cards it touches
+#   drag a box on the scatter or  select the dots / bars it touches (a box stays
+#   the bar chart                 in the chart it started in)
+#   hold Shift                    add to the selection instead of replacing it;
+#                                 Shift+click a card adds / removes just that card
+#   click empty space             clear the selection
 extends Control
 
 signal sell(fish_resource_array: Array)
@@ -38,6 +48,22 @@ var _ghost_style: StyleBoxFlat
 var _drag_card: Control
 var _drag_offset := Vector2.ZERO
 var _zone := ""
+## Every card dragged with the current drag (the selection, or just the card).
+var _drag_group: Array = []
+
+## Box selection. Selected fish show in KoiChart.PICKED_COLOR on the cards and
+## all the charts; the keyboard commands ignore the selection for now.
+const BOX_THRESHOLD := 4.0
+var _selection: Array = []   # fish_conf
+var _box: Panel
+var _box_from := Vector2.ZERO
+var _box_pressing := false
+var _box_active := false
+var _box_add := false        # Shift held: add to the selection
+var _box_base: Array = []    # selection when the box started
+var _box_chart: Control = null   # chart the box started in, or null = cards
+## True while the terminal shows the selection summary rather than one fish.
+var _show_summary := false
 # --- Lifecycle ---
 
 func _ready() -> void:
@@ -102,6 +128,7 @@ func _populate(fish_array: Array) -> void:
 # --- Card events ---
 
 func _on_card_hovered(fish: fish_conf) -> void:
+	_show_summary = false
 	# Mouse, keys and chart clicks all move the keyboard cursor to this fish.
 	var i := _cards().map(func(c): return c.fish_resource).find(fish)
 	if i >= 0 and i != _cursor:
@@ -112,10 +139,21 @@ func _on_card_hovered(fish: fish_conf) -> void:
 
 func _on_card_unhovered(_fish: fish_conf) -> void:
 	_shown_fish = selected_fish   # back to the selected fish (or nothing)
+	_show_summary = not _selection.is_empty()
 	if selected_fish:
 		graph_manager.update_for_fish(selected_fish)
 
 func _on_card_selected(fish: fish_conf) -> void:
+	if Input.is_key_pressed(KEY_SHIFT):
+		# Shift+click: add / remove just this card.
+		var sel := _selection.duplicate()
+		if fish in sel:
+			sel.erase(fish)
+		else:
+			sel.append(fish)
+		_set_selection(sel)
+		return
+	_set_selection([])
 	selected_fish = null if selected_fish == fish else fish
 
 func _on_bar_clicked(fish: fish_conf, _i) -> void:
@@ -127,6 +165,11 @@ func _on_bar_clicked(fish: fish_conf, _i) -> void:
 
 func _on_drag_started(card: Control, mouse: Vector2) -> void:
 	_drag_card = card
+	# A selected card takes the whole selection with it.
+	if card.fish_resource in _selection:
+		_drag_group = _cards().filter(func(c): return c.fish_resource in _selection)
+	else:
+		_drag_group = [card]
 	if _ghost == null:
 		_ghost_style = StyleBoxFlat.new()
 		_ghost_style.bg_color = Color(0.1, 0.12, 0.16, 0.85)
@@ -144,13 +187,26 @@ func _on_drag_started(card: Control, mouse: Vector2) -> void:
 		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_ghost.add_child(pic)
+		var count := Label.new()
+		count.name = "Count"
+		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		count.add_theme_font_size_override("font_size", 16)
+		count.add_theme_color_override("font_outline_color", Color.BLACK)
+		count.add_theme_constant_override("outline_size", 4)
+		count.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+		count.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		count.position += Vector2(-4, 2)
+		_ghost.add_child(count)
 		add_child(_ghost)
 	var rect: Rect2 = card.get_global_rect()
 	_ghost.size = rect.size
 	_drag_offset = rect.position - mouse
 	(_ghost.get_node("Fish") as TextureRect).texture = card.fish_texture()
+	var n := _drag_group.size()
+	(_ghost.get_node("Count") as Label).text = "×%d" % n if n > 1 else ""
 	_ghost.visible = true
-	card.modulate.a = 0.3
+	for c in _drag_group:
+		c.modulate.a = 0.3
 	_on_drag_moved(card, mouse)
 
 
@@ -185,20 +241,139 @@ func _on_drag_ended(card: Control, mouse: Vector2) -> void:
 		_ghost.visible = false
 	_set_zone("")
 	_drag_card = null
-	if is_instance_valid(card):
-		card.modulate.a = 1.0
-	var fish: fish_conf = card.fish_resource
-	if fish == null:
+	var group := _drag_group.filter(func(c): return is_instance_valid(c))
+	_drag_group = []
+	for c in group:
+		c.modulate.a = 1.0
+	if not is_instance_valid(card) or card.fish_resource == null:
 		return
+	var fish: Array = group.map(func(c): return c.fish_resource)
 	if zone == "keep":
-		_drop_message(run_command({"cmd": "keep", "fish": [fish]}))
+		_drop_message(run_command({"cmd": "keep", "fish": fish}))
 	elif zone == "trash":
-		_drop_message(run_command({"cmd": "recycle", "fish": [fish]}))
+		_drop_message(run_command({"cmd": "recycle", "fish": fish}))
 
 
 ## Mouse actions report in the terminal like key commands do.
 func _drop_message(text: String) -> void:
 	action_message.emit(text)
+
+
+# --- Box selection --------------------------------------------------------------
+
+func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+	var mb := event as InputEventMouseButton
+	if mb and mb.button_index == MOUSE_BUTTON_LEFT:
+		if mb.pressed:
+			_box_press(mb)
+		elif _box_pressing:
+			_box_release(mb)
+	elif event is InputEventMouseMotion and _box_pressing:
+		_box_motion(event.global_position)
+
+
+## A press starts a (possible) box when it lands on empty space: not on a
+## card or a button, and inside the shop. The growth chart is click-only.
+func _box_press(mb: InputEventMouseButton) -> void:
+	var p := mb.global_position
+	if not get_global_rect().has_point(p) or _drag_card:
+		return
+	var over := get_viewport().gui_get_hovered_control()
+	if over is BaseButton or over is LineEdit:
+		return
+	for c in _cards():
+		if c.get_global_rect().has_point(p):
+			return   # the card handles it (click / drag)
+	if %Growth_curve.plot.get_global_rect().has_point(p):
+		return
+	_box_chart = null
+	for chart in [%bellcurve, %Histogram]:
+		if chart.plot.get_global_rect().has_point(p):
+			_box_chart = chart
+	_box_pressing = true
+	_box_active = false
+	_box_from = p
+	_box_add = mb.shift_pressed
+	_box_base = _selection.duplicate() if _box_add else []
+
+
+func _box_motion(p: Vector2) -> void:
+	if not _box_active:
+		if p.distance_to(_box_from) <= BOX_THRESHOLD:
+			return
+		_box_active = true
+		if _box == null:
+			var style := StyleBoxFlat.new()
+			style.bg_color = Color(KoiChart.PICKED_COLOR, 0.12)
+			style.border_color = Color(KoiChart.PICKED_COLOR, 0.9)
+			style.set_border_width_all(1)
+			_box = Panel.new()
+			_box.top_level = true
+			_box.z_index = 20
+			_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_box.add_theme_stylebox_override("panel", style)
+			add_child(_box)
+		_box.visible = true
+	var rect := Rect2(_box_from, Vector2.ZERO).expand(p)
+	if _box_chart:   # stays inside the chart it started in
+		rect = rect.intersection(_box_chart.plot.get_global_rect())
+	_box.global_position = rect.position
+	_box.size = rect.size
+	# Live: the selection follows the box while it's dragged.
+	var sel := _box_base.duplicate()
+	for f in _box_hits(rect):
+		if f not in sel:
+			sel.append(f)
+	_set_selection(sel)
+
+
+func _box_hits(rect: Rect2) -> Array:
+	if _box_chart:
+		return _box_chart.fish_in_rect(rect)
+	return _cards().filter(func(c): return rect.intersects(c.get_global_rect())) \
+		.map(func(c): return c.fish_resource)
+
+
+func _box_release(mb: InputEventMouseButton) -> void:
+	_box_pressing = false
+	if _box_active:
+		_box_active = false
+		_box.visible = false
+		get_viewport().set_input_as_handled()
+	elif _box_chart == null and not mb.shift_pressed:
+		_set_selection([])   # plain click on empty space
+
+
+## The box-selected fish (in the order they were picked).
+func selection() -> Array:
+	return _selection.duplicate()
+
+
+func _set_selection(fish: Array) -> void:
+	var live := fish.filter(func(f): return f in card_manager.temp_fish_array)
+	var changed := live != _selection
+	_selection = live
+	_show_summary = not _selection.is_empty()
+	if not changed:
+		return
+	for c in _cards():
+		c.set_picked(c.fish_resource in _selection)
+	graph_manager.set_picked(_selection)
+
+
+## Terminal text for the selection.
+func _selection_info() -> String:
+	var income := 0.0
+	var refund := 0.0
+	for f in _selection:
+		income += f.income
+		refund += PassiveSystems.recycle_refund(f)
+	var room := FishHandler.toilet_space()
+	return "%d fish selected\nIncome $%s/s together\nRecycle all for $%s\nToilet room %d%s" % [
+		_selection.size(), FishLabelDisplay.num(income), FishLabelDisplay.num(refund), room,
+		"" if room >= _selection.size() else "  (only %d fit)" % room]
 
 
 ## Buttons on the right bar. Each returns the message for the terminal.
@@ -235,6 +410,7 @@ func _after_transaction() -> void:
 	_shown_fish = null
 	graph_manager.refresh_histogram(card_manager.temp_fish_array)
 	graph_manager.clear_hover()
+	_set_selection(_selection)   # drop the fish that just left
 	_refresh_affordability()
 	_select_cursor.call_deferred()   # the next fish under the cursor
 
@@ -377,6 +553,8 @@ func _select_cursor() -> void:
 
 
 func command_info() -> String:
+	if _show_summary and not _selection.is_empty():
+		return _selection_info()
 	return FishLabelDisplay.describe(_shown_fish)
 
 

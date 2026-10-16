@@ -27,6 +27,7 @@ const REACH := 3.2
 
 var _fish: Array = []
 var _selected: fish_conf = null
+var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
 var _mode := 0
 var _series_fish := {}   # series name -> Array of fish, in point order (for clicks)
 
@@ -104,13 +105,34 @@ func _redraw() -> void:
 	_series_fish.clear()
 	var others := _fish.filter(func(f): return f != _selected)
 	if not others.is_empty():
-		_add_series(series, "Fish", others, mode)
-		colors.append(FISH_COLOR)
+		var plain := others.filter(func(f): return f not in _picked)
+		var picked := others.filter(func(f): return f in _picked)
+		if not plain.is_empty():
+			_add_series(series, "Fish", plain, mode)
+			colors.append(FISH_COLOR)
+		if not picked.is_empty():
+			_add_series(series, "Picked", picked, mode)
+			colors.append(PICKED_COLOR)
 	if _selected and _selected in _fish:
 		_add_series(series, "Selected", [_selected], mode)   # drawn last, on top
 		colors.append(SELECTED_COLOR)
 	var title := "%s ↑  %s →" % [STAT_NAMES[mode[2]], STAT_NAMES[mode[1]]]
 	draw(plot, {"series": series, "colors": colors, "title": title}, _on_plot_clicked)
+
+
+## Box selection: show these fish as picked.
+func set_picked(fish: Array) -> void:
+	if fish == _picked:
+		return
+	_picked = fish.duplicate()
+	_redraw()
+
+
+## Fish whose dot touches `rect` (screen coordinates).
+func fish_in_rect(rect: Rect2) -> Array:
+	var mode: Array = MODES[_mode]
+	var hit := rect.grow(4.0)   # about a dot's radius
+	return _fish.filter(func(f): return hit.has_point(TauCharts.data_to_global(plot, _z(f, mode[1]), _z(f, mode[2]))))
 
 
 func _add_series(series: Dictionary, name: String, fish: Array, mode: Array) -> void:

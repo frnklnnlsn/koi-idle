@@ -27,6 +27,7 @@ var _fish: Array = []
 var _selected: fish_conf = null
 var _all_view := true
 var _series_fish: Array = []   # series index -> fish (All view clicks)
+var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
 
 
 # --- Chart definitions (shared by the game and ChartPreview) ----------------
@@ -55,7 +56,8 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 
 
 ## Many fish. data: {"curves": Array of curve dicts (as draw()), "selected": int
-## (-1 = none)}. The selected curve is drawn last, in colour.
+## (-1 = none), "picked": Array[int]}. The selected curve is drawn last, in
+## colour; picked (box-selected) curves in PICKED_COLOR.
 static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var curves: Array = data.get("curves", [])
 	if curves.is_empty():
@@ -63,6 +65,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		p.title = "No fish selected"
 		return
 	var selected: int = data.get("selected", -1)
+	var picked: Array = data.get("picked", [])
 	var x_max := 1.0
 	for c in curves:
 		x_max = maxf(x_max, grown_hours(c))
@@ -72,6 +75,9 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	var series := {}
 	var colors := []
 	var order := range(curves.size())
+	for i in picked:   # picked curves above the rest
+		order.erase(i)
+		order.append(i)
 	if selected >= 0:
 		order.erase(selected)
 		order.append(selected)   # drawn last = on top
@@ -80,7 +86,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		for h in xs:
 			m.append(_mass(curves[i], h))
 		series[str(i + 1)] = m
-		colors.append(SELECTED_COLOR if i == selected else OTHER_COLOR)
+		colors.append(SELECTED_COLOR if i == selected else (PICKED_COLOR if i in picked else OTHER_COLOR))
 
 	var opts := {"y_log": true, "minimal": true, "colors": colors, "hover_nearest": true}
 	if on_click.is_valid():
@@ -137,6 +143,14 @@ func set_fish_collection(fish_array: Array) -> void:
 	_redraw()
 
 
+## Box selection: show these fish as picked.
+func set_picked(fish: Array) -> void:
+	if fish == _picked:
+		return
+	_picked = fish.duplicate()
+	_redraw()
+
+
 func set_fish_growth(fish_res) -> void:
 	_selected = fish_res
 	_data = data_for(fish_res) if fish_res else _DEFAULT.duplicate()
@@ -179,7 +193,11 @@ func _redraw() -> void:
 		_series_fish = _fish.duplicate()
 		for f in _fish:
 			curves.append(data_for(f))
-		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected)}, _on_plot_clicked)
+		var picked := []
+		for i in _fish.size():
+			if _fish[i] in _picked:
+				picked.append(i)
+		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected), "picked": picked}, _on_plot_clicked)
 	else:
 		draw(plot, _data)
 

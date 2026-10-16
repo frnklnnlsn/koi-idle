@@ -7,6 +7,9 @@
 class_name KoiChart
 extends MarginContainer
 
+## Colour of box-selected fish, in every chart and on the cards.
+const PICKED_COLOR := Color(0.35, 0.85, 1.0)
+
 @onready var plot: TauPlot = $Plot
 
 

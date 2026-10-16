@@ -31,6 +31,12 @@ func refresh_histogram(fish_array: Array):
 		if chart and chart.has_method("set_fish_collection"):
 			chart.set_fish_collection(fish_array)
 
+## Box-selected fish, shown in KoiChart.PICKED_COLOR on every chart.
+func set_picked(fish_array: Array):
+	for chart in [distribution_graph, growth_curve, histogram_graph]:
+		if chart and chart.has_method("set_picked"):
+			chart.set_picked(fish_array)
+
 func clear_hover():
 	if histogram_graph: histogram_graph.clear_fish_card_hover()
 

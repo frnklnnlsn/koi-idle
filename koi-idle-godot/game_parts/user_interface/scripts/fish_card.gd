@@ -23,6 +23,9 @@ var focused:bool = false
 var is_cursor := false
 var _number: Label
 var _cursor_frame: Panel
+var _picked_frame: Panel
+## True while the card is box-selected.
+var is_picked := false
 
 
 func _ready() -> void:
@@ -119,6 +122,26 @@ func set_number(n: int) -> void:
 	_number.text = str(n)
 
 
+## Box-selected on / off: a tint and frame in KoiChart.PICKED_COLOR (the
+## cursor's gold frame draws over it).
+func set_picked(on: bool) -> void:
+	is_picked = on
+	if on and _picked_frame == null:
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(KoiChart.PICKED_COLOR, 0.22)
+		style.border_color = KoiChart.PICKED_COLOR
+		style.set_border_width_all(2)
+		style.set_corner_radius_all(3)
+		_picked_frame = Panel.new()
+		_picked_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_picked_frame.add_theme_stylebox_override("panel", style)
+		add_child(_picked_frame)
+		if _cursor_frame:
+			move_child(_cursor_frame, -1)
+	if _picked_frame:
+		_picked_frame.visible = on
+
+
 ## Keyboard cursor on / off: same enlarged look as mouse hover, plus a frame.
 func set_cursor(on: bool) -> void:
 	is_cursor = on
@@ -133,6 +156,6 @@ func set_cursor(on: bool) -> void:
 		_cursor_frame = Panel.new()
 		_cursor_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_cursor_frame.add_theme_stylebox_override("panel", style)
-		add_child(_cursor_frame)
+		add_child(_cursor_frame)   # after the picked frame, so it draws on top
 	if _cursor_frame:
 		_cursor_frame.visible = on

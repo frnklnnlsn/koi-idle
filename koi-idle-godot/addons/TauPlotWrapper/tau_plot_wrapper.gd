@@ -283,3 +283,51 @@ static func _values(series: Dictionary) -> Array[PackedFloat64Array]:
 	for key in series:
 		out.append(PackedFloat64Array(series[key]))
 	return out
+
+
+# --- Screen positions (for box selection over a chart) --------------------------
+# These read TauPlot's internal layout (not public API in v0.2.0), so if a TauPlot
+# update breaks box selection, this is the place to fix.
+
+## The plot's internal XY plot, or null before it has been laid out.
+static func _xy(plot: TauPlot):
+	var xy = plot.get("_xy_plot")
+	if xy == null or xy._xy_layout == null or not xy._xy_layout.has_pane_layouts():
+		return null
+	return xy
+
+
+## Where the data point (x, y) is drawn, in screen (global) coordinates.
+## Vector2.INF if the plot isn't laid out yet.
+static func data_to_global(plot: TauPlot, x: float, y: float) -> Vector2:
+	var xy = _xy(plot)
+	if xy == null:
+		return Vector2.INF
+	var pl = xy._xy_layout.pane_layouts[0]
+	var ys: Array = pl.y_mappings.values()
+	if pl.x_mapping == null or ys.is_empty():
+		return Vector2.INF
+	var local: Vector2 = xy._xy_layout.map_point_to_screen(pl.x_mapping.to_px(x), ys[0].to_px(y))
+	return xy._pane_renderers[0].get_global_transform() * local
+
+
+## Screen rectangle of bar `index` of a bar chart (from 0 up to `value`),
+## `width` = share of its slot the bar fills. Empty Rect2 if not laid out.
+static func bar_global_rect(plot: TauPlot, index: int, value: float, width := 0.8) -> Rect2:
+	var xy = _xy(plot)
+	if xy == null:
+		return Rect2()
+	var layout = xy._xy_layout
+	var pl = layout.pane_layouts[0]
+	var ys: Array = pl.y_mappings.values()
+	var n: int = layout.domain.x_categories.size()
+	if ys.is_empty() or n == 0:
+		return Rect2()
+	var step: float = pl.pane_rect.size.x / n
+	var cx: float = layout.map_x_category_center_to_px(0, index)
+	var y0: float = ys[0].to_px(0.0)
+	var y1: float = ys[0].to_px(value)
+	# At least a few pixels tall, so tiny bars can still be boxed.
+	var top := minf(minf(y0, y1), maxf(y0, y1) - 3.0)
+	var local := Rect2(cx - step * width / 2.0, top, step * width, maxf(y0, y1) - top)
+	return xy._pane_renderers[0].get_global_transform() * local
