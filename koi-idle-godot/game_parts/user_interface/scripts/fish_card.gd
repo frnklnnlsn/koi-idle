@@ -3,7 +3,20 @@ extends MarginContainer
 signal hovered(fish_resource:fish_conf)
 signal unhovered(fish_resource:fish_conf)
 signal selected_deselected(fish_resource:fish_conf)
+## Mouse drag of this card (the shop decides what it means: up = keep,
+## down = trash). Positions are global mouse positions.
+signal drag_started(card: Control, mouse: Vector2)
+signal drag_moved(card: Control, mouse: Vector2)
+signal drag_ended(card: Control, mouse: Vector2)
 var fish_resource:fish_conf
+
+## Pixels the mouse must move with the button held before it counts as a drag
+## rather than a click.
+const DRAG_THRESHOLD := 8.0
+var _press_pos := Vector2.ZERO
+var _pressing := false
+var dragging := false
+var _just_dragged := false
 
 var focused:bool = false
 ## True while the keyboard cursor is on this card.
@@ -15,8 +28,34 @@ var _cursor_frame: Panel
 func _ready() -> void:
 	# See-through fish viewport, so the card's rarity colour shows behind it.
 	$SubViewportContainer/FishViewport.transparent_bg = true
+	$card_button.gui_input.connect(_on_button_input)
 	if fish_resource:
 		_apply_rarity()
+
+
+## The fish picture, for drawing a copy of the card while it's dragged.
+func fish_texture() -> Texture2D:
+	return $SubViewportContainer/FishViewport.get_texture()
+
+
+func _on_button_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			_pressing = true
+			_press_pos = event.global_position
+		else:
+			_pressing = false
+			if dragging:
+				dragging = false
+				_just_dragged = true   # so this release isn't also a click...
+				set_deferred("_just_dragged", false)   # ...but only this one
+				drag_ended.emit(self, event.global_position)
+	elif event is InputEventMouseMotion and _pressing:
+		if not dragging and event.global_position.distance_to(_press_pos) > DRAG_THRESHOLD:
+			dragging = true
+			drag_started.emit(self, event.global_position)
+		if dragging:
+			drag_moved.emit(self, event.global_position)
 
 
 ## Background colour by the fish's combined rarity across all three stats
@@ -40,6 +79,9 @@ func _apply_rarity() -> void:
 	move_child(bg, 0)   # behind the fish and the button
 
 func _on_card_button_pressed():
+	if _just_dragged:
+		_just_dragged = false
+		return
 	
 	#print(self.has_theme_stylebox("normal"))
 	if focused == false:

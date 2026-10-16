@@ -15,6 +15,8 @@
 #   .             repeat the last keep / recycle / buy
 #   :             command line (see parse_ex)
 #   Esc           cancel what you've typed
+#   s             open / close the shop (handled by the command line, works
+#                 everywhere; see CommandLine.global_keys)
 class_name VimKeys
 extends RefCounted
 

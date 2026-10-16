@@ -24,6 +24,10 @@ const REPEATABLE := ["keep", "recycle", "buy", "fill"]
 ## Returns the node keys should go to, or null when nothing takes keys.
 var target_provider: Callable
 
+## Keys that work everywhere, even with no screen taking keys: key name ->
+## Callable (e.g. "s" opens / closes the shop). Checked before anything else.
+var global_keys := {}
+
 ## Look of the fish info lines.
 @export var info_font_size := 14
 @export var info_color := Color(0.85, 0.88, 0.95)
@@ -45,7 +49,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var target = _target()
 	_status.text = target.command_status() if target \
-		else "toilet %d/%d · open the shop to use keys" % [FishHandler.work_count(), FishHandler.capacity]
+		else "toilet %d/%d · S opens the shop" % [FishHandler.work_count(), FishHandler.capacity]
 	_set_info(target.command_info() if target and target.has_method("command_info") else "")
 
 
@@ -71,10 +75,15 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	# Holding a key only repeats movement.
 	if k.echo and k.keycode not in [KEY_H, KEY_L, KEY_LEFT, KEY_RIGHT]:
 		return
+	var key := VimKeys.key_name(k)
+	# Only when nothing is half typed, so "3s" style input can't misfire.
+	if key in global_keys and _keys.pending() == "" and not k.echo:
+		get_viewport().set_input_as_handled()
+		global_keys[key].call()
+		return
 	var target = _target()
 	if target == null:
 		return
-	var key := VimKeys.key_name(k)
 	if key == "" or key == "enter":
 		return
 	get_viewport().set_input_as_handled()
@@ -138,6 +147,12 @@ func _on_ex_input(event: InputEvent) -> void:
 
 func _say(text: String) -> void:
 	_message.text = text
+
+
+## Show a message from outside the keys (mouse buttons, card drags).
+func say(text: String) -> void:
+	if text != "":
+		_say(text)
 
 
 func _target():

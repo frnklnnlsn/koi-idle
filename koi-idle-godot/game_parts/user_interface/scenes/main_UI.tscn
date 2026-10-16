@@ -18,6 +18,10 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/list.png" id="16_ic_list"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/shop.png" id="17_ic_shop"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/fishing.png" id="18_ic_fish"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/buy.png" id="19_ic_buy"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/buy_max.png" id="20_ic_buymax"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_money"]
 content_margin_left = 8.0
@@ -214,6 +218,67 @@ focus_mode = 0
 icon = ExtResource("18_ic_fish")
 icon_alignment = 1
 
+[node name="ShopBar" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(34, 0)
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -34.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Items" type="VBoxContainer" parent="ShopBar"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BuyButton" type="Button" parent="ShopBar/Items"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Buy one fish of the current rank  (b)"
+focus_mode = 0
+icon = ExtResource("19_ic_buy")
+icon_alignment = 1
+
+[node name="BuyMaxButton" type="Button" parent="ShopBar/Items"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Fill the pool: buy as many as fit and you can afford  (B)"
+focus_mode = 0
+icon = ExtResource("20_ic_buymax")
+icon_alignment = 1
+
+[node name="TopGap" type="Control" parent="ShopBar/Items"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="KeepLight" type="TextureRect" parent="ShopBar/Items"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Lights up while a card is dragged up to keep it"
+texture = ExtResource("21_ic_keep")
+stretch_mode = 3
+
+[node name="TrashLight" type="TextureRect" parent="ShopBar/Items"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Lights up while a card is dragged down to recycle it"
+texture = ExtResource("22_ic_trash")
+stretch_mode = 3
+
+[node name="BottomGap" type="Control" parent="ShopBar/Items"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
 [node name="CommandLine" parent="." instance=ExtResource("12_cmdl")]
 unique_name_in_owner = true
 layout_mode = 1
@@ -223,3 +288,5 @@ layout_mode = 1
 [connection signal="pressed" from="Sidebar/Buttons/List" to="." method="_on_list_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Shop" to="." method="_on_shop_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/GoFishing" to="." method="_on_go_fishing_pressed"]
+[connection signal="pressed" from="ShopBar/Items/BuyButton" to="." method="_on_buy_pressed"]
+[connection signal="pressed" from="ShopBar/Items/BuyMaxButton" to="." method="_on_buy_max_pressed"]

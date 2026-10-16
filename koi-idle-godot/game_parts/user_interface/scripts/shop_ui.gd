@@ -5,6 +5,14 @@
 extends Control
 
 signal sell(fish_resource_array: Array)
+## While a card is dragged: "keep" (above the card row), "trash" (below it)
+## or "" (over the row, or not dragging). The right bar's lights follow this.
+signal drag_zone_changed(zone: String)
+## A message for the terminal from a mouse action (drag, buttons).
+signal action_message(text: String)
+
+const KEEP_COLOR := Color(0.3, 0.9, 0.4)
+const TRASH_COLOR := Color(1.0, 0.3, 0.3)
 
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
 ## Empty space above the cards, sized so the cards' bottom edge sits on the
@@ -24,6 +32,12 @@ var _last_known_net_worth: float = -1.0
 var _cursor := 0
 ## The fish whose details the terminal shows (hovered, else selected).
 var _shown_fish: fish_conf = null
+## Card drag: the copy that follows the mouse, and where it is.
+var _ghost: Panel
+var _ghost_style: StyleBoxFlat
+var _drag_card: Control
+var _drag_offset := Vector2.ZERO
+var _zone := ""
 # --- Lifecycle ---
 
 func _ready() -> void:
@@ -67,6 +81,9 @@ func _populate(fish_array: Array) -> void:
 		card.hovered.connect(_on_card_hovered)
 		card.unhovered.connect(_on_card_unhovered)
 		card.selected_deselected.connect(_on_card_selected)
+		card.drag_started.connect(_on_drag_started)
+		card.drag_moved.connect(_on_drag_moved)
+		card.drag_ended.connect(_on_drag_ended)
 		_renumber()
 		# Cards arrive one by one; stop if the scene was reloaded meanwhile
 		# (Apply / new save), or we'd keep working on a freed shop.
@@ -104,6 +121,93 @@ func _on_card_selected(fish: fish_conf) -> void:
 func _on_bar_clicked(fish: fish_conf, _i) -> void:
 	selected_fish = fish
 	_on_card_hovered(fish)
+
+
+# --- Card drag: up to keep, down to trash ------------------------------------
+
+func _on_drag_started(card: Control, mouse: Vector2) -> void:
+	_drag_card = card
+	if _ghost == null:
+		_ghost_style = StyleBoxFlat.new()
+		_ghost_style.bg_color = Color(0.1, 0.12, 0.16, 0.85)
+		_ghost_style.set_border_width_all(2)
+		_ghost_style.set_corner_radius_all(4)
+		_ghost = Panel.new()
+		_ghost.top_level = true
+		_ghost.z_index = 10
+		_ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_ghost.add_theme_stylebox_override("panel", _ghost_style)
+		var pic := TextureRect.new()
+		pic.name = "Fish"
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_ghost.add_child(pic)
+		add_child(_ghost)
+	var rect: Rect2 = card.get_global_rect()
+	_ghost.size = rect.size
+	_drag_offset = rect.position - mouse
+	(_ghost.get_node("Fish") as TextureRect).texture = card.fish_texture()
+	_ghost.visible = true
+	card.modulate.a = 0.3
+	_on_drag_moved(card, mouse)
+
+
+func _on_drag_moved(_card: Control, mouse: Vector2) -> void:
+	if _ghost == null:
+		return
+	_ghost.global_position = mouse + _drag_offset
+	_set_zone(drag_zone(mouse.y))
+
+
+## Which zone a drag at screen height `y` is in: the card row is neutral,
+## above it keeps, below it trashes.
+func drag_zone(y: float) -> String:
+	var row: Rect2 = fish_card_hbox.get_parent().get_global_rect()
+	if y < row.position.y:
+		return "keep"
+	if y > row.end.y:
+		return "trash"
+	return ""
+
+
+func _set_zone(zone: String) -> void:
+	_ghost_style.border_color = {"keep": KEEP_COLOR, "trash": TRASH_COLOR}.get(zone, Color(1, 1, 1, 0.4))
+	if zone != _zone:
+		_zone = zone
+		drag_zone_changed.emit(zone)
+
+
+func _on_drag_ended(card: Control, mouse: Vector2) -> void:
+	var zone := drag_zone(mouse.y)
+	if _ghost:
+		_ghost.visible = false
+	_set_zone("")
+	_drag_card = null
+	if is_instance_valid(card):
+		card.modulate.a = 1.0
+	var fish: fish_conf = card.fish_resource
+	if fish == null:
+		return
+	if zone == "keep":
+		_drop_message(run_command({"cmd": "keep", "fish": [fish]}))
+	elif zone == "trash":
+		_drop_message(run_command({"cmd": "recycle", "fish": [fish]}))
+
+
+## Mouse actions report in the terminal like key commands do.
+func _drop_message(text: String) -> void:
+	action_message.emit(text)
+
+
+## Buttons on the right bar. Each returns the message for the terminal.
+func buy_one() -> String:
+	return run_command({"cmd": "buy", "count": 1})
+
+
+func fill_pool() -> String:
+	return run_command({"cmd": "fill"})
 
 
 # --- Transactions ---
@@ -251,6 +355,8 @@ func run_command(cmd: Dictionary) -> String:
 func _pick(cmd: Dictionary, cards: Array) -> Array:
 	if cards.is_empty():
 		return []
+	if cmd.has("fish"):   # specific fish (a dragged card)
+		return cards.filter(func(c): return c.fish_resource in cmd["fish"])
 	if cmd.get("all", false):
 		return cards
 	if cmd.has("from"):

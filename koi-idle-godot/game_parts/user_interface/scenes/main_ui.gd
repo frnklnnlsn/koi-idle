@@ -12,12 +12,28 @@ extends Control
 @onready var _main_column: VBoxContainer = $VBoxContainer
 ## Icon buttons down the left edge (menu, flush, view, list, shop, fishing).
 @onready var _sidebar: Control = %Sidebar
+## Shop-only bar down the right edge: buy buttons, keep / trash lights.
+@onready var _shop_bar: Control = %ShopBar
+@onready var _keep_light: TextureRect = %KeepLight
+@onready var _trash_light: TextureRect = %TrashLight
+
+## Light colours while a card is dragged into a zone; OFF otherwise.
+@export var keep_on := Color(0.3, 0.9, 0.4)
+@export var trash_on := Color(1.0, 0.3, 0.3)
+@export var light_off := Color(0.45, 0.47, 0.52, 0.7)
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	# Keys drive the shop while it's open.
 	command_line.target_provider = func(): return shop_ui if shop_ui.visible else null
 	command_line.resized.connect(_fit_above_terminal)
+	# S opens / closes the shop from anywhere.
+	command_line.global_keys["s"] = _on_shop_pressed
+	shop_ui.visibility_changed.connect(_on_shop_visibility)
+	shop_ui.drag_zone_changed.connect(_on_drag_zone)
+	shop_ui.action_message.connect(command_line.say)
+	_on_shop_visibility()
+	_on_drag_zone("")
 	_fit_above_terminal()
 
 
@@ -27,7 +43,27 @@ func _fit_above_terminal() -> void:
 	var h := command_line.size.y if command_line.visible else 0.0
 	_main_column.offset_bottom = -h
 	_sidebar.offset_bottom = -h
+	_shop_bar.offset_bottom = -h
 	_main_column.offset_left = _sidebar.size.x
+	_main_column.offset_right = -_shop_bar.size.x if _shop_bar.visible else 0.0
+
+
+func _on_shop_visibility() -> void:
+	_shop_bar.visible = shop_ui.visible
+	_fit_above_terminal()
+
+
+func _on_drag_zone(zone: String) -> void:
+	_keep_light.modulate = keep_on if zone == "keep" else light_off
+	_trash_light.modulate = trash_on if zone == "trash" else light_off
+
+
+func _on_buy_pressed() -> void:
+	command_line.say(shop_ui.buy_one())
+
+
+func _on_buy_max_pressed() -> void:
+	command_line.say(shop_ui.fill_pool())
 
 
 func _process(_delta: float) -> void:
