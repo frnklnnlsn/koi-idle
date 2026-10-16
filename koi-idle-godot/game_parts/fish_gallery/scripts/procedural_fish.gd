@@ -88,6 +88,9 @@ var previous_direction: Vector2 = Vector2.RIGHT
 
 # --- Eating state ---
 ## Probability of entering EATING from VERY_SLOW_SWIM on each state transition
+## Eating (slow down, stop, rock in place) is paused for now: false = fish
+## never eat. Turn back on here (or per fish in the Inspector).
+@export var eating_enabled: bool = false
 @export var eating_chance_from_very_slow: float = 0.2
 ## Probability of entering EATING from SLOW_SWIM on each state transition
 @export var eating_chance_from_slow:      float = 0.15
@@ -270,7 +273,7 @@ func unlock_state() -> void:
 func transition_to_next_state() -> void:
 	match current_state:
 		FishState.VERY_SLOW_SWIM:
-			if randf() < eating_chance_from_very_slow:
+			if eating_enabled and randf() < eating_chance_from_very_slow:
 				current_state = FishState.EATING
 			else:
 				current_state = FishState.ACCELERATING
@@ -278,7 +281,7 @@ func transition_to_next_state() -> void:
 		FishState.ACCELERATING:
 			current_state = target_state
 		FishState.SLOW_SWIM:
-			if randf() < eating_chance_from_slow:
+			if eating_enabled and randf() < eating_chance_from_slow:
 				current_state = FishState.EATING
 			elif randf() < 0.3:
 				current_state = FishState.DECELERATING

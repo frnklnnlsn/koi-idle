@@ -14,7 +14,8 @@
 #   [ / ]         previous / next rank
 #   .             repeat the last keep / recycle / buy
 #   :             command line (see parse_ex)
-#   Esc           cancel what you've typed
+#   Esc           cancel what you've typed (with nothing typed: close the
+#                 open panel, see CommandLine.global_keys)
 #   s             open / close the shop (handled by the command line, works
 #                 everywhere; see CommandLine.global_keys)
 class_name VimKeys

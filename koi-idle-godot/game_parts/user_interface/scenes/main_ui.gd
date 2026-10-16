@@ -22,6 +22,10 @@ extends Control
 @export var trash_on := Color(1.0, 0.3, 0.3)
 @export var light_off := Color(0.45, 0.47, 0.52, 0.7)
 
+## Panels that Esc closes (shop, list, fishing). For a new pop-up, add its
+## node to this group (Node tab > Groups in the editor, or add_to_group).
+const ESC_CLOSES := "esc_closes"
+
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	# Keys drive the shop while it's open.
@@ -29,6 +33,10 @@ func _ready() -> void:
 	command_line.resized.connect(_fit_above_terminal)
 	# S opens / closes the shop from anywhere.
 	command_line.global_keys["s"] = _on_shop_pressed
+	# Esc closes the open panel (once nothing is half typed in the terminal).
+	command_line.global_keys["escape"] = close_open_panel
+	for panel in [shop_ui, list_ui, fishing_ui]:
+		panel.add_to_group(ESC_CLOSES)
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
@@ -46,6 +54,16 @@ func _fit_above_terminal() -> void:
 	_shop_bar.offset_bottom = -h
 	_main_column.offset_left = _sidebar.size.x
 	_main_column.offset_right = -_shop_bar.size.x if _shop_bar.visible else 0.0
+
+
+## Hides the first visible panel in the ESC_CLOSES group. Returns true if
+## one was closed.
+func close_open_panel() -> bool:
+	for panel in get_tree().get_nodes_in_group(ESC_CLOSES):
+		if panel is CanvasItem and panel.is_visible_in_tree():
+			panel.visible = false
+			return true
+	return false
 
 
 func _on_shop_visibility() -> void:

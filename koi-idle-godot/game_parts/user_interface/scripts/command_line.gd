@@ -25,7 +25,9 @@ const REPEATABLE := ["keep", "recycle", "buy", "fill"]
 var target_provider: Callable
 
 ## Keys that work everywhere, even with no screen taking keys: key name ->
-## Callable (e.g. "s" opens / closes the shop). Checked before anything else.
+## Callable (e.g. "s" opens / closes the shop, "escape" closes the open
+## panel). Checked first, but only when nothing is half typed, so Esc still
+## cancels a pending "3d" before it closes anything.
 var global_keys := {}
 
 ## Look of the fish info lines.

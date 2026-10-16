@@ -43,10 +43,10 @@ var _cursor := 0
 ## The fish whose details the terminal shows (hovered, else selected).
 var _shown_fish: fish_conf = null
 ## Card drag: the copy that follows the mouse, and where it is.
-var _ghost: Panel
+var _ghosts: Array = []          # Panel copies, reused between drags
+var _ghost_offsets: Array = []   # per copy: its card's offset from the mouse
 var _ghost_style: StyleBoxFlat
 var _drag_card: Control
-var _drag_offset := Vector2.ZERO
 var _zone := ""
 ## Every card dragged with the current drag (the selection, or just the card).
 var _drag_group: Array = []
@@ -170,50 +170,65 @@ func _on_drag_started(card: Control, mouse: Vector2) -> void:
 		_drag_group = _cards().filter(func(c): return c.fish_resource in _selection)
 	else:
 		_drag_group = [card]
-	if _ghost == null:
-		_ghost_style = StyleBoxFlat.new()
+	if _ghost_style == null:
+		_ghost_style = StyleBoxFlat.new()   # shared, so all copies change colour together
 		_ghost_style.bg_color = Color(0.1, 0.12, 0.16, 0.85)
 		_ghost_style.set_border_width_all(2)
 		_ghost_style.set_corner_radius_all(4)
-		_ghost = Panel.new()
-		_ghost.top_level = true
-		_ghost.z_index = 10
-		_ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_ghost.add_theme_stylebox_override("panel", _ghost_style)
-		var pic := TextureRect.new()
-		pic.name = "Fish"
-		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		_ghost.add_child(pic)
-		var count := Label.new()
-		count.name = "Count"
-		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		count.add_theme_font_size_override("font_size", 16)
-		count.add_theme_color_override("font_outline_color", Color.BLACK)
-		count.add_theme_constant_override("outline_size", 4)
-		count.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-		count.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-		count.position += Vector2(-4, 2)
-		_ghost.add_child(count)
-		add_child(_ghost)
-	var rect: Rect2 = card.get_global_rect()
-	_ghost.size = rect.size
-	_drag_offset = rect.position - mouse
-	(_ghost.get_node("Fish") as TextureRect).texture = card.fish_texture()
-	var n := _drag_group.size()
-	(_ghost.get_node("Count") as Label).text = "×%d" % n if n > 1 else ""
-	_ghost.visible = true
-	for c in _drag_group:
+	while _ghosts.size() < _drag_group.size():
+		_ghosts.append(_make_ghost())
+	# One copy per dragged card, each keeping its offset from the mouse, so the
+	# whole group moves together; the grabbed card's copy is on top.
+	_ghost_offsets.clear()
+	for i in _ghosts.size():
+		var g: Panel = _ghosts[i]
+		g.visible = i < _drag_group.size()
+		if not g.visible:
+			continue
+		var c: Control = _drag_group[i]
+		# Normal card size, even for the hovered (enlarged) one.
+		var rect := Rect2(c.global_position, c.size)
+		g.size = rect.size
+		g.z_index = 11 if c == card else 10
+		_ghost_offsets.append(rect.position - mouse)
+		(g.get_node("Fish") as TextureRect).texture = c.fish_texture()
+		var n := _drag_group.size()
+		(g.get_node("Count") as Label).text = "×%d" % n if n > 1 and c == card else ""
 		c.modulate.a = 0.3
 	_on_drag_moved(card, mouse)
 
 
+func _make_ghost() -> Panel:
+	var g := Panel.new()
+	g.top_level = true
+	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	g.add_theme_stylebox_override("panel", _ghost_style)
+	var pic := TextureRect.new()
+	pic.name = "Fish"
+	pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pic.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	g.add_child(pic)
+	var count := Label.new()
+	count.name = "Count"
+	count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	count.add_theme_font_size_override("font_size", 16)
+	count.add_theme_color_override("font_outline_color", Color.BLACK)
+	count.add_theme_constant_override("outline_size", 4)
+	count.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	count.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	count.position += Vector2(-4, 2)
+	g.add_child(count)
+	add_child(g)
+	return g
+
+
 func _on_drag_moved(_card: Control, mouse: Vector2) -> void:
-	if _ghost == null:
+	if _ghost_offsets.is_empty():
 		return
-	_ghost.global_position = mouse + _drag_offset
+	for i in _ghost_offsets.size():
+		_ghosts[i].global_position = mouse + _ghost_offsets[i]
 	_set_zone(drag_zone(mouse.y))
 
 
@@ -229,7 +244,8 @@ func drag_zone(y: float) -> String:
 
 
 func _set_zone(zone: String) -> void:
-	_ghost_style.border_color = {"keep": KEEP_COLOR, "trash": TRASH_COLOR}.get(zone, Color(1, 1, 1, 0.4))
+	if _ghost_style:
+		_ghost_style.border_color = {"keep": KEEP_COLOR, "trash": TRASH_COLOR}.get(zone, Color(1, 1, 1, 0.4))
 	if zone != _zone:
 		_zone = zone
 		drag_zone_changed.emit(zone)
@@ -237,8 +253,9 @@ func _set_zone(zone: String) -> void:
 
 func _on_drag_ended(card: Control, mouse: Vector2) -> void:
 	var zone := drag_zone(mouse.y)
-	if _ghost:
-		_ghost.visible = false
+	for g in _ghosts:
+		g.visible = false
+	_ghost_offsets.clear()
 	_set_zone("")
 	_drag_card = null
 	var group := _drag_group.filter(func(c): return is_instance_valid(c))

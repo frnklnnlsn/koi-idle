@@ -13,6 +13,9 @@ signal eating_entered(start_speed: float)
 # --- Exports (tweak in Inspector) ---
 @export var acceleration_duration:        float = 0.5
 @export var deceleration_duration:        float = 0.5
+## Eating (slow down, stop, rock in place) is paused for now: false = fish
+## never eat. Turn back on here (or per fish in the Inspector).
+@export var eating_enabled: bool = false
 @export var eating_chance_from_very_slow: float = 0.2
 @export var eating_chance_from_slow:      float = 0.15
 @export var eating_rest_duration_min:     float = 2.0
@@ -163,7 +166,7 @@ func _transition_to_next_state() -> void:
 	var FS = _fish.FishState
 	match current_state:
 		FS.VERY_SLOW_SWIM:
-			if randf() < eating_chance_from_very_slow:
+			if eating_enabled and randf() < eating_chance_from_very_slow:
 				current_state = FS.EATING
 			else:
 				current_state = FS.ACCELERATING
@@ -171,7 +174,7 @@ func _transition_to_next_state() -> void:
 		FS.ACCELERATING:
 			current_state = target_state
 		FS.SLOW_SWIM:
-			if randf() < eating_chance_from_slow:
+			if eating_enabled and randf() < eating_chance_from_slow:
 				current_state = FS.EATING
 			elif randf() < 0.3:
 				current_state = FS.DECELERATING
