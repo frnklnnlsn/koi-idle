@@ -21,11 +21,20 @@ var _pending_display_list: Array = []
 var _spawn_queue:  Array = []   # Array of fish data dicts waiting to be placed
 var _spawn_timer:  float = 0.0
 var _channel_idx:  int   = 0    # round-robins through channels
+## The pond's boundary, built from the PondArea/SwimShape node (drag / resize
+## it in pond_area.tscn), shared by every pond fish.
+var _swim_area: SwimArea
 
 @onready var fish_container_pond: Node2D = %FishContainerPond
 
 
 func _ready() -> void:
+	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
+	if swim_shape:
+		_swim_area = swim_shape.make_swim_area()
+		fish_container_pond.child_entered_tree.connect(func(n):
+			if "swim_area" in n:
+				n.swim_area = _swim_area)
 	DisplayManager.display_fish_pond.connect(Display)
 	DisplayManager.fish_caught.connect(_on_fish_caught)
 	DisplayManager.flush_completed.connect(_on_flush_completed)

@@ -1,11 +1,15 @@
-[gd_scene load_steps=4 format=3 uid="uid://ceo0jkwaeceei"]
+[gd_scene format=3 uid="uid://ceo0jkwaeceei"]
 
 [ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
+[ext_resource type="Script" path="res://scripts/swim_shape.gd" id="3_swim"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
 height = 100.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_swim"]
+radius = 100.0
 
 [node name="ToiletArea" type="Area2D"]
 metadata/_edit_vertical_guides_ = [128.0]
@@ -23,3 +27,8 @@ shape = SubResource("CapsuleShape2D_lsxmt")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_t615y")
+
+[node name="SwimShape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_swim")
+debug_color = Color(0.6, 1, 0.38, 0.25)
+script = ExtResource("3_swim")

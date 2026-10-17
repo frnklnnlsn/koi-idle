@@ -11,16 +11,25 @@ var _display:     FishDisplay
 var _is_flushing: bool  = false
 var _fish_cache:  Array = []
 
-## The toilet's own boundary, shared by every toilet fish. The flush shrinks
-## this one resource, so all toilet fish follow it without touching the pond's.
-const _BASE_AREA: SwimArea = preload("res://game_parts/FishComposition/resources/pond_swim_area.tres")
-var _swim_area: SwimArea = _BASE_AREA.duplicate()
+## The toilet's own boundary, shared by every toilet fish, built from the
+## ToiletArea/SwimShape node (drag / resize it in toilet_area.tscn). The flush
+## shrinks this one resource, so all toilet fish follow it.
+const _FALLBACK_AREA: SwimArea = preload("res://game_parts/FishComposition/resources/pond_swim_area.tres")
+var _base_area: SwimArea
+var _swim_area: SwimArea
 var _base_avoidance: float = -1.0   # fish's normal avoidance distance, read on first flush
 
 @onready var fish_container_toilet: Node2D = %FishContainerToilet
 
 
 func _ready() -> void:
+	var swim_shape := get_node_or_null("ToiletArea/SwimShape") as SwimShape
+	_base_area = swim_shape.make_swim_area() if swim_shape else _FALLBACK_AREA
+	_swim_area = _base_area.duplicate()
+	# Every toilet fish gets the toilet's boundary as it's added.
+	fish_container_toilet.child_entered_tree.connect(func(n):
+		if "swim_area" in n:
+			n.swim_area = _swim_area)
 	DisplayManager.display_fish_toilet.connect(Display)
 	DisplayManager.flush_fish.connect(Flush)
 
@@ -82,7 +91,7 @@ func _play_flush_animation() -> void:
 			return
 
 	# ② Starting values: the toilet's boundary and the fish's avoidance distance
-	var start_radius: float   = _swim_area.size.x
+	var start_size: Vector2   = _swim_area.size
 	var start_center: Vector2 = _swim_area.center
 	if _base_avoidance < 0.0:
 		for fish in _fish_cache:
@@ -95,7 +104,7 @@ func _play_flush_animation() -> void:
 	var tween := create_tween()
 	tween.set_ease(Tween.EASE_IN)
 	tween.set_trans(Tween.TRANS_QUAD)
-	tween.tween_method(_apply_flush_progress.bind(start_radius, start_center, _base_avoidance),
+	tween.tween_method(_apply_flush_progress.bind(start_size, start_center, _base_avoidance),
 		0.0, 1.0, flush_duration)
 	await tween.finished
 
@@ -104,8 +113,9 @@ func _play_flush_animation() -> void:
 		await get_tree().create_timer(flush_hold_duration).timeout
 
 
-func _apply_flush_progress(t: float, start_radius: float, start_center: Vector2, start_avoidance: float) -> void:
-	_swim_area.size   = Vector2.ONE * lerpf(start_radius, flush_final_radius, t)
+func _apply_flush_progress(t: float, start_size: Vector2, start_center: Vector2, start_avoidance: float) -> void:
+	# Whatever the shape, it shrinks to a small blob at the drain.
+	_swim_area.size   = start_size.lerp(Vector2.ONE * flush_final_radius, t)
 	_swim_area.center = start_center.lerp(flush_drain_point, t)
 	var a := lerpf(start_avoidance, flush_final_radius * 0.5, t)
 	for fish in _fish_cache:
@@ -121,5 +131,5 @@ func Clear() -> void:
 			fish.queue_free()
 	_fish_cache.clear()
 	# Reset the boundary so the next batch of toilet fish gets the full bowl.
-	_swim_area.size   = _BASE_AREA.size
-	_swim_area.center = _BASE_AREA.center
+	_swim_area.size   = _base_area.size
+	_swim_area.center = _base_area.center
