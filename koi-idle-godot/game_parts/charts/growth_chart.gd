@@ -17,8 +17,6 @@ signal fish_clicked(fish: fish_conf)
 
 const _DEFAULT := {"base": 5.0, "growth_rate": 0.5, "carrying_capacity": 100.0, "mid_point": 12.0, "hours": -1.0, "mass": -1.0}
 const STEPS := 100
-const OTHER_COLOR := Color(0.55, 0.62, 0.75, 0.45)
-const SELECTED_COLOR := Color(1.0, 0.85, 0.2)
 ## The All view stops here even if a slow grower takes longer.
 const MAX_HOURS := 96.0
 
@@ -27,7 +25,7 @@ var _fish: Array = []
 var _selected: fish_conf = null
 var _all_view := true
 var _series_fish: Array = []   # series index -> fish (All view clicks)
-var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
+var _picked: Array = []   # box-selected fish (UIPalette picked colour)
 
 
 # --- Chart definitions (shared by the game and ChartPreview) ----------------
@@ -47,7 +45,7 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 	for h in xs:
 		mass.append(_mass(data, h))
 
-	var opts := {"y_log": true, "minimal": true, "hover_nearest": false}
+	var opts := {"y_log": true, "minimal": true, "hover_nearest": false, "colors": [UIPalette.get_palette().accent], "marker_color": UIPalette.get_palette().accent}
 	if hours_now >= 0.0:
 		opts["markers"] = {"Now": Vector2(hours_now, maxf(data.get("mass", base), base))}
 		opts["marker_drops"] = false
@@ -57,7 +55,7 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 
 ## Many fish. data: {"curves": Array of curve dicts (as draw()), "selected": int
 ## (-1 = none), "picked": Array[int]}. The selected curve is drawn last, in
-## colour; picked (box-selected) curves in PICKED_COLOR.
+## colour; picked (box-selected) curves in the palette's picked colour.
 static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var curves: Array = data.get("curves", [])
 	if curves.is_empty():
@@ -72,6 +70,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	x_max = minf(x_max, MAX_HOURS)
 	var xs := _hours(x_max)
 
+	var pal := UIPalette.get_palette()
 	var series := {}
 	var colors := []
 	var order := range(curves.size())
@@ -86,7 +85,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		for h in xs:
 			m.append(_mass(curves[i], h))
 		series[str(i + 1)] = m
-		colors.append(SELECTED_COLOR if i == selected else (PICKED_COLOR if i in picked else OTHER_COLOR))
+		colors.append(pal.accent if i == selected else (pal.picked if i in picked else pal.chart_line))
 
 	var opts := {"y_log": true, "minimal": true, "colors": colors, "hover_nearest": true}
 	if on_click.is_valid():

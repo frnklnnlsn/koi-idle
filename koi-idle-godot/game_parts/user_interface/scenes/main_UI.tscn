@@ -23,20 +23,6 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_money"]
-content_margin_left = 8.0
-content_margin_right = 8.0
-bg_color = Color(0.1, 0.11, 0.14, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.35, 0.38, 0.45, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
 anchors_preset = 15
@@ -133,7 +119,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxFlat_money")
+theme_type_variation = &"MoneyBox"
 text = "$ 0"
 horizontal_alignment = 1
 vertical_alignment = 1

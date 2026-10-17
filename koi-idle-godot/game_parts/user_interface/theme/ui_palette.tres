@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="UIPalette" format=3]
+
+[ext_resource type="Script" path="res://game_parts/user_interface/theme/ui_palette.gd" id="1_2uowo"]
+
+[resource]
+script = ExtResource("1_2uowo")

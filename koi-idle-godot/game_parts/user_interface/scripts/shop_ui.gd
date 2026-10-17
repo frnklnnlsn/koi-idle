@@ -21,8 +21,6 @@ signal drag_zone_changed(zone: String)
 ## A message for the terminal from a mouse action (drag, buttons).
 signal action_message(text: String)
 
-const KEEP_COLOR := Color(0.3, 0.9, 0.4)
-const TRASH_COLOR := Color(1.0, 0.3, 0.3)
 
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
 ## Empty space above the cards, sized so the cards' bottom edge sits on the
@@ -51,7 +49,7 @@ var _zone := ""
 ## Every card dragged with the current drag (the selection, or just the card).
 var _drag_group: Array = []
 
-## Box selection. Selected fish show in KoiChart.PICKED_COLOR on the cards and
+## Box selection. Selected fish show in the palette's picked colour on the cards and
 ## all the charts; the keyboard commands ignore the selection for now.
 const BOX_THRESHOLD := 4.0
 var _selection: Array = []   # fish_conf
@@ -172,7 +170,7 @@ func _on_drag_started(card: Control, mouse: Vector2) -> void:
 		_drag_group = [card]
 	if _ghost_style == null:
 		_ghost_style = StyleBoxFlat.new()   # shared, so all copies change colour together
-		_ghost_style.bg_color = Color(0.1, 0.12, 0.16, 0.85)
+		_ghost_style.bg_color = Color(UIPalette.get_palette().inset, 0.9)
 		_ghost_style.set_border_width_all(2)
 		_ghost_style.set_corner_radius_all(4)
 	while _ghosts.size() < _drag_group.size():
@@ -245,7 +243,7 @@ func drag_zone(y: float) -> String:
 
 func _set_zone(zone: String) -> void:
 	if _ghost_style:
-		_ghost_style.border_color = {"keep": KEEP_COLOR, "trash": TRASH_COLOR}.get(zone, Color(1, 1, 1, 0.4))
+		_ghost_style.border_color = {"keep": UIPalette.get_palette().keep, "trash": UIPalette.get_palette().trash}.get(zone, Color(UIPalette.get_palette().text_dim, 0.6))
 	if zone != _zone:
 		_zone = zone
 		drag_zone_changed.emit(zone)
@@ -323,8 +321,8 @@ func _box_motion(p: Vector2) -> void:
 		_box_active = true
 		if _box == null:
 			var style := StyleBoxFlat.new()
-			style.bg_color = Color(KoiChart.PICKED_COLOR, 0.12)
-			style.border_color = Color(KoiChart.PICKED_COLOR, 0.9)
+			style.bg_color = Color(UIPalette.get_palette().picked, 0.12)
+			style.border_color = Color(UIPalette.get_palette().picked, 0.9)
 			style.set_border_width_all(1)
 			_box = Panel.new()
 			_box.top_level = true

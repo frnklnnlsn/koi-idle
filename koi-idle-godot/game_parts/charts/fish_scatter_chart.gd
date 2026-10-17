@@ -20,14 +20,12 @@ const MODES := [
 	["Size × Growth", "size", "mass"],
 ]
 const STAT_NAMES := {"income": "Income", "mass": "Size", "size": "Growth"}
-const FISH_COLOR := Color(0.55, 0.65, 0.85)
-const SELECTED_COLOR := Color(1.0, 0.85, 0.2)
 ## Axis reach in spreads either side of average (rolls stop at 3).
 const REACH := 3.2
 
 var _fish: Array = []
 var _selected: fish_conf = null
-var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
+var _picked: Array = []   # box-selected fish (UIPalette picked colour)
 var _mode := 0
 var _series_fish := {}   # series name -> Array of fish, in point order (for clicks)
 
@@ -56,7 +54,7 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 static func sample_data() -> Dictionary:
 	return {
 		"series": {"Fish": [[1.2, -0.4, -0.5, 0.3], [0.8, 1.6, 0.2, -1.1]], "Selected": [[0.1], [0.6]]},
-		"colors": [FISH_COLOR, SELECTED_COLOR],
+		"colors": [UIPalette.get_palette().chart_mark, UIPalette.get_palette().accent],
 		"title": "Income ↑  Growth →",
 	}
 
@@ -109,13 +107,13 @@ func _redraw() -> void:
 		var picked := others.filter(func(f): return f in _picked)
 		if not plain.is_empty():
 			_add_series(series, "Fish", plain, mode)
-			colors.append(FISH_COLOR)
+			colors.append(UIPalette.get_palette().chart_mark)
 		if not picked.is_empty():
 			_add_series(series, "Picked", picked, mode)
-			colors.append(PICKED_COLOR)
+			colors.append(UIPalette.get_palette().picked)
 	if _selected and _selected in _fish:
 		_add_series(series, "Selected", [_selected], mode)   # drawn last, on top
-		colors.append(SELECTED_COLOR)
+		colors.append(UIPalette.get_palette().accent)
 	var title := "%s ↑  %s →" % [STAT_NAMES[mode[2]], STAT_NAMES[mode[1]]]
 	draw(plot, {"series": series, "colors": colors, "title": title}, _on_plot_clicked)
 

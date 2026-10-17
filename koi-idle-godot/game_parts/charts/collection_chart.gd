@@ -8,7 +8,6 @@ extends KoiChart
 
 signal bar_clicked(fish_resource: fish_conf, bar_index: int)
 
-const HIGHLIGHT := Color(1.0, 0.85, 0.2)
 
 ## Shown above the bars. Set per scene in the Inspector (e.g. "Selected fish"
 ## in the shop, "Pond fish" in a list). Empty = name the current stat.
@@ -20,7 +19,7 @@ const STATS := [["Income", "Income /s"], ["Size", "Starting mass (g)"], ["Max si
 var _fish: Array = []          # fish_conf, as given
 var _sorted: Array = []        # fish_conf, sorted by the current stat
 var _hovered: fish_conf = null
-var _picked: Array = []   # box-selected fish (shown in PICKED_COLOR)
+var _picked: Array = []   # box-selected fish (UIPalette picked colour)
 var _stat := 0
 
 
@@ -54,7 +53,7 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 		"y_title": data.get("y_title", "Income /s"),
 		"stacked": true,
 		"minimal": true,
-		"colors": [TauXYStyle.DEFAULT_SERIES_COLOR, PICKED_COLOR, HIGHLIGHT],
+		"colors": [UIPalette.get_palette().chart_mark, UIPalette.get_palette().picked, UIPalette.get_palette().accent],
 	}
 	if on_click.is_valid():
 		opts["on_click"] = on_click

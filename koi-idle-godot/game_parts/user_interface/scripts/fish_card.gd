@@ -115,21 +115,21 @@ func set_number(n: int) -> void:
 		_number.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		_number.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		_number.add_theme_font_size_override("font_size", 11)
-		_number.add_theme_color_override("font_color", Color(1, 1, 1, 0.75))
+		_number.add_theme_color_override("font_color", Color(UIPalette.get_palette().text, 0.8))
 		_number.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		_number.add_theme_constant_override("outline_size", 3)
 		add_child(_number)
 	_number.text = str(n)
 
 
-## Box-selected on / off: a tint and frame in KoiChart.PICKED_COLOR (the
+## Box-selected on / off: a tint and frame in the palette's picked colour (the
 ## cursor's gold frame draws over it).
 func set_picked(on: bool) -> void:
 	is_picked = on
 	if on and _picked_frame == null:
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(KoiChart.PICKED_COLOR, 0.22)
-		style.border_color = KoiChart.PICKED_COLOR
+		style.bg_color = Color(UIPalette.get_palette().picked, 0.22)
+		style.border_color = UIPalette.get_palette().picked
 		style.set_border_width_all(2)
 		style.set_corner_radius_all(3)
 		_picked_frame = Panel.new()
@@ -150,7 +150,7 @@ func set_cursor(on: bool) -> void:
 	if on and _cursor_frame == null:
 		var style := StyleBoxFlat.new()
 		style.draw_center = false
-		style.border_color = Color(1.0, 0.85, 0.2)
+		style.border_color = UIPalette.get_palette().accent
 		style.set_border_width_all(2)
 		style.set_corner_radius_all(3)
 		_cursor_frame = Panel.new()

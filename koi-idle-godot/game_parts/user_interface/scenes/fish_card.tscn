@@ -1,68 +1,6 @@
-[gd_scene load_steps=14 format=3 uid="uid://7g1pu5t8amra"]
+[gd_scene format=3 uid="uid://7g1pu5t8amra"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_card.gd" id="1_wweqa"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2t3nj"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w78gw"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oibs1"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rbw6s"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eouob"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rq5wj"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_woqmn"]
-bg_color = Color(0.764025, 0.494785, 0.316213, 0.447059)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n8lty"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h7mw3"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.8, 0, 0, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t5hsw"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n8bws"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b622u"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
 
 [node name="fish_card" type="MarginContainer"]
 custom_minimum_size = Vector2(100, 100)
@@ -93,23 +31,12 @@ render_target_update_mode = 4
 
 [node name="card_button" type="Button" parent="."]
 layout_mode = 2
-theme_override_styles/focus = SubResource("StyleBoxFlat_2t3nj")
-theme_override_styles/disabled_mirrored = SubResource("StyleBoxEmpty_w78gw")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_oibs1")
-theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_rbw6s")
-theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_eouob")
-theme_override_styles/hover_mirrored = SubResource("StyleBoxEmpty_rq5wj")
-theme_override_styles/hover = SubResource("StyleBoxFlat_woqmn")
-theme_override_styles/pressed_mirrored = SubResource("StyleBoxEmpty_n8lty")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_h7mw3")
-theme_override_styles/normal_mirrored = SubResource("StyleBoxEmpty_t5hsw")
-theme_override_styles/normal = SubResource("StyleBoxFlat_n8bws")
+theme_type_variation = &"FishCardButton"
 
 [node name="Panel" type="Panel" parent="."]
 visible = false
 layout_mode = 2
 mouse_filter = 1
-theme_override_styles/panel = SubResource("StyleBoxFlat_b622u")
 
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

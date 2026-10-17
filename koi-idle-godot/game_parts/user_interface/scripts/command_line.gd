@@ -30,9 +30,8 @@ var target_provider: Callable
 ## cancels a pending "3d" before it closes anything.
 var global_keys := {}
 
-## Look of the fish info lines.
+## Size of the fish info lines (colour: the palette's text).
 @export var info_font_size := 14
-@export var info_color := Color(0.85, 0.88, 0.95)
 
 var _keys := VimKeys.new()
 var _last: Dictionary = {}
@@ -61,7 +60,7 @@ func _set_info(text: String) -> void:
 	while _info.get_child_count() < lines.size():
 		var l := Label.new()
 		l.add_theme_font_size_override("font_size", info_font_size)
-		l.add_theme_color_override("font_color", info_color)
+		l.add_theme_color_override("font_color", UIPalette.get_palette().text)
 		_info.add_child(l)
 	for i in _info.get_child_count():
 		var l: Label = _info.get_child(i)

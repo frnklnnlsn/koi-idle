@@ -4,13 +4,13 @@
 [ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_sn4uf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fyua3"]
-bg_color = Color(0.7655, 0.491586, 0.724425, 1)
+bg_color = Color(0.0863, 0.1020, 0.2471, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ucq3i"]
-bg_color = Color(0.707749, 0.579895, 0.34638, 1)
+bg_color = Color(0.1971, 0.1944, 0.2287, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iq83y"]
-bg_color = Color(0.370471, 0.674774, 0.511318, 1)
+bg_color = Color(0.3325, 0.3075, 0.2063, 1)
 
 [node name="FishListRow" type="PanelContainer"]
 offset_right = 271.0

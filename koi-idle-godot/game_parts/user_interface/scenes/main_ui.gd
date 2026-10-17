@@ -17,10 +17,7 @@ extends Control
 @onready var _keep_light: TextureRect = %KeepLight
 @onready var _trash_light: TextureRect = %TrashLight
 
-## Light colours while a card is dragged into a zone; OFF otherwise.
-@export var keep_on := Color(0.3, 0.9, 0.4)
-@export var trash_on := Color(1.0, 0.3, 0.3)
-@export var light_off := Color(0.45, 0.47, 0.52, 0.7)
+## Light colours (keep / trash / off) come from UIPalette.
 
 ## Panels that Esc closes (shop, list, fishing). For a new pop-up, add its
 ## node to this group (Node tab > Groups in the editor, or add_to_group).
@@ -72,8 +69,10 @@ func _on_shop_visibility() -> void:
 
 
 func _on_drag_zone(zone: String) -> void:
-	_keep_light.modulate = keep_on if zone == "keep" else light_off
-	_trash_light.modulate = trash_on if zone == "trash" else light_off
+	var pal := UIPalette.get_palette()
+	var off := Color(pal.text_dim, 0.6)
+	_keep_light.modulate = pal.keep.lightened(0.15) if zone == "keep" else off
+	_trash_light.modulate = pal.trash.lightened(0.2) if zone == "trash" else off
 
 
 func _on_buy_pressed() -> void:
