@@ -2,33 +2,34 @@
 
 [ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
-[ext_resource type="Script" path="res://scripts/swim_shape.gd" id="3_swim"]
+[ext_resource type="Script" uid="uid://cfmoa6hcvdirb" path="res://scripts/swim_shape.gd" id="3_swim"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
 height = 100.0
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_swim"]
-radius = 100.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_r3384"]
+radius = 106.0
+height = 254.0
 
-[node name="ToiletArea" type="Area2D"]
+[node name="ToiletArea" type="Area2D" unique_id=1489680432]
 metadata/_edit_vertical_guides_ = [128.0]
 
-[node name="ToiletSprite" type="Sprite2D" parent="."]
-visible = false
+[node name="ToiletSprite" type="Sprite2D" parent="." unique_id=1309309159]
+z_index = -2
 position = Vector2(-18, -1)
 scale = Vector2(0.6, 0.6)
 texture = ExtResource("1_b7m5k")
 
-[node name="BoundaryShape" type="CollisionShape2D" parent="."]
+[node name="BoundaryShape" type="CollisionShape2D" parent="." unique_id=1333683224]
 unique_name_in_owner = true
 position = Vector2(0, 1)
 shape = SubResource("CapsuleShape2D_lsxmt")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1500697648]
 texture = ExtResource("2_t615y")
 
-[node name="SwimShape" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_swim")
+[node name="SwimShape" type="CollisionShape2D" parent="." unique_id=1964696330]
+shape = SubResource("CapsuleShape2D_r3384")
 debug_color = Color(0.6, 1, 0.38, 0.25)
 script = ExtResource("3_swim")
