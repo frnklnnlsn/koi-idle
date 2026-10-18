@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/buy_max.png" id="20_ic_buymax"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -238,6 +239,12 @@ tooltip_text = "Fill the pool: buy as many as fit and you can afford  (B)"
 focus_mode = 0
 icon = ExtResource("20_ic_buymax")
 icon_alignment = 1
+
+[node name="RankMeter" type="Control" parent="ShopBar/Items"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Rank"
+script = ExtResource("23_rank_meter")
 
 [node name="TopGap" type="Control" parent="ShopBar/Items"]
 layout_mode = 2

@@ -16,6 +16,8 @@ extends Control
 @onready var _shop_bar: Control = %ShopBar
 @onready var _keep_light: TextureRect = %KeepLight
 @onready var _trash_light: TextureRect = %TrashLight
+## Rank picker on the ShopBar (rank_meter.gd): bars sized in its Inspector.
+@onready var _rank_meter: RankMeter = %RankMeter
 
 ## Light colours (keep / trash / off) come from UIPalette.
 
@@ -37,6 +39,8 @@ func _ready() -> void:
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
+	_rank_meter.rank_clicked.connect(_on_rank_clicked)
+	_rank_meter.rank_scrolled.connect(_on_rank_scrolled)
 	_on_shop_visibility()
 	_on_drag_zone("")
 	_fit_above_terminal()
@@ -86,6 +90,28 @@ func _on_buy_max_pressed() -> void:
 func _process(_delta: float) -> void:
 	# Whole coins only, rounded down so it never shows money you don't have yet.
 	net_worth_label.text = "$ " + _with_commas(floori(PassiveSystems.net_worth))
+	if _shop_bar.visible:
+		_update_rank_meter()
+
+
+## Shows the shop's rank and how many ranks your money covers.
+func _update_rank_meter() -> void:
+	var n := 0
+	while n < Ranks.count() and PassiveSystems.net_worth >= Ranks.get_rank(n).cost:
+		n += 1
+	_rank_meter.affordable = n
+	_rank_meter.rank = shop_ui.rank
+
+
+## Clicking or scrolling the meter runs the same rank command as :rank N / [ ].
+func _on_rank_clicked(r: int) -> void:
+	command_line.say(shop_ui.run_command({"cmd": "rank", "to": r}))
+	_update_rank_meter()
+
+
+func _on_rank_scrolled(step: int) -> void:
+	command_line.say(shop_ui.run_command({"cmd": "rank", "by": step}))
+	_update_rank_meter()
 ## 1234567 -> "1,234,567"
 static func _with_commas(n: int) -> String:
 	var digits := str(absi(n))
