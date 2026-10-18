@@ -8,7 +8,7 @@
 //   band + bright core) over an optional water colour.
 //
 //   Surface layer (above the fish): random sparkles, plus foam pulsing along
-//   the edge of the pond's swim shape (the pond sets the shape for you).
+//   the edge of the swim shape (off by default; the scripts set the shape).
 //
 // Positions are pond pixels, so the floor's light lines up with the light on
 // the fish (water_wobble.gdshader); keep light_scale / light_speed / pixel
@@ -16,11 +16,14 @@
 shader_type canvas_item;
 
 #include "res://game_parts/FishComposition/shaders/water_light.gdshaderinc"
+#include "res://game_parts/FishComposition/shaders/water_area.gdshaderinc"
 
 // false = floor layer, true = surface layer.
 uniform bool surface_layer = false;
 // Size of one "pixel" of the effect, in pond pixels (1 = native, 2 = chunky).
 uniform float pixel_size : hint_range(1.0, 8.0, 1.0) = 2.0;
+// Draw only inside the swim area (set by the toilet / pond script).
+uniform bool clip_to_area = false;
 
 group_uniforms water;
 // Fill under the light (alpha 0 = keep whatever is behind).
@@ -52,12 +55,9 @@ uniform bool sparkles_only_on_light = true;
 
 group_uniforms foam;
 uniform vec4 foam_color : source_color = vec4(0.85, 0.92, 1.0, 0.5);
-// Width of the foam band at the edge, in pond pixels (0 = no foam, the default).
+// Width of the foam band along the swim area's edge, in pond pixels
+// (0 = no foam, the default).
 uniform float foam_width : hint_range(0.0, 40.0, 0.5) = 0.0;
-// Set by the pond from its swim shape (an ellipse or circle).
-uniform vec2 foam_center = vec2(0.0);
-uniform vec2 foam_radii = vec2(0.0);
-uniform float foam_rotation = 0.0;
 group_uniforms;
 
 varying vec2 world_pos;
@@ -71,17 +71,6 @@ vec4 over(vec4 dst, vec4 src) {
 	float a = src.a + dst.a * (1.0 - src.a);
 	vec3 rgb = (src.rgb * src.a + dst.rgb * dst.a * (1.0 - src.a)) / max(a, 0.0001);
 	return vec4(rgb, a);
-}
-
-// Distance inside the swim ellipse's edge, in pond pixels (negative = outside).
-float edge_distance(vec2 p) {
-	vec2 l = p - foam_center;
-	float c = cos(-foam_rotation);
-	float s = sin(-foam_rotation);
-	l = vec2(l.x * c - l.y * s, l.x * s + l.y * c);
-	vec2 r = max(foam_radii, vec2(0.001));
-	float n = length(l / r);
-	return (1.0 - n) * min(r.x, r.y);
 }
 
 void fragment() {
@@ -108,8 +97,8 @@ void fragment() {
 		if (glint > 0.5) {
 			col = over(col, sparkle_color);
 		}
-		if (foam_width > 0.0 && foam_radii.x > 0.0) {
-			float d = edge_distance(p);
+		if (foam_width > 0.0 && area_shape != 0) {
+			float d = area_distance(p);
 			// Foam band that breathes in and out, as in the pixel-art shader.
 			float breathe = 0.55 + 0.45 * abs(sin(TIME + 1.5707963));
 			float foam = step(0.0, d) * step(d, foam_width * breathe);
@@ -117,6 +106,9 @@ void fragment() {
 				col = over(col, foam_color);
 			}
 		}
+	}
+	if (clip_to_area && area_distance(world_pos) < 0.0) {
+		col.a = 0.0;
 	}
 	COLOR = col;
 }

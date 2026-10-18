@@ -42,6 +42,18 @@ float water_light(vec2 pos, float scale, float t, float width) {
 }
 
 
+// Refraction wobble: how far (in pond pixels, before x amplitude) water bends
+// what's under it at a pond position. Fish move their outline by this,
+// underwater sprites shift their picture by it, so both waver together.
+vec2 water_wobble_offset(vec2 world, float wavelength, float speed, float cross_ripple, float t) {
+	float k = 6.2831853 / wavelength;
+	float tt = t * speed;
+	vec2 offset;
+	offset.x = sin(world.y * k + tt) + cross_ripple * sin((world.x + world.y) * k * 0.7 - tt * 1.3);
+	offset.y = cos(world.x * k * 0.9 + tt * 1.1) + cross_ripple * cos((world.x - world.y) * k * 0.6 + tt * 0.8);
+	return offset / (1.0 + cross_ripple);
+}
+
 // --- Pixel-art helpers (ideas from "2D Pixel Art Water", godotshaders.com,
 // CC0) --------------------------------------------------------------------
 

@@ -66,6 +66,15 @@ unique_name_in_owner = true
 
 [node name="ToiletArea" parent="ToiletViewportContainer/ToiletViewport" unique_id=1143554548 instance=ExtResource("5_88aja")]
 
+[node name="WaterSurface" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
+z_index = 10
+material = ExtResource("25_watersurface")
+offset_left = -320.0
+offset_top = -200.0
+offset_right = 320.0
+offset_bottom = 200.0
+mouse_filter = 2
+
 [node name="PondViewportContainer" type="SubViewportContainer" parent="." unique_id=1075590828]
 unique_name_in_owner = true
 visible = false

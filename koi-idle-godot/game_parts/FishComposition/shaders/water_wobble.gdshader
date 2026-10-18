@@ -48,12 +48,7 @@ void vertex() {
 	// Where this vertex is in the pond (fish nodes aren't rotated or scaled).
 	vec2 world = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
 	world_pos = world;
-	float k = 6.2831853 / wavelength;
-	float t = TIME * speed;
-	vec2 offset;
-	offset.x = sin(world.y * k + t) + cross_ripple * sin((world.x + world.y) * k * 0.7 - t * 1.3);
-	offset.y = cos(world.x * k * 0.9 + t * 1.1) + cross_ripple * cos((world.x - world.y) * k * 0.6 + t * 0.8);
-	VERTEX += offset * amplitude / (1.0 + cross_ripple);
+	VERTEX += water_wobble_offset(world, wavelength, speed, cross_ripple, TIME) * amplitude;
 }
 
 void fragment() {
