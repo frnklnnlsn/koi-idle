@@ -40,9 +40,9 @@ class_name Pond extends SubViewport
 ## (level 3 = 64% of the size).
 @export_range(0.0, 0.3, 0.01) var depth_size_loss: float = 0.12
 ## Colour deep fish fade toward (multiplied over the fish, so it also darkens).
-@export var depth_tint: Color = Color(0.22, 0.27, 0.45)
-## How far toward depth_tint each level goes: 0.25 = level 3 is 75% of the way.
-@export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.25
+@export var depth_tint: Color = Color(0.14, 0.17, 0.32)
+## How far toward depth_tint each level goes: 0.28 = level 3 is 84% of the way.
+@export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.28
 
 # ── Internal ────────────────────────────────────────────────────────────────
 var _display:              FishDisplay
