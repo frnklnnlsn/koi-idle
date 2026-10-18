@@ -188,7 +188,7 @@ icon_alignment = 1
 [node name="View" type="Button" parent="Sidebar/Buttons" unique_id=1871109062]
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-tooltip_text = "Switch view: toilet / pond"
+tooltip_text = "Switch view: toilet / pond  (v)"
 focus_mode = 0
 icon = ExtResource("15_ic_view")
 icon_alignment = 1

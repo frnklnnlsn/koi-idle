@@ -35,6 +35,8 @@ func _ready() -> void:
 	command_line.resized.connect(_fit_above_terminal)
 	# S opens / closes the shop from anywhere.
 	command_line.global_keys["s"] = _on_shop_pressed
+	# V switches between the toilet and the pond, like the View button.
+	command_line.global_keys["v"] = _on_view_pressed
 	# Esc closes the open panel (once nothing is half typed in the terminal).
 	command_line.global_keys["escape"] = close_open_panel
 	for panel in [shop_ui, list_ui, fishing_ui]:

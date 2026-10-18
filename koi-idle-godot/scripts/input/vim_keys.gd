@@ -18,6 +18,7 @@
 #                 open panel, see CommandLine.global_keys)
 #   s             open / close the shop (handled by the command line, works
 #                 everywhere; see CommandLine.global_keys)
+#   v             switch between the toilet and the pond view (same)
 class_name VimKeys
 extends RefCounted
 
