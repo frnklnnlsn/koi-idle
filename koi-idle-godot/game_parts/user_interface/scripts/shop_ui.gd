@@ -62,6 +62,11 @@ var _box_base: Array = []    # selection when the box started
 var _box_chart: Control = null   # chart the box started in, or null = cards
 ## True while the terminal shows the selection summary rather than one fish.
 var _show_summary := false
+
+# Size of a fish card (fish_card.tscn minimum size and margin), for placing
+# the card row before any cards exist.
+const CARD_HEIGHT := 100.0
+const CARD_MARGIN := 10.0
 # --- Lifecycle ---
 
 func _ready() -> void:
@@ -582,24 +587,32 @@ func command_status() -> String:
 
 ## Grows or shrinks the spacer above the cards so their row ends exactly at
 ## the middle of the screen; the charts take the space below.
+## The height is worked out from parts of the layout that don't depend on the
+## spacer itself, so calling this several times in a row (it is, when the shop
+## opens) always gives the same answer.
 func _place_cards() -> void:
 	if not is_visible_in_tree():
 		return
 	await get_tree().process_frame   # let containers settle first
 	if not is_inside_tree():
 		return
-	# Measure a card that isn't enlarged by the cursor; with no cards yet,
-	# where one would sit (they're centred in the row).
-	var bottom: float
+	var row: Control = fish_card_hbox
+	# Where the card frames end, measured from the top of the card row: a real
+	# card that isn't enlarged by the cursor, or where one would sit (cards
+	# are centred in the row) when there are none yet.
+	var card_bottom: float
 	var plain := _cards().filter(func(c): return not c.is_cursor)
 	if not plain.is_empty():
+		var c: Control = plain[0]
 		# The visible frame ends inside the card's margin.
-		bottom = plain[0].global_position.y + plain[0].size.y - plain[0].get_theme_constant("margin_bottom")
+		card_bottom = c.global_position.y - row.global_position.y + c.size.y - c.get_theme_constant("margin_bottom")
 	else:
-		var row: Control = fish_card_hbox.get_parent()
-		bottom = row.global_position.y + (row.size.y + 100.0) / 2.0 - 10.0
+		card_bottom = (row.size.y + CARD_HEIGHT) / 2.0 - CARD_MARGIN
+	# Distance from the spacer's bottom edge to the top of the card row
+	# (containers and separation in between), from the same layout pass.
+	var gap := row.global_position.y - (_top_spacer.global_position.y + _top_spacer.size.y)
 	var middle := get_viewport().get_visible_rect().size.y / 2.0
-	var h := maxf(_top_spacer.custom_minimum_size.y + middle - bottom, 0.0)
+	var h := maxf(middle - _top_spacer.global_position.y - gap - card_bottom, 0.0)
 	if absf(h - _top_spacer.custom_minimum_size.y) > 1.0:
 		_top_spacer.custom_minimum_size.y = h
 

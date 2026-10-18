@@ -26,6 +26,7 @@ var _selected: fish_conf = null
 var _all_view := true
 var _series_fish: Array = []   # series index -> fish (All view clicks)
 var _picked: Array = []   # box-selected fish (UIPalette picked colour)
+var _collection_mode := false   # given a collection (shop / fishing), not just one fish (list view)
 var _caught: Array = []   # fishing: on the line now (accent)
 var _earlier: Array = []  # fishing: caught earlier this session (faded)
 
@@ -152,6 +153,7 @@ func _ready() -> void:
 
 ## The fish shown in the All view (e.g. the shop's current batch).
 func set_fish_collection(fish_array: Array) -> void:
+	_collection_mode = true
 	_fish = fish_array.filter(func(f): return f is fish_conf)
 	_redraw()
 
@@ -209,10 +211,19 @@ func _on_view(i: int) -> void:
 func _redraw() -> void:
 	if not plot:
 		return
-	# No collection given (e.g. the list view): always the single-fish view.
+	# No collection given (e.g. the list view): always the single-fish view,
+	# without tabs. Nothing at all (an empty shop): an empty chart the same
+	# size as the others, so the tabs keep their space but aren't shown.
+	var empty := _collection_mode and _fish.is_empty()
 	if _tab_row:
-		_tab_row.visible = not _fish.is_empty()
-	if _all_view and not _fish.is_empty():
+		_tab_row.visible = not _fish.is_empty() or empty
+		_tab_row.modulate.a = 0.0 if empty else 1.0
+		for b in _tab_buttons:
+			b.disabled = empty
+	if empty:
+		plot.reset()
+		plot.title = "No fish selected"
+	elif _all_view and not _fish.is_empty():
 		var curves := []
 		_series_fish = _fish.duplicate()
 		for f in _fish:
