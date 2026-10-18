@@ -49,6 +49,12 @@ extends Node2D
 @export var remember_position: bool = false
 ## Heading to start with instead of a random one (set before adding the fish).
 var start_heading: Vector2 = Vector2.ZERO
+
+## How bent a new fish's body is, in degrees from head to tail. Each fish
+## picks a random bend around this (most a little less, a few up to 3x more),
+## curving left or right, like a fish caught mid-swim. 0 = dead straight.
+## Measured on swimming fish: median head-to-tail bend about 12 degrees.
+@export_range(0.0, 45.0, 0.5) var spawn_bend: float = 18.0
 const REMEMBER_INTERVAL := 0.5
 var _remember_timer: float = 0.0
 
@@ -146,19 +152,15 @@ func _ready() -> void:
 	else:
 		current_direction = Vector2.RIGHT.rotated(randf() * TAU)
 
-	# Seed the Line2Ds with initial positions, head at start_position and the
-	# tail trailing opposite the heading (so the fish doesn't spend its first
-	# seconds swinging round to face where it's going).
+	# Seed the Line2Ds: head at start_position, the body trailing behind it
+	# in a gentle random curve (see spawn_bend), the way a swimming fish looks,
+	# so it doesn't start wiggly or spend its first seconds straightening.
 	# start_position is a LOCAL offset from the node's position (default 0,0),
 	# matching the old procedural_fish so spawners can just set node.position.
-	var back = -current_direction
-	var side = back.rotated(PI / 2)
 	for i in range(num_points):
-		var offset = i * seg_length
-		var wave_y = sin(offset * wavelength) * amplitude
-		var p = start_position + back * offset + side * wave_y
-		fish_body.add_point(p)
-		skeleton.add_point(p)
+		fish_body.add_point(start_position)
+		skeleton.add_point(start_position)
+	_lay_out_body(seg_length)
 
 	# Sizes at factor 1, for set_size_factor().
 	_base_seg = seg_length
@@ -356,15 +358,29 @@ func _apply_size() -> void:
 	skeleton.width = _base_skeleton_width * size_factor
 
 
-## After an instant resize, lay the body out straight behind the head at the
-## new segment length, so a big fish doesn't spend seconds unfolding.
+## After an instant resize, lay the body out again at the new segment
+## length, so a big fish doesn't spend seconds unfolding.
 func _respace_body() -> void:
-	var seg: float = _body_chain.seg_length
-	var head := fish_body.get_point_position(0)
-	for i in range(1, fish_body.get_point_count()):
-		var p := head - current_direction * seg * i
+	_lay_out_body(_body_chain.seg_length)
+
+
+## Lays the body out behind the head as a smooth arc with a random bend
+## (spawn_bend; straight for fixed-heading card fish).
+func _lay_out_body(seg: float) -> void:
+	var count := fish_body.get_point_count()
+	var bend := 0.0
+	if not _steering.lock_heading and spawn_bend > 0.0:
+		# Half-normal spread: median about 0.67 x spawn_bend, capped at 3x.
+		bend = minf(absf(randfn(0.0, spawn_bend)), spawn_bend * 3.0)
+		bend = deg_to_rad(bend) * (1.0 if randf() < 0.5 else -1.0)
+	var turn := bend / maxf(count - 2, 1)
+	var p := fish_body.get_point_position(0)
+	var dir := -current_direction
+	for i in range(1, count):
+		p += dir * seg
 		fish_body.set_point_position(i, p)
 		skeleton.set_point_position(i, p)
+		dir = dir.rotated(turn)
 
 
 ## Tail wiggle grows like the swim speed, not the full size: a big fish that
