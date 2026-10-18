@@ -24,6 +24,11 @@ class_name fish_conf
 @export var x_start:float
 @export var y_start:float
 
+### pond look
+## How deep the fish swims in the pond: 0 = at the surface, higher = deeper
+## (smaller and darker). -1 = not in the pond yet; the pond picks one at random.
+@export var depth: int = -1
+
 
 ### generated tag/ID, name can be displayed instead
 @export var ID: String

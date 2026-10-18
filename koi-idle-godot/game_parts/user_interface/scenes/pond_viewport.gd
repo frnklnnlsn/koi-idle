@@ -28,6 +28,22 @@ class_name Pond extends SubViewport
 ## Seconds a fish takes to swell to its new size after each growth update.
 @export_range(0.0, 10.0, 0.1) var size_change_seconds: float = 2.0
 
+# ── Depth ───────────────────────────────────────────────────────────────────
+# Each fish swims at a depth picked at random when it first enters the pond
+# (saved with the fish). Level 0 is the surface; each level down the fish is
+# drawn behind the ones above, a bit smaller and a bit darker, so the pond
+# looks deep. The swim area is the same at every depth.
+@export_group("Depth")
+## How many depth levels (1 = everyone at the surface).
+@export_range(1, 10) var depth_levels: int = 4
+## Size lost per level down: 0.12 = each level is 12% smaller than the surface
+## (level 3 = 64% of the size).
+@export_range(0.0, 0.3, 0.01) var depth_size_loss: float = 0.12
+## Colour deep fish fade toward (multiplied over the fish, so it also darkens).
+@export var depth_tint: Color = Color(0.22, 0.27, 0.45)
+## How far toward depth_tint each level goes: 0.25 = level 3 is 75% of the way.
+@export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.25
+
 # ── Internal ────────────────────────────────────────────────────────────────
 var _display:              FishDisplay
 var _pending_display_list: Array = []
@@ -182,8 +198,19 @@ func _update_sizes(seconds: float) -> void:
 
 
 func _size_fish(node: Node, seconds: float) -> void:
-	if node.has_method("set_size_factor") and "fish_res" in node:
-		node.set_size_factor(size_for(node.fish_res), seconds)
+	if not (node.has_method("set_size_factor") and "fish_res" in node) or node.fish_res == null:
+		return
+	var level := depth_of(node.fish_res)
+	node.set_size_factor(size_for(node.fish_res) * maxf(1.0 - depth_size_loss * level, 0.05), seconds)
+	node.z_index = -level   # deeper fish drawn behind
+	node.modulate = Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
+
+
+## The fish's depth level, picking one at random the first time.
+func depth_of(fish: fish_conf) -> int:
+	if fish.depth < 0 or fish.depth >= depth_levels:
+		fish.depth = randi() % depth_levels
+	return fish.depth
 
 
 func _on_fish_caught(fish_list: Array) -> void:
