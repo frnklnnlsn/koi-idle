@@ -9,9 +9,8 @@
 #   Sell Pond fail-safe: sell every pond fish at a discount (click twice to confirm)
 #
 # Below the panel, the shop's three charts show every pond fish. Fish on the
-# line are drawn in the accent colour; fish you kept earlier this session stay
-# on the charts, faded (UIPalette chart_caught_earlier). That history is
-# forgotten when the game closes.
+# line are drawn in the accent colour. Keep or Release clears the highlight:
+# kept fish leave the pond (and the charts), released ones look normal again.
 extends Control
 
 @onready var fishing_status: RichTextLabel = %FishingStatus
@@ -38,7 +37,6 @@ var _waiting     := false   # cast is out, waiting for a bite
 var _just_caught := false   # a fresh catch: choose Keep / Release / Leave On
 var _sell_armed  := false   # Sell Pond clicked once; next click within SELL_CONFIRM_SECONDS sells
 var _sell_arm_id := 0       # so an old timeout can't disarm a newer confirmation
-var _caught_earlier: Array = []   # fish kept this session (they've left the pond)
 
 
 func _ready() -> void:
@@ -116,7 +114,6 @@ func _on_keep_pressed() -> void:
 	var paid := line.value()
 	var count := line.chain.size()
 	PassiveSystems.pay_catch(paid)
-	_caught_earlier.append_array(line.chain)
 	DisplayManager.fish_caught.emit(line.chain.duplicate())   # removes them from the pond
 	line.clear()
 	_just_caught = false
@@ -221,14 +218,13 @@ func _refresh() -> void:
 		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
 
 
-## Pond fish plus this session's earlier catches; the line's fish highlighted.
+## Every pond fish; the line's fish highlighted.
 func _update_charts(pond: Array) -> void:
 	if not is_visible_in_tree():
 		return
-	var fish := pond + _caught_earlier
 	for chart in [_scatter, _growth, _bars]:
-		chart.set_fish_collection(fish)
-		chart.set_caught(line.chain, _caught_earlier)
+		chart.set_fish_collection(pond)
+		chart.set_caught(line.chain, [])
 
 
 func _set_status(bbcode: String) -> void:
