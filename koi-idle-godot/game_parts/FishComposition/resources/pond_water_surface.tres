@@ -13,3 +13,4 @@ shader_parameter/rippling = 4.0
 shader_parameter/light_scale = 90.0
 shader_parameter/light_speed = 0.5
 shader_parameter/light_width = 0.14
+shader_parameter/foam_width = 0.0

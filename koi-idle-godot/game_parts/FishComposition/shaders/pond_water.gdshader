@@ -52,8 +52,8 @@ uniform bool sparkles_only_on_light = true;
 
 group_uniforms foam;
 uniform vec4 foam_color : source_color = vec4(0.85, 0.92, 1.0, 0.5);
-// Width of the foam band at the edge, in pond pixels (0 = no foam).
-uniform float foam_width : hint_range(0.0, 40.0, 0.5) = 6.0;
+// Width of the foam band at the edge, in pond pixels (0 = no foam, the default).
+uniform float foam_width : hint_range(0.0, 40.0, 0.5) = 0.0;
 // Set by the pond from its swim shape (an ellipse or circle).
 uniform vec2 foam_center = vec2(0.0);
 uniform vec2 foam_radii = vec2(0.0);
