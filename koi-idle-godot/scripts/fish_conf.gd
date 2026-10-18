@@ -28,6 +28,11 @@ class_name fish_conf
 ## How deep the fish swims in the pond: 0 = at the surface, higher = deeper
 ## (smaller and darker). -1 = not in the pond yet; the pond picks one at random.
 @export var depth: int = -1
+## Where the fish was swimming (its head, in its toilet's or pond's fish
+## container) and which way it faced, so it reappears there on the next start.
+## A zero heading = no saved place (new fish, or just flushed into the pond).
+@export var swim_position: Vector2 = Vector2.ZERO
+@export var swim_heading: Vector2 = Vector2.ZERO
 
 
 ### generated tag/ID, name can be displayed instead

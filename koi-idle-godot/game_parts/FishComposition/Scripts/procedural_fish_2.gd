@@ -42,6 +42,16 @@ extends Node2D
 @export var fast_speed:      float = 0.3
 @export var very_slow_speed: float = 0.05
 
+# --- Saved place ---
+## Write where the fish is (fish_res.swim_position / swim_heading) every
+## REMEMBER_INTERVAL seconds, so it reappears there next start. The toilet
+## and pond turn this on (FishDisplay); shop-card fish leave it off.
+@export var remember_position: bool = false
+## Heading to start with instead of a random one (set before adding the fish).
+var start_heading: Vector2 = Vector2.ZERO
+const REMEMBER_INTERVAL := 0.5
+var _remember_timer: float = 0.0
+
 # --- Live size (pond growth) ---
 ## How much a bigger fish speeds up: speed × size ^ this. 0 = same speed at
 ## any size, 0.5 = a 4× fish swims 2× faster, 1 = in proportion to size.
@@ -131,6 +141,8 @@ func _ready() -> void:
 	# Pick the starting heading first so the body can be laid out behind it.
 	if _steering.lock_heading:
 		current_direction = _steering.locked_direction.normalized()
+	elif start_heading != Vector2.ZERO:
+		current_direction = start_heading.normalized()
 	else:
 		current_direction = Vector2.RIGHT.rotated(randf() * TAU)
 
@@ -193,6 +205,11 @@ func _process(delta: float) -> void:
 	if size_factor != _target_size:
 		size_factor = move_toward(size_factor, _target_size, _size_speed * delta)
 		_apply_size()
+	if remember_position and fish_res:
+		_remember_timer += delta
+		if _remember_timer >= REMEMBER_INTERVAL:
+			_remember_timer = 0.0
+			_remember_place()
 
 	var FS = FishState
 	match _state_machine.current_state:
@@ -309,6 +326,15 @@ func set_state_wave_params(state: int, amp: float, freq: float, start: float, ph
 
 func get_state_wave_params(state: int) -> Dictionary:
 	return _state_machine.get_wave_params(state)
+
+
+## Stores where the head is (in the parent's space) and the heading on the
+## fish's data; the next save writes it to disk.
+func _remember_place() -> void:
+	if fish_body.get_point_count() == 0:
+		return
+	fish_res.swim_position = position + fish_body.get_point_position(0)
+	fish_res.swim_heading = current_direction
 
 
 ## Grow or shrink the fish to `factor` × its normal size, easing there over

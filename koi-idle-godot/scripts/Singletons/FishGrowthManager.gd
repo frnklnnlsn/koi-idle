@@ -47,6 +47,8 @@ func _process(delta: float) -> void:
 static func enter_pond(fish: fish_conf) -> void:
 	fish.y_start = fish.mass
 	fish.age = 0.0
+	# Its toilet position means nothing in the pond: it arrives by the pipe.
+	fish.swim_heading = Vector2.ZERO
 	# A curve needs somewhere to grow to. Old saves can hold fish whose
 	# carrying capacity rounded down to (or below) their base mass.
 	if fish.carrying_capacity <= fish.y_start:
