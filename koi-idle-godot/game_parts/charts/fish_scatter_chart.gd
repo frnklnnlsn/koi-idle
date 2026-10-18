@@ -72,7 +72,10 @@ func _ready() -> void:
 
 
 func set_fish_collection(fish_array: Array) -> void:
-	_fish = fish_array.filter(func(f): return f is fish_conf)
+	var fish := fish_array.filter(func(f): return f is fish_conf)
+	if fish == _fish and is_node_ready():
+		return   # same fish as before (e.g. a growth tick): nothing to redraw
+	_fish = fish
 	_redraw()
 
 
@@ -96,7 +99,7 @@ func _on_mode(i: int) -> void:
 	_redraw()
 
 
-func _redraw() -> void:
+func _redraw_now() -> void:
 	if not plot:
 		return
 	var mode: Array = MODES[_mode]

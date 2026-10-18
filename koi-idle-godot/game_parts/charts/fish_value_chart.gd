@@ -81,6 +81,6 @@ func clear_fish_value() -> void:
 	_redraw()
 
 
-func _redraw() -> void:
+func _redraw_now() -> void:
 	if plot:
 		draw(plot, {"rank": _rank, "fish_value": _fish_value})

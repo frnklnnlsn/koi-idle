@@ -16,7 +16,9 @@ extends KoiChart
 signal fish_clicked(fish: fish_conf)
 
 const _DEFAULT := {"base": 5.0, "growth_rate": 0.5, "carrying_capacity": 100.0, "mid_point": 12.0, "hours": -1.0, "mass": -1.0}
-const STEPS := 100
+## Points per curve. Hovering searches every point of every curve, so with
+## many fish fewer points = snappier hover (50 still draws smooth S-curves).
+const STEPS := 50
 ## The All view stops here even if a slow grower takes longer.
 const MAX_HOURS := 96.0
 
@@ -153,8 +155,11 @@ func _ready() -> void:
 
 ## The fish shown in the All view (e.g. the shop's current batch).
 func set_fish_collection(fish_array: Array) -> void:
+	var fish := fish_array.filter(func(f): return f is fish_conf)
+	if fish == _fish and _collection_mode and is_node_ready():
+		return   # same fish as before (e.g. a growth tick): nothing to redraw
 	_collection_mode = true
-	_fish = fish_array.filter(func(f): return f is fish_conf)
+	_fish = fish
 	_redraw()
 
 
@@ -208,7 +213,7 @@ func _on_view(i: int) -> void:
 	_redraw()
 
 
-func _redraw() -> void:
+func _redraw_now() -> void:
 	if not plot:
 		return
 	# No collection given (e.g. the list view): always the single-fish view,

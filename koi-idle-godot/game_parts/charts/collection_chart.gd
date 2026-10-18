@@ -91,7 +91,10 @@ func _ready() -> void:
 
 
 func set_fish_collection(fish_array: Array) -> void:
-	_fish = fish_array.filter(func(f): return f is fish_conf)
+	var fish := fish_array.filter(func(f): return f is fish_conf)
+	if fish == _fish and is_node_ready():
+		return   # same fish as before (e.g. a growth tick): nothing to redraw
+	_fish = fish
 	_sort()
 	_redraw()
 
@@ -169,7 +172,7 @@ func _sort() -> void:
 	_sorted.sort_custom(func(a, b): return stat_value(a, _stat) < stat_value(b, _stat))
 
 
-func _redraw() -> void:
+func _redraw_now() -> void:
 	if not plot:
 		return
 	var values := []

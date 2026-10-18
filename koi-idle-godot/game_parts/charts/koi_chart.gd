@@ -15,6 +15,29 @@ extends MarginContainer
 
 var _tab_buttons: Array[Button] = []
 var _tab_row: HBoxContainer
+var _redraw_queued := false
+
+
+## Asks for the chart to be rebuilt. Rebuilding a TauPlot is expensive and
+## leaves it blank for a frame, so however many changes arrive in one frame
+## (new fish, highlight, selection...), the chart is rebuilt once, at the end
+## of the frame.
+func _redraw() -> void:
+	if _redraw_queued:
+		return
+	_redraw_queued = true
+	_flush_redraw.call_deferred()
+
+
+func _flush_redraw() -> void:
+	_redraw_queued = false
+	if is_inside_tree():
+		_redraw_now()
+
+
+## Builds the chart from its current data. Each chart implements this.
+func _redraw_now() -> void:
+	pass
 
 
 ## A small row of toggle buttons above the chart, right-aligned, for charts
