@@ -18,6 +18,9 @@ extends Control
 @onready var _trash_light: TextureRect = %TrashLight
 ## Rank picker on the ShopBar (rank_meter.gd): bars sized in its Inspector.
 @onready var _rank_meter: RankMeter = %RankMeter
+## See-through layer over the toilet / pond while the shop is open. Change how
+## dark it is with its Color (the alpha slider) in the Inspector.
+@onready var _shop_backdrop: ColorRect = %ShopBackdrop
 
 ## Light colours (keep / trash / off) come from UIPalette.
 
@@ -69,6 +72,7 @@ func close_open_panel() -> bool:
 
 func _on_shop_visibility() -> void:
 	_shop_bar.visible = shop_ui.visible
+	_shop_backdrop.visible = shop_ui.visible
 	_fit_above_terminal()
 
 
