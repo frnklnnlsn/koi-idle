@@ -68,7 +68,7 @@ func begin_entry(direction: Vector2, duration: float) -> void:
 
 ## Returns {"direction": Vector2, "new_head_global": Vector2}
 ## seg_length and speed are needed to compute how far the head moves this frame.
-func update(delta: float, head_global: Vector2, seg_length: int,
+func update(delta: float, head_global: Vector2, seg_length: float,
 			speed: float, time: float) -> Dictionary:
 	_wander_timer += delta
 
@@ -88,7 +88,7 @@ func update(delta: float, head_global: Vector2, seg_length: int,
 
 # ------------------------------------------------------------------ Wander path
 
-func _update_wander(head_global: Vector2, seg_length: int,
+func _update_wander(head_global: Vector2, seg_length: float,
 					speed: float, time: float) -> Dictionary:
 	# Update wander angle periodically
 	if _wander_timer > 1.0:
@@ -141,7 +141,7 @@ func _update_wander(head_global: Vector2, seg_length: int,
 
 # ------------------------------------------------------------------ Entry path
 
-func _update_entry(head_global: Vector2, seg_length: int, speed: float) -> Dictionary:
+func _update_entry(head_global: Vector2, seg_length: float, speed: float) -> Dictionary:
 	_entry_timer += get_process_delta_time()
 	var t = clamp(_entry_timer / _entry_duration, 0.0, 1.0)
 	if t >= 1.0:

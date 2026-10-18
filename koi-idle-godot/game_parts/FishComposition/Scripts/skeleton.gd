@@ -77,9 +77,11 @@ func _draw():
 	if parent and "fish_res" in parent and parent.fish_res:
 		ellipse_color = parent.fish_res.fin_color
 	
-	draw_ellipses_at_index(fin_index1, ellipse_offset1)
+	# Fins grow with the fish (procedural_fish_2 size_factor).
+	var grow: float = parent.size_factor if parent and "size_factor" in parent else 1.0
+	draw_ellipses_at_index(fin_index1, ellipse_offset1 * grow, grow)
 
-func draw_ellipses_at_index(index: int, ellipse_offset):
+func draw_ellipses_at_index(index: int, ellipse_offset, grow: float = 1.0):
 	if index < get_point_count() - 1 and ellipse_offset != null:
 		var pos = get_point_position(index)
 		var next_pos = get_point_position(index + 1)
@@ -93,17 +95,17 @@ func draw_ellipses_at_index(index: int, ellipse_offset):
 		var angle1 = dir.angle() + PI / 2 + rotation_offset
 		var angle2 = dir.angle() + PI / 1 + rotation_offset
 		
-		draw_rotated_ellipse(ellipse1_pos, angle2 + PI)
-		draw_rotated_ellipse(ellipse2_pos, angle1)
+		draw_rotated_ellipse(ellipse1_pos, angle2 + PI, grow)
+		draw_rotated_ellipse(ellipse2_pos, angle1, grow)
 
-func draw_rotated_ellipse(center: Vector2, angle: float):
+func draw_rotated_ellipse(center: Vector2, angle: float, grow: float = 1.0):
 	var num_points = 32
 	var points = PackedVector2Array()
 	
 	for i in range(num_points):
 		var angle_offset = TAU * i / num_points
-		var x = ellipse_size.x * cos(angle_offset)
-		var y = ellipse_size.y * sin(angle_offset)
+		var x = ellipse_size.x * grow * cos(angle_offset)
+		var y = ellipse_size.y * grow * sin(angle_offset)
 		var rotated_x = x * cos(angle) - y * sin(angle)
 		var rotated_y = x * sin(angle) + y * cos(angle)
 		points.append(center + Vector2(rotated_x, rotated_y))

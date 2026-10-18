@@ -9,10 +9,10 @@ var _fish_body: Line2D
 var _skeleton:  Line2D
 
 var num_points: int = 10
-var seg_length: int = 15  # read by coordinator: _body_chain.seg_length
+var seg_length: float = 15.0  # read by coordinator; changed live when the fish grows
 
 
-func init(fish_body: Line2D, skeleton: Line2D, points: int, segment_length: int) -> void:
+func init(fish_body: Line2D, skeleton: Line2D, points: int, segment_length: float) -> void:
 	_fish_body  = fish_body
 	_skeleton   = skeleton
 	num_points  = points

@@ -42,6 +42,19 @@ extends Node2D
 @export var fast_speed:      float = 0.3
 @export var very_slow_speed: float = 0.05
 
+# --- Live size (pond growth) ---
+## How much a bigger fish speeds up: speed × size ^ this. 0 = same speed at
+## any size, 0.5 = a 4× fish swims 2× faster, 1 = in proportion to size.
+@export_range(0.0, 1.0, 0.05) var speed_size_exponent: float = 0.5
+## Current size relative to the fish's normal size (1 = as built). Change it
+## with set_size_factor(); the pond sets it from how much the fish has grown.
+var size_factor: float = 1.0
+var _target_size: float = 1.0
+var _size_speed: float = 1.0   # size units per second while easing to the target
+var _base_seg: float = 0.0
+var _base_body_width: float = 0.0
+var _base_skeleton_width: float = 0.0
+
 
 # ------------------------------------------------------------------ State enum
 # Kept here so procedural_skeleton can still do `koi.FishState.SLOW_SWIM` etc.
@@ -135,6 +148,11 @@ func _ready() -> void:
 		fish_body.add_point(p)
 		skeleton.add_point(p)
 
+	# Sizes at factor 1, for set_size_factor().
+	_base_seg = seg_length
+	_base_body_width = fish_body.width
+	_base_skeleton_width = skeleton.width
+
 	# Init components
 	_state_machine.init(self)
 	_state_machine.apply_scale(fish_scale)
@@ -143,6 +161,10 @@ func _ready() -> void:
 	_steering.swim_area = swim_area
 	_body_chain.init(fish_body, skeleton, num_points, seg_length)
 	_eating.init(fish_body, skeleton, _state_machine, seg_length)
+	# Sized before entering the tree (set_size_factor): apply it now.
+	if size_factor != 1.0:
+		_apply_size()
+		_respace_body()
 
 	# Wire signals
 	_state_machine.state_changed.connect(_on_state_changed)
@@ -168,6 +190,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	time += delta
+	if size_factor != _target_size:
+		size_factor = move_toward(size_factor, _target_size, _size_speed * delta)
+		_apply_size()
 
 	var FS = FishState
 	match _state_machine.current_state:
@@ -202,12 +227,12 @@ func _process(delta: float) -> void:
 func _swim(delta: float, speed: float) -> void:
 	current_speed = speed
 	var head_global = to_global(fish_body.get_point_position(0))
-	var result      = _steering.update(delta, head_global, _body_chain.seg_length, speed, time)
+	var result      = _steering.update(delta, head_global, _step_length(), speed, time)
 	current_direction = result["direction"]
 	_body_chain.update(
 		to_local(result["new_head_global"]),
 		speed,
-		wave_amplitude, wave_frequency, wave_start_point, wave_phase_step,
+		wave_amplitude * _wave_scale(), wave_frequency, wave_start_point, wave_phase_step,
 		time
 	)
 
@@ -220,7 +245,7 @@ func _eat(delta: float) -> void:
 	# Phase 1 — fish is still moving; steering and body_chain handle movement
 	if not _eating.is_stopped and current_speed > _eating.eating_stop_threshold:
 		var head_global = to_global(fish_body.get_point_position(0))
-		var result      = _steering.update(delta, head_global, _body_chain.seg_length, current_speed, time)
+		var result      = _steering.update(delta, head_global, _step_length(), current_speed, time)
 		current_direction = result["direction"]
 		_body_chain.update(
 			to_local(result["new_head_global"]),
@@ -284,6 +309,48 @@ func set_state_wave_params(state: int, amp: float, freq: float, start: float, ph
 
 func get_state_wave_params(state: int) -> Dictionary:
 	return _state_machine.get_wave_params(state)
+
+
+## Grow or shrink the fish to `factor` × its normal size, easing there over
+## `seconds` (0 = at once). Swim area and behaviour are unchanged.
+func set_size_factor(factor: float, seconds: float = 1.0) -> void:
+	_target_size = maxf(factor, 0.01)
+	if seconds <= 0.0 or not is_node_ready():
+		size_factor = _target_size
+		if is_node_ready():
+			_apply_size()
+			_respace_body()
+	else:
+		_size_speed = maxf(absf(_target_size - size_factor) / seconds, 0.0001)
+
+
+func _apply_size() -> void:
+	_body_chain.seg_length = _base_seg * size_factor
+	fish_body.width = _base_body_width * size_factor
+	skeleton.width = _base_skeleton_width * size_factor
+
+
+## After an instant resize, lay the body out straight behind the head at the
+## new segment length, so a big fish doesn't spend seconds unfolding.
+func _respace_body() -> void:
+	var seg: float = _body_chain.seg_length
+	var head := fish_body.get_point_position(0)
+	for i in range(1, fish_body.get_point_count()):
+		var p := head - current_direction * seg * i
+		fish_body.set_point_position(i, p)
+		skeleton.set_point_position(i, p)
+
+
+## Tail wiggle grows like the swim speed, not the full size: a big fish that
+## moves less than its body length per beat would otherwise curl up.
+func _wave_scale() -> float:
+	return pow(size_factor, speed_size_exponent)
+
+
+## How far the head moves per unit of speed: the normal segment length, sped
+## up a little for bigger fish (speed_size_exponent).
+func _step_length() -> float:
+	return _base_seg * pow(size_factor, speed_size_exponent)
 
 
 # ------------------------------------------------------------------ Easing helpers

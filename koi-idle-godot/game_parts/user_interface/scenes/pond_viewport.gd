@@ -14,6 +14,20 @@ class_name Pond extends SubViewport
 ## Seconds between each fish emerging — spread them out so it looks natural
 @export var spawn_stagger_sec:   float  = 0.35
 
+# ── Growth → size ───────────────────────────────────────────────────────────
+# Every fish enters the pond at the same size, whatever its mass. As it grows
+# it gets bigger: growth = current mass ÷ mass when it entered the pond, and
+# size = growth ^ size_exponent, capped at max_size_factor. The swim area
+# stays the same for every size.
+@export_group("Growth size")
+## 0.333 = like real fish (mass grows with length³): 8× the mass = 2× as long.
+## 0.5 = stronger (4× the mass = 2× as long), 0 = no size change.
+@export_range(0.0, 1.0, 0.001) var size_exponent: float = 0.333
+## Biggest a fish can get, relative to its starting size.
+@export_range(1.0, 10.0, 0.1) var max_size_factor: float = 4.0
+## Seconds a fish takes to swell to its new size after each growth update.
+@export_range(0.0, 10.0, 0.1) var size_change_seconds: float = 2.0
+
 # ── Internal ────────────────────────────────────────────────────────────────
 var _display:              FishDisplay
 var _pending_display_list: Array = []
@@ -38,6 +52,7 @@ func _ready() -> void:
 	DisplayManager.display_fish_pond.connect(Display)
 	DisplayManager.fish_caught.connect(_on_fish_caught)
 	DisplayManager.flush_completed.connect(_on_flush_completed)
+	FishGrowthManager.growth_updated.connect(_update_sizes.bind(size_change_seconds))
 
 	var factory = FishFactory.new()
 	_display    = FishDisplay.new(factory)
@@ -47,6 +62,7 @@ func _ready() -> void:
 		push_warning("No save data found.")
 		return
 	_display.display_all(save_data.list_of_retired_fish, fish_container_pond)
+	_update_sizes(0.0)
 
 
 func _process(delta: float) -> void:
@@ -99,6 +115,7 @@ func _spawn_one(fish_data) -> void:
 	var node = fish_container_pond.get_node_or_null(fish_data.ID)
 	if node == null:
 		return
+	_size_fish(node, 0.0)
 
 	# Position it at the pipe channel (convert world → SubViewport local)
 	var spawn_world = _next_spawn_position()
@@ -147,6 +164,26 @@ func _spawn_filtered(list: Array) -> void:
 	# Queue them — _process will drip them out one per stagger interval
 	_spawn_queue.append_array(new_fish)
 	_spawn_timer = 0.0   # fire the first one immediately
+
+
+# ── Growth → size ───────────────────────────────────────────────────────────
+
+## How big a fish should look: 1 on entering the pond, more as it grows.
+func size_for(fish: fish_conf) -> float:
+	if fish == null or fish.y_start <= 0.0:
+		return 1.0
+	var growth := maxf(fish.mass / fish.y_start, 1.0)
+	return clampf(pow(growth, size_exponent), 1.0, max_size_factor)
+
+
+func _update_sizes(seconds: float) -> void:
+	for node in fish_container_pond.get_children():
+		_size_fish(node, seconds)
+
+
+func _size_fish(node: Node, seconds: float) -> void:
+	if node.has_method("set_size_factor") and "fish_res" in node:
+		node.set_size_factor(size_for(node.fish_res), seconds)
 
 
 func _on_fish_caught(fish_list: Array) -> void:
