@@ -23,6 +23,10 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
+[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/water_light_layer.gdshader" id="24_waterlight"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_waterlight"]
+shader = ExtResource("24_waterlight")
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -83,6 +87,15 @@ render_target_update_mode = 0
 script = ExtResource("5_e8jla")
 
 [node name="Camera2D" type="Camera2D" parent="PondViewportContainer/PondViewport" unique_id=337218323]
+
+[node name="WaterLight" type="ColorRect" parent="PondViewportContainer/PondViewport"]
+z_index = -10
+material = SubResource("ShaderMaterial_waterlight")
+offset_left = -450.0
+offset_top = -300.0
+offset_right = 450.0
+offset_bottom = 300.0
+mouse_filter = 2
 
 [node name="FishDisplay" type="Node" parent="PondViewportContainer/PondViewport" unique_id=751578376]
 script = ExtResource("7_k1q3n")
