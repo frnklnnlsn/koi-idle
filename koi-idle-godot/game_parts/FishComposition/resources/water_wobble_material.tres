@@ -1,6 +1,6 @@
-[gd_resource type="ShaderMaterial" format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://b6wr12tal6t0e"]
 
-[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/water_wobble.gdshader" id="1_wobble"]
+[ext_resource type="Shader" uid="uid://d14k2aij85hvt" path="res://game_parts/FishComposition/shaders/water_wobble.gdshader" id="1_wobble"]
 [ext_resource type="Texture2D" path="res://game_parts/FishComposition/resources/water_noise.tres" id="2_noise"]
 
 [resource]

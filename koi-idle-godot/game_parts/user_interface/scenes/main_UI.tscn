@@ -12,19 +12,19 @@
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/command_line.tscn" id="12_cmdl"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/menu.png" id="13_ic_menu"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/flush.png" id="14_ic_flush"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/view.png" id="15_ic_view"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/list.png" id="16_ic_list"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/shop.png" id="17_ic_shop"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/fishing.png" id="18_ic_fish"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/buy.png" id="19_ic_buy"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/buy_max.png" id="20_ic_buymax"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
-[ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
-[ext_resource type="Script" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
-[ext_resource type="Material" path="res://game_parts/FishComposition/resources/pond_water_floor.tres" id="24_waterfloor"]
-[ext_resource type="Material" path="res://game_parts/FishComposition/resources/pond_water_surface.tres" id="25_watersurface"]
+[ext_resource type="Texture2D" uid="uid://v5p8opmgscx5" path="res://art/ui_icons/menu.png" id="13_ic_menu"]
+[ext_resource type="Texture2D" uid="uid://20ftdpnkhqtm" path="res://art/ui_icons/flush.png" id="14_ic_flush"]
+[ext_resource type="Texture2D" uid="uid://dkgc0laeiyoc4" path="res://art/ui_icons/view.png" id="15_ic_view"]
+[ext_resource type="Texture2D" uid="uid://bhci321euy7ga" path="res://art/ui_icons/list.png" id="16_ic_list"]
+[ext_resource type="Texture2D" uid="uid://bwsojffbgyh0t" path="res://art/ui_icons/shop.png" id="17_ic_shop"]
+[ext_resource type="Texture2D" uid="uid://bi4nefglmml1i" path="res://art/ui_icons/fishing.png" id="18_ic_fish"]
+[ext_resource type="Texture2D" uid="uid://bwjk3pf3qogst" path="res://art/ui_icons/buy.png" id="19_ic_buy"]
+[ext_resource type="Texture2D" uid="uid://cv1rq68ky0fc3" path="res://art/ui_icons/buy_max.png" id="20_ic_buymax"]
+[ext_resource type="Texture2D" uid="uid://bjpnco36j76f0" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
+[ext_resource type="Texture2D" uid="uid://b1snre3pmkd2e" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
+[ext_resource type="Script" uid="uid://beg04w0lyvae0" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
+[ext_resource type="Material" uid="uid://chr2uba2n6oeh" path="res://game_parts/FishComposition/resources/pond_water_floor.tres" id="24_waterfloor"]
+[ext_resource type="Material" uid="uid://cl360n1m31cq2" path="res://game_parts/FishComposition/resources/pond_water_surface.tres" id="25_watersurface"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -86,7 +86,7 @@ script = ExtResource("5_e8jla")
 
 [node name="Camera2D" type="Camera2D" parent="PondViewportContainer/PondViewport" unique_id=337218323]
 
-[node name="WaterFloor" type="ColorRect" parent="PondViewportContainer/PondViewport"]
+[node name="WaterFloor" type="ColorRect" parent="PondViewportContainer/PondViewport" unique_id=1142705647]
 z_index = -10
 material = ExtResource("24_waterfloor")
 offset_left = -450.0
@@ -95,7 +95,7 @@ offset_right = 450.0
 offset_bottom = 300.0
 mouse_filter = 2
 
-[node name="WaterSurface" type="ColorRect" parent="PondViewportContainer/PondViewport"]
+[node name="WaterSurface" type="ColorRect" parent="PondViewportContainer/PondViewport" unique_id=221497263]
 z_index = 10
 material = ExtResource("25_watersurface")
 offset_left = -450.0
@@ -117,7 +117,7 @@ unique_name_in_owner = true
 
 [node name="PondArea" parent="PondViewportContainer/PondViewport" unique_id=749628175 instance=ExtResource("8_xc818")]
 
-[node name="ShopBackdrop" type="ColorRect" parent="."]
+[node name="ShopBackdrop" type="ColorRect" parent="." unique_id=2114121382]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -151,8 +151,8 @@ alignment = 1
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
 theme_type_variation = &"MoneyBox"
+theme_override_font_sizes/font_size = 20
 text = "$ 0"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -176,7 +176,7 @@ visible = false
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Sidebar" type="PanelContainer" parent="."]
+[node name="Sidebar" type="PanelContainer" parent="." unique_id=1841153259]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 0)
 layout_mode = 1
@@ -185,7 +185,7 @@ anchor_bottom = 1.0
 offset_right = 34.0
 grow_vertical = 2
 
-[node name="Buttons" type="VBoxContainer" parent="Sidebar"]
+[node name="Buttons" type="VBoxContainer" parent="Sidebar" unique_id=2007811705]
 layout_mode = 2
 theme_override_constants/separation = 4
 
@@ -237,7 +237,7 @@ focus_mode = 0
 icon = ExtResource("18_ic_fish")
 icon_alignment = 1
 
-[node name="ShopBar" type="PanelContainer" parent="."]
+[node name="ShopBar" type="PanelContainer" parent="." unique_id=1971783586]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(34, 0)
@@ -250,11 +250,11 @@ offset_left = -34.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="Items" type="VBoxContainer" parent="ShopBar"]
+[node name="Items" type="VBoxContainer" parent="ShopBar" unique_id=651414450]
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="BuyButton" type="Button" parent="ShopBar/Items"]
+[node name="BuyButton" type="Button" parent="ShopBar/Items" unique_id=1728275815]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
@@ -263,7 +263,7 @@ focus_mode = 0
 icon = ExtResource("19_ic_buy")
 icon_alignment = 1
 
-[node name="BuyMaxButton" type="Button" parent="ShopBar/Items"]
+[node name="BuyMaxButton" type="Button" parent="ShopBar/Items" unique_id=1195668233]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
@@ -272,18 +272,18 @@ focus_mode = 0
 icon = ExtResource("20_ic_buymax")
 icon_alignment = 1
 
-[node name="RankMeter" type="Control" parent="ShopBar/Items"]
+[node name="RankMeter" type="Control" parent="ShopBar/Items" unique_id=204349139]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Rank"
 script = ExtResource("23_rank_meter")
 
-[node name="TopGap" type="Control" parent="ShopBar/Items"]
+[node name="TopGap" type="Control" parent="ShopBar/Items" unique_id=24156381]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="KeepLight" type="TextureRect" parent="ShopBar/Items"]
+[node name="KeepLight" type="TextureRect" parent="ShopBar/Items" unique_id=143135009]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
@@ -291,7 +291,7 @@ tooltip_text = "Lights up while a card is dragged up to keep it"
 texture = ExtResource("21_ic_keep")
 stretch_mode = 3
 
-[node name="TrashLight" type="TextureRect" parent="ShopBar/Items"]
+[node name="TrashLight" type="TextureRect" parent="ShopBar/Items" unique_id=911835025]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
@@ -299,12 +299,12 @@ tooltip_text = "Lights up while a card is dragged down to recycle it"
 texture = ExtResource("22_ic_trash")
 stretch_mode = 3
 
-[node name="BottomGap" type="Control" parent="ShopBar/Items"]
+[node name="BottomGap" type="Control" parent="ShopBar/Items" unique_id=1853061906]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="CommandLine" parent="." instance=ExtResource("12_cmdl")]
+[node name="CommandLine" parent="." unique_id=1830276273 instance=ExtResource("12_cmdl")]
 unique_name_in_owner = true
 layout_mode = 1
 
