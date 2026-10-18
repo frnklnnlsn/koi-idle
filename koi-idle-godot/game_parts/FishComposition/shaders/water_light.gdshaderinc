@@ -41,9 +41,39 @@ float water_light(vec2 pos, float scale, float t, float width) {
 	return l * l;
 }
 
-// The same with soft or hard edges: hardness 0 = soft glow, 1 = crisp
-// pixel-art lines.
-float water_light_shaped(vec2 pos, float scale, float t, float width, float hardness) {
-	float l = water_light(pos, scale, t, width);
-	return mix(l, step(0.35, l), hardness);
+
+// --- Pixel-art helpers (ideas from "2D Pixel Art Water", godotshaders.com,
+// CC0) --------------------------------------------------------------------
+
+// Snaps a pond position to a grid of `pixel`-sized squares (centre of the
+// square), so light and sparkles come out as solid pixel blocks.
+vec2 water_snap(vec2 pos, float pixel) {
+	float s = max(pixel, 0.001);
+	return (floor(pos / s) + 0.5) * s;
+}
+
+// Sideways shift (pixels) that wobbles a pattern, from a scrolling seamless
+// noise texture: the "rippling" of the pixel-art water shader.
+// noise_px = how many pond pixels one noise tile covers.
+vec2 water_ripple(sampler2D noise_tex, vec2 pos, float noise_px, float amount, float t) {
+	vec2 n = texture(noise_tex, pos / noise_px + vec2(t * 0.03, t * 0.02)).rg;
+	return (n - 0.5) * 2.0 * amount;
+}
+
+// Two-tone banding of a 0..1 light value: 0 = none, 1 = light band,
+// 2 = bright core.
+float water_band(float l, float band_at, float core_at) {
+	return step(band_at, l) + step(core_at, l);
+}
+
+// Random surface sparkles at a pond position: two noise samples scrolling
+// opposite ways, overlay-blended and taken away from a still sample; where
+// the difference is high, a glint. threshold: higher = fewer sparkles.
+float water_sparkle(sampler2D noise_tex, vec2 pos, float noise_px, float scale, float t, float threshold) {
+	vec2 uv = pos / noise_px;
+	vec4 a = texture(noise_tex, uv * scale + t * 0.2);
+	vec4 b = texture(noise_tex, uv * scale - t * 0.2);
+	vec4 overlay = mix(1.0 - 2.0 * (1.0 - a) * (1.0 - b), 2.0 * a * b, step(a, vec4(0.5)));
+	vec4 still = texture(noise_tex, uv);
+	return step(threshold, (still - overlay).r);
 }

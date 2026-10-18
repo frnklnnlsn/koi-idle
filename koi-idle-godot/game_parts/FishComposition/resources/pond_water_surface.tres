@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/pond_water.gdshader" id="1_water"]
+[ext_resource type="Texture2D" path="res://game_parts/FishComposition/resources/water_noise.tres" id="2_noise"]
+
+[resource]
+shader = ExtResource("1_water")
+shader_parameter/surface_layer = true
+shader_parameter/pixel_size = 2.0
+shader_parameter/noise = ExtResource("2_noise")
+shader_parameter/noise_px = 256.0
+shader_parameter/rippling = 4.0
+shader_parameter/light_scale = 90.0
+shader_parameter/light_speed = 0.5
+shader_parameter/light_width = 0.14

@@ -62,6 +62,7 @@ func _ready() -> void:
 	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
 	if swim_shape:
 		_swim_area = swim_shape.make_swim_area()
+		_show_foam(_swim_area)
 		fish_container_pond.child_entered_tree.connect(func(n):
 			if "swim_area" in n:
 				n.swim_area = _swim_area)
@@ -79,6 +80,25 @@ func _ready() -> void:
 		return
 	_display.display_all(save_data.list_of_retired_fish, fish_container_pond)
 	_update_sizes(0.0)
+
+
+## Tells the WaterSurface layer (pond_water.gdshader) where the swim area's
+## edge is, so its foam runs along it. Circles and ellipses only; other
+## shapes get no foam.
+func _show_foam(area: SwimArea) -> void:
+	var surface := get_node_or_null("WaterSurface") as CanvasItem
+	var mat := surface.material as ShaderMaterial if surface else null
+	if mat == null:
+		return
+	var radii := Vector2.ZERO
+	match area.shape:
+		SwimArea.Shape.CIRCLE:
+			radii = Vector2(area.size.x, area.size.x)
+		SwimArea.Shape.ELLIPSE:
+			radii = area.size
+	mat.set_shader_parameter("foam_center", area.center)
+	mat.set_shader_parameter("foam_radii", radii)
+	mat.set_shader_parameter("foam_rotation", area.rotation)
 
 
 func _process(delta: float) -> void:
