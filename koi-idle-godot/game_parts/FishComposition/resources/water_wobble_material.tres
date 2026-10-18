@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/water_wobble.gdshader" id="1_wobble"]
+
+[resource]
+shader = ExtResource("1_wobble")
+shader_parameter/amplitude = 0.8
+shader_parameter/wavelength = 36.0
+shader_parameter/speed = 0.9
+shader_parameter/cross_ripple = 0.6
