@@ -23,12 +23,12 @@ signal rank_scrolled(step: int)
 enum Align { LEFT, CENTER, RIGHT }
 
 ## Thickness of each bar (pixels, top to bottom).
-@export_range(1, 20) var bar_thickness: int = 3:
+@export_range(1, 20) var bar_thickness: int = 5:
 	set(v):
 		bar_thickness = v
 		_relayout()
 ## Space between bars.
-@export_range(0, 20) var gap: int = 2:
+@export_range(0, 20) var gap: int = 3:
 	set(v):
 		gap = v
 		_relayout()
