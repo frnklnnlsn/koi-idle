@@ -23,6 +23,15 @@ var swim_area: SwimArea = null
 # --- Avoidance ---
 @export var boundary_avoidance_distance: float = 800.0
 @export var boundary_avoidance_strength: float = 1.5
+## How strongly avoiding a wall also turns the fish's wandering direction
+## inward. Without it the wander keeps pulling toward the wall while the
+## avoidance pushes away, and the fish slides along the edge.
+## 0 = old behaviour (edge-hugging), 0.5 = spreads over the whole area,
+## 1 = turns back sharply and favours the middle.
+@export_range(0.0, 3.0, 0.05) var wall_turn_memory: float = 0.5
+## How sharply a fish that touches the edge turns back inside (per frame).
+## Was 0.06; higher = less sliding along the edge.
+@export_range(0.0, 1.0, 0.01) var edge_bounce: float = 0.3
 
 # --- Live state (readable by coordinator) ---
 var current_direction:  Vector2 = Vector2.RIGHT
@@ -106,9 +115,16 @@ func _update_wander(head_global: Vector2, seg_length: float,
 			var to_safety  = swim_area.direction_to_safety(head_global)
 			var intensity  = pow(1.0 - (dist_from_edge / boundary_avoidance_distance), 1.5)
 			boundary_force = to_safety * boundary_avoidance_strength * intensity
-			# Add a perpendicular nudge so fish curves away rather than reversing
-			var perp = to_safety.rotated(PI / 2) * (1.0 if randf() > 0.5 else -1.0)
+			# Add a perpendicular nudge so fish curves away rather than reversing,
+			# on the side it's already turning (a random side every frame cancels out).
+			var side := 1.0 if current_direction.cross(to_safety) >= 0.0 else -1.0
+			var perp = to_safety.rotated(PI / 2) * side
 			boundary_force += perp * intensity * 0.2
+			# Swing the wander direction inward too, so it stops pulling the fish
+			# back toward the wall once the avoidance has turned it.
+			if wall_turn_memory > 0.0:
+				var k := clampf(wall_turn_memory * intensity * get_process_delta_time() * 3.0, 0.0, 1.0)
+				_wander_angle = lerp_angle(_wander_angle, to_safety.angle(), k)
 
 	# Direction smoothing with clamped turn rate
 	var total_force       = wander_force + boundary_force
@@ -134,7 +150,9 @@ func _update_wander(head_global: Vector2, seg_length: float,
 	if swim_area and not swim_area.is_inside(new_pos):
 		new_pos           = swim_area.clamp_to_boundary(new_pos)
 		var dir_to_center = swim_area.direction_to_safety(new_pos)
-		current_direction = current_direction.lerp(dir_to_center, 0.06)
+		current_direction = current_direction.lerp(dir_to_center, edge_bounce).normalized()
+		if wall_turn_memory > 0.0:
+			_wander_angle = dir_to_center.angle()
 
 	return {"direction": current_direction, "new_head_global": new_pos}
 
