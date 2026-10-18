@@ -42,6 +42,10 @@ const THEME_PATH := "res://game_parts/user_interface/theme/ui_theme.tres"
 @export var chart_mark := Color("5d6bb5")
 ## Growth curves that aren't highlighted.
 @export var chart_line := Color(0.42, 0.47, 0.75, 0.5)
+## Fishing charts: fish you caught earlier this session, a dimmed accent. Fish
+## on the line right now use the accent colour. Use a solid colour: the charts
+## ignore transparency (alpha).
+@export var chart_caught_earlier := Color("6a6126")
 
 @export_tool_button("Rebuild theme") var _rebuild_button = rebuild_theme
 

@@ -26,6 +26,8 @@ const REACH := 3.2
 var _fish: Array = []
 var _selected: fish_conf = null
 var _picked: Array = []   # box-selected fish (UIPalette picked colour)
+var _caught: Array = []   # fishing: on the line now (accent)
+var _earlier: Array = []  # fishing: caught earlier this session (faded)
 var _mode := 0
 var _series_fish := {}   # series name -> Array of fish, in point order (for clicks)
 
@@ -101,21 +103,35 @@ func _redraw() -> void:
 	var series := {}
 	var colors := []
 	_series_fish.clear()
+	var pal := UIPalette.get_palette()
 	var others := _fish.filter(func(f): return f != _selected)
-	if not others.is_empty():
-		var plain := others.filter(func(f): return f not in _picked)
-		var picked := others.filter(func(f): return f in _picked)
-		if not plain.is_empty():
-			_add_series(series, "Fish", plain, mode)
-			colors.append(UIPalette.get_palette().chart_mark)
-		if not picked.is_empty():
-			_add_series(series, "Picked", picked, mode)
-			colors.append(UIPalette.get_palette().picked)
+	# Groups in draw order (later = on top): [name, fish, colour].
+	var groups := [
+		["Fish", others.filter(func(f): return f not in _picked and f not in _caught and f not in _earlier), pal.chart_mark],
+		["Earlier", others.filter(func(f): return f in _earlier and f not in _caught and f not in _picked),pal.chart_caught_earlier],
+		["Picked", others.filter(func(f): return f in _picked and f not in _caught), pal.picked],
+		["Caught", others.filter(func(f): return f in _caught), pal.accent],
+	]
+	for g in groups:
+		if not g[1].is_empty():
+			_add_series(series, g[0], g[1], mode)
+			colors.append(g[2])
 	if _selected and _selected in _fish:
 		_add_series(series, "Selected", [_selected], mode)   # drawn last, on top
 		colors.append(UIPalette.get_palette().accent)
 	var title := "%s ↑  %s →" % [STAT_NAMES[mode[2]], STAT_NAMES[mode[1]]]
 	draw(plot, {"series": series, "colors": colors, "title": title}, _on_plot_clicked)
+
+
+## Fishing: fish on the line now (accent colour) and fish caught earlier this
+## session (UIPalette chart_caught_earlier, faded). Earlier fish have left the
+## pond, so the fishing panel adds them to the collection too.
+func set_caught(on_line: Array, earlier: Array) -> void:
+	if on_line == _caught and earlier == _earlier:
+		return
+	_caught = on_line.duplicate()
+	_earlier = earlier.duplicate()
+	_redraw()
 
 
 ## Box selection: show these fish as picked.

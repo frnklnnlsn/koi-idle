@@ -26,6 +26,8 @@ var _selected: fish_conf = null
 var _all_view := true
 var _series_fish: Array = []   # series index -> fish (All view clicks)
 var _picked: Array = []   # box-selected fish (UIPalette picked colour)
+var _caught: Array = []   # fishing: on the line now (accent)
+var _earlier: Array = []  # fishing: caught earlier this session (faded)
 
 
 # --- Chart definitions (shared by the game and ChartPreview) ----------------
@@ -54,8 +56,10 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 
 
 ## Many fish. data: {"curves": Array of curve dicts (as draw()), "selected": int
-## (-1 = none), "picked": Array[int]}. The selected curve is drawn last, in
-## colour; picked (box-selected) curves in the palette's picked colour.
+## (-1 = none), "picked": Array[int], "caught": Array[int], "earlier": Array[int]}.
+## The selected curve is drawn last, in colour; picked (box-selected) curves in
+## the palette's picked colour; caught ones (fishing) in the accent colour,
+## earlier catches faded.
 static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var curves: Array = data.get("curves", [])
 	if curves.is_empty():
@@ -64,6 +68,8 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		return
 	var selected: int = data.get("selected", -1)
 	var picked: Array = data.get("picked", [])
+	var caught: Array = data.get("caught", [])
+	var earlier: Array = data.get("earlier", [])
 	var x_max := 1.0
 	for c in curves:
 		x_max = maxf(x_max, grown_hours(c))
@@ -74,9 +80,10 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	var series := {}
 	var colors := []
 	var order := range(curves.size())
-	for i in picked:   # picked curves above the rest
-		order.erase(i)
-		order.append(i)
+	for group in [earlier, picked, caught]:   # each group above the ones before
+		for i in group:
+			order.erase(i)
+			order.append(i)
 	if selected >= 0:
 		order.erase(selected)
 		order.append(selected)   # drawn last = on top
@@ -85,7 +92,14 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		for h in xs:
 			m.append(_mass(curves[i], h))
 		series[str(i + 1)] = m
-		colors.append(pal.accent if i == selected else (pal.picked if i in picked else pal.chart_line))
+		var c: Color = pal.chart_line
+		if i == selected or i in caught:
+			c = pal.accent
+		elif i in picked:
+			c = pal.picked
+		elif i in earlier:
+			c = pal.chart_caught_earlier
+		colors.append(c)
 
 	var opts := {"y_log": true, "minimal": true, "colors": colors, "hover_nearest": true}
 	if on_click.is_valid():
@@ -139,6 +153,17 @@ func _ready() -> void:
 ## The fish shown in the All view (e.g. the shop's current batch).
 func set_fish_collection(fish_array: Array) -> void:
 	_fish = fish_array.filter(func(f): return f is fish_conf)
+	_redraw()
+
+
+## Fishing: fish on the line now (accent colour) and fish caught earlier this
+## session (UIPalette chart_caught_earlier, faded). Earlier fish have left the
+## pond, so the fishing panel adds them to the collection too.
+func set_caught(on_line: Array, earlier: Array) -> void:
+	if on_line == _caught and earlier == _earlier:
+		return
+	_caught = on_line.duplicate()
+	_earlier = earlier.duplicate()
 	_redraw()
 
 
@@ -196,7 +221,15 @@ func _redraw() -> void:
 		for i in _fish.size():
 			if _fish[i] in _picked:
 				picked.append(i)
-		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected), "picked": picked}, _on_plot_clicked)
+		var caught := []
+		var earlier := []
+		for i in _fish.size():
+			if _fish[i] in _caught:
+				caught.append(i)
+			elif _fish[i] in _earlier:
+				earlier.append(i)
+		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected), "picked": picked,
+			"caught": caught, "earlier": earlier}, _on_plot_clicked)
 	else:
 		draw(plot, _data)
 

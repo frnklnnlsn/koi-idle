@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://kctuxuaxjl0r"]
+[gd_scene format=3 uid="uid://kctuxuaxjl0r"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/fishing_ui.gd" id="1_31oin"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/fish_scatter_chart.tscn" id="2_scatter"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="3_growth"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_bars"]
 
 [node name="FishingUI" type="Control"]
 layout_mode = 3
@@ -13,11 +16,10 @@ script = ExtResource("1_31oin")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 0.25
 anchor_right = 0.5
-anchor_bottom = 0.5
+anchor_bottom = 0.25
 offset_left = -101.5
 offset_top = -60.0
 offset_right = 101.5
@@ -108,6 +110,56 @@ unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Sell every fish in the pond at a discount. Asks you to confirm first."
 text = "Sell Pond"
+
+[node name="Charts" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScatterMargin" type="MarginContainer" parent="Charts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 4
+
+[node name="Scatter" parent="Charts/ScatterMargin" instance=ExtResource("2_scatter")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="GrowthMargin" type="MarginContainer" parent="Charts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 4
+
+[node name="Growth" parent="Charts/GrowthMargin" instance=ExtResource("3_growth")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="BarsMargin" type="MarginContainer" parent="Charts"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 4
+
+[node name="Bars" parent="Charts/BarsMargin" instance=ExtResource("4_bars")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+chart_title = "Pond fish"
 
 [node name="FishingTimer" type="Timer" parent="."]
 unique_name_in_owner = true

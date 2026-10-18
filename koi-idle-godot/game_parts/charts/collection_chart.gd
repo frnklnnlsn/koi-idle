@@ -20,13 +20,17 @@ var _fish: Array = []          # fish_conf, as given
 var _sorted: Array = []        # fish_conf, sorted by the current stat
 var _hovered: fish_conf = null
 var _picked: Array = []   # box-selected fish (UIPalette picked colour)
+var _caught: Array = []   # fishing: on the line now (accent)
+var _earlier: Array = []  # fishing: caught earlier this session (faded)
 var _stat := 0
 
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
 ## data: {"values": Array[float] sorted ascending, "highlight": int (-1 = none),
-##        "picked": Array[int] (box-selected bars), "title": String (optional)}
+##        "picked": Array[int] (box-selected bars), "caught": Array[int] (fishing:
+##        on the line, accent), "earlier": Array[int] (fishing: caught earlier,
+##        faded), "title": String (optional)}
 ## Highlighted and picked bars are drawn as their own stacked series so they
 ## can be coloured.
 static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
@@ -39,13 +43,24 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var highlight: int = data.get("highlight", -1)
 	var labels := PackedStringArray()
 	var picked_ids: Array = data.get("picked", [])
+	var caught_ids: Array = data.get("caught", [])
+	var earlier_ids: Array = data.get("earlier", [])
 	var others := []
+	var faded := []
 	var boxed := []
 	var picked := []
 	for i in values.size():
 		labels.append(str(i + 1))
-		var kind := 2 if i == highlight else (1 if i in picked_ids else 0)
+		# 2 = accent (hovered or on the line), 1 = box-selected, 3 = caught earlier
+		var kind := 0
+		if i == highlight or i in caught_ids:
+			kind = 2
+		elif i in picked_ids:
+			kind = 1
+		elif i in earlier_ids:
+			kind = 3
 		others.append(values[i] if kind == 0 else 0.0)
+		faded.append(values[i] if kind == 3 else 0.0)
 		boxed.append(values[i] if kind == 1 else 0.0)
 		picked.append(values[i] if kind == 2 else 0.0)
 
@@ -53,11 +68,12 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 		"y_title": data.get("y_title", "Income /s"),
 		"stacked": true,
 		"minimal": true,
-		"colors": [UIPalette.get_palette().chart_mark, UIPalette.get_palette().picked, UIPalette.get_palette().accent],
+		"colors": [UIPalette.get_palette().chart_mark, UIPalette.get_palette().chart_caught_earlier,
+			UIPalette.get_palette().picked, UIPalette.get_palette().accent],
 	}
 	if on_click.is_valid():
 		opts["on_click"] = on_click
-	TauCharts.bar(p, data.get("title", "Fish by value"), labels, {"Fish": others, "Picked": boxed, "Hovered": picked}, opts)
+	TauCharts.bar(p, data.get("title", "Fish by value"), labels, {"Fish": others, "Earlier": faded, "Picked": boxed, "Hovered": picked}, opts)
 
 
 static func sample_data() -> Dictionary:
@@ -99,6 +115,17 @@ func set_fish_card_hover(fish_res: fish_conf) -> void:
 
 func clear_fish_card_hover() -> void:
 	_hovered = null
+	_redraw()
+
+
+## Fishing: fish on the line now (accent colour) and fish caught earlier this
+## session (UIPalette chart_caught_earlier, faded). Earlier fish have left the
+## pond, so the fishing panel adds them to the collection too.
+func set_caught(on_line: Array, earlier: Array) -> void:
+	if on_line == _caught and earlier == _earlier:
+		return
+	_caught = on_line.duplicate()
+	_earlier = earlier.duplicate()
 	_redraw()
 
 
@@ -150,10 +177,17 @@ func _redraw() -> void:
 		values.append(stat_value(f, _stat))
 	var title := chart_title if chart_title != "" else "By " + String(STATS[_stat][0]).to_lower()
 	var picked := []
+	var caught := []
+	var earlier := []
 	for i in _sorted.size():
 		if _sorted[i] in _picked:
 			picked.append(i)
-	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "picked": picked, "title": title,
+		if _sorted[i] in _caught:
+			caught.append(i)
+		elif _sorted[i] in _earlier:
+			earlier.append(i)
+	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "picked": picked,
+		"caught": caught, "earlier": earlier, "title": title,
 		"y_title": STATS[_stat][1]}, _on_plot_clicked)
 
 

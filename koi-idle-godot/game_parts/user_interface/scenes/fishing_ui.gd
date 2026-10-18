@@ -7,6 +7,11 @@
 #   Release   let everything on the line go; the fish stay in the pond
 #   Leave On  keep the new catch on the line as bait for the next rank up
 #   Sell Pond fail-safe: sell every pond fish at a discount (click twice to confirm)
+#
+# Below the panel, the shop's three charts show every pond fish. Fish on the
+# line are drawn in the accent colour; fish you kept earlier this session stay
+# on the charts, faded (UIPalette chart_caught_earlier). That history is
+# forgotten when the game closes.
 extends Control
 
 @onready var fishing_status: RichTextLabel = %FishingStatus
@@ -20,6 +25,10 @@ extends Control
 @onready var leave_on_button: Button       = %LeaveOnButton
 @onready var fishing_timer:  Timer         = $FishingTimer
 @onready var sell_pond_button: Button      = %SellPondButton
+# Charts along the bottom half (Charts node in fishing_ui.tscn).
+@onready var _scatter: FishScatterChart    = %Scatter
+@onready var _growth:  GrowthChart         = %Growth
+@onready var _bars:    CollectionChart     = %Bars
 
 ## Seconds the Sell Pond confirmation stays armed before it resets.
 const SELL_CONFIRM_SECONDS := 4.0
@@ -29,6 +38,7 @@ var _waiting     := false   # cast is out, waiting for a bite
 var _just_caught := false   # a fresh catch: choose Keep / Release / Leave On
 var _sell_armed  := false   # Sell Pond clicked once; next click within SELL_CONFIRM_SECONDS sells
 var _sell_arm_id := 0       # so an old timeout can't disarm a newer confirmation
+var _caught_earlier: Array = []   # fish kept this session (they've left the pond)
 
 
 func _ready() -> void:
@@ -106,6 +116,7 @@ func _on_keep_pressed() -> void:
 	var paid := line.value()
 	var count := line.chain.size()
 	PassiveSystems.pay_catch(paid)
+	_caught_earlier.append_array(line.chain)
 	DisplayManager.fish_caught.emit(line.chain.duplicate())   # removes them from the pond
 	line.clear()
 	_just_caught = false
@@ -199,6 +210,7 @@ func _refresh() -> void:
 	leave_on_button.disabled = not _just_caught
 
 	var pond := _pond_fish()
+	_update_charts(pond)
 	sell_pond_button.disabled = _waiting or pond.is_empty()
 	if pond.is_empty():
 		_sell_armed = false
@@ -207,6 +219,16 @@ func _refresh() -> void:
 		sell_pond_button.text = "Confirm: sell %d fish for $%s?" % [pond.size(), _commas(floori(line.pond_sale_value(pond)))]
 	else:
 		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
+
+
+## Pond fish plus this session's earlier catches; the line's fish highlighted.
+func _update_charts(pond: Array) -> void:
+	if not is_visible_in_tree():
+		return
+	var fish := pond + _caught_earlier
+	for chart in [_scatter, _growth, _bars]:
+		chart.set_fish_collection(fish)
+		chart.set_caught(line.chain, _caught_earlier)
 
 
 func _set_status(bbcode: String) -> void:

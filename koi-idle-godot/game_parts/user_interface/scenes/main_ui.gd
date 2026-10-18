@@ -18,7 +18,7 @@ extends Control
 @onready var _trash_light: TextureRect = %TrashLight
 ## Rank picker on the ShopBar (rank_meter.gd): bars sized in its Inspector.
 @onready var _rank_meter: RankMeter = %RankMeter
-## See-through layer over the toilet / pond while the shop is open. Change how
+## See-through layer over the toilet / pond while the shop or fishing is open. Change how
 ## dark it is with its Color (the alpha slider) in the Inspector.
 @onready var _shop_backdrop: ColorRect = %ShopBackdrop
 
@@ -40,6 +40,7 @@ func _ready() -> void:
 	for panel in [shop_ui, list_ui, fishing_ui]:
 		panel.add_to_group(ESC_CLOSES)
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
+	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
 	_rank_meter.rank_clicked.connect(_on_rank_clicked)
@@ -72,8 +73,12 @@ func close_open_panel() -> bool:
 
 func _on_shop_visibility() -> void:
 	_shop_bar.visible = shop_ui.visible
-	_shop_backdrop.visible = shop_ui.visible
+	_update_backdrop()
 	_fit_above_terminal()
+
+
+func _update_backdrop() -> void:
+	_shop_backdrop.visible = shop_ui.visible or fishing_ui.visible
 
 
 func _on_drag_zone(zone: String) -> void:
