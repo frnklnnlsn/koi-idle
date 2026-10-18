@@ -105,6 +105,9 @@ func feed(key: String) -> Dictionary:
 ##   b 5   / buy 5     buy 5 fish
 ##   B     / fill      fill the pool
 ##   rank 2            switch to rank 2
+##   sellall           sell every toilet fish (price minus the recycle fee),
+##                     asks y / n first; sellall! sells without asking.
+##                     Works on any screen.
 static func parse_ex(text: String) -> Dictionary:
 	var t := text.strip_edges()
 	if t == "":
@@ -124,6 +127,8 @@ static func parse_ex(text: String) -> Dictionary:
 		return {"cmd": "buy", "count": int(m.get_string(1)) if m.get_string(1) != "" else 1}
 	if t == "B" or t == "fill":
 		return {"cmd": "fill"}
+	if t == "sellall" or t == "sellall!":
+		return {"cmd": "sellall", "confirmed": t.ends_with("!")}
 	re.compile("^rank\\s+(\\d+)$")
 	m = re.search(t)
 	if m:

@@ -94,6 +94,30 @@ func remove_work_fish(remove_work_fish:Array)->void:
 		
 		SaveManager.save_current_data(save_data)
 
+## What selling every toilet fish would pay: each fish's price minus the
+## rank table's recycle fee (the same as recycling it in the shop).
+func toilet_sale_value() -> float:
+	var total := 0.0
+	for fish in SaveManager.load_saved_data().list_of_work_fish:
+		if fish is fish_conf:
+			total += PassiveSystems.recycle_refund(fish)
+	return total
+
+
+## Sells every fish in the toilet (:sellall). Returns how many and the money.
+func sell_all_work_fish() -> Dictionary:
+	var save_data: SaveData = SaveManager.load_saved_data()
+	var count := save_data.list_of_work_fish.size()
+	if count == 0:
+		return {"count": 0, "paid": 0.0}
+	var paid := toilet_sale_value()
+	save_data.list_of_work_fish.clear()
+	PassiveSystems.net_worth += paid
+	PassiveSystems.reset_income()   # no fish left earning; also saves
+	DisplayManager.toilet_cleared.emit()
+	return {"count": count, "paid": paid}
+
+
 func flush_to_retired(fish_list: Array) -> void:
 	var save_data: SaveData = SaveManager.load_saved_data()  # <-- missing this
 	if not save_data:

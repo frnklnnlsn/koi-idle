@@ -32,6 +32,7 @@ func _ready() -> void:
 			n.swim_area = _swim_area)
 	DisplayManager.display_fish_toilet.connect(Display)
 	DisplayManager.flush_fish.connect(Flush)
+	DisplayManager.toilet_cleared.connect(Clear)
 
 	var factory = FishFactory.new()
 	_display    = FishDisplay.new(factory)

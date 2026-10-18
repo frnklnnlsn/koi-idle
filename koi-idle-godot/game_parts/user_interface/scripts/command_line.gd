@@ -35,6 +35,8 @@ var global_keys := {}
 
 var _keys := VimKeys.new()
 var _last: Dictionary = {}
+## A y / n question is waiting (e.g. :sellall): called with true on y.
+var _confirm: Callable
 @onready var _info: GridContainer = %Info
 @onready var _prompt: Label = %Prompt
 @onready var _ex: LineEdit = %Ex
@@ -77,13 +79,23 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if k.echo and k.keycode not in [KEY_H, KEY_L, KEY_LEFT, KEY_RIGHT]:
 		return
 	var key := VimKeys.key_name(k)
+	# A y / n question takes the next key, whatever it is.
+	if _confirm.is_valid() and key != "":
+		get_viewport().set_input_as_handled()
+		var answer := _confirm
+		_confirm = Callable()
+		_prompt.text = ""
+		answer.call(key == "y")
+		return
 	# Only when nothing is half typed, so "3s" style input can't misfire.
 	if key in global_keys and _keys.pending() == "" and not k.echo:
 		get_viewport().set_input_as_handled()
 		global_keys[key].call()
 		return
 	var target = _target()
-	if target == null:
+	# ":" opens the command line on any screen (some commands, like
+	# :sellall, don't need the shop); other keys only drive the shop.
+	if target == null and not (key == ":" and _keys.pending() == ""):
 		return
 	if key == "" or key == "enter":
 		return
@@ -115,11 +127,35 @@ func _run(cmd: Dictionary) -> void:
 				_say("Nothing to repeat yet")
 				return
 			cmd = _last
+		"sellall":
+			_sell_all(cmd.get("confirmed", false))
+			return
 	if target == null:
+		_say("Open the shop first (s)")
 		return
 	if cmd["cmd"] in REPEATABLE:
 		_last = cmd
 	_say(target.run_command(cmd))
+
+
+## :sellall: sells every toilet fish, after a y / n unless confirmed.
+func _sell_all(confirmed: bool) -> void:
+	var count := FishHandler.work_count()
+	if count == 0:
+		_say("No fish in the toilet to sell")
+		return
+	var value := FishHandler.toilet_sale_value()
+	if not confirmed:
+		_say("Sell %d toilet fish for $%s?  y / n" % [count, FishLabelDisplay.num(value)])
+		_prompt.text = "y/n"
+		_confirm = func(yes: bool):
+			if yes:
+				_sell_all(true)
+			else:
+				_say("Kept your toilet fish")
+		return
+	var sold := FishHandler.sell_all_work_fish()
+	_say("Sold %d toilet fish for $%s" % [sold["count"], FishLabelDisplay.num(sold["paid"])])
 
 
 func _open_ex() -> void:
