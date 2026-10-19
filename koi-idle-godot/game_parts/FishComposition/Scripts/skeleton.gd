@@ -71,6 +71,10 @@ func update_visuals_for_state():
 			ellipse_size = start_size.lerp(target_size, ease_in_quad(progress))
 		koi.FishState.EATING:
 			ellipse_size = slow_ellipse_size * 1.1
+		koi.FishState.SCHOOLING:
+			# Between the slow and fast fin sizes, by how fast the school swims.
+			var t: float = clampf((koi.current_speed - koi.slow_speed) / maxf(koi.fast_speed - koi.slow_speed, 0.001), 0.0, 1.0)
+			ellipse_size = slow_ellipse_size.lerp(fast_ellipse_size, t)
 
 func _draw():
 	var parent = get_parent()

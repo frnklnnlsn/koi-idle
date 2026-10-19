@@ -33,6 +33,12 @@ var swim_area: SwimArea = null
 ## Was 0.06; higher = less sliding along the edge.
 @export_range(0.0, 1.0, 0.01) var edge_bounce: float = 0.3
 
+# --- Schooling ---
+## Set every frame by the school while following (zero = wander on its own).
+var follow_dir: Vector2 = Vector2.ZERO
+## How strongly a follower steers toward follow_dir (wander uses wander_strength).
+@export var follow_strength: float = 1.2
+
 # --- Live state (readable by coordinator) ---
 var current_direction:  Vector2 = Vector2.RIGHT
 var previous_direction: Vector2 = Vector2.RIGHT
@@ -63,6 +69,11 @@ func init(initial_direction: Vector2, fish_scale: float) -> void:
 # ------------------------------------------------------------------ Entry override
 
 ## Lock the fish onto a straight exit path immediately after spawning from a pipe.
+## Still swimming out of the pipe (begin_entry).
+func is_entering() -> bool:
+	return _entry_active
+
+
 func begin_entry(direction: Vector2, duration: float) -> void:
 	_entry_active    = true
 	_entry_timer     = 0.0
@@ -105,6 +116,11 @@ func _update_wander(head_global: Vector2, seg_length: float,
 		_wander_timer  = 0.0
 
 	var wander_force = Vector2(cos(_wander_angle), sin(_wander_angle)) * wander_strength
+	# In a school: head where the school says instead of wandering. Keep the
+	# wander angle in step so leaving the school doesn't jerk the fish round.
+	if follow_dir != Vector2.ZERO:
+		wander_force = follow_dir * follow_strength
+		_wander_angle = follow_dir.angle()
 
 	# Boundary avoidance
 	var boundary_force = Vector2.ZERO

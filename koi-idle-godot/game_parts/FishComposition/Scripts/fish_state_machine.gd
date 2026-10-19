@@ -58,6 +58,8 @@ func schedule_next_state_change() -> void:
 		FS.EATING:
 			next_state_change = eating_decel_duration \
 				+ randf_range(eating_rest_duration_min, eating_rest_duration_max)
+		FS.SCHOOLING:
+			next_state_change = INF   # the school ends it (leave_school)
 			eating_entered.emit(_fish.current_speed)
 
 
@@ -83,6 +85,7 @@ func _init_state_wave_params() -> void:
 		3: {"amp": 3.50, "freq": 5.00, "start": 0.50, "phase": 0.10},
 		4: {"amp": 3.50, "freq": 5.00, "start": 0.50, "phase": 0.10},
 		5: {"amp": 3.50, "freq": 5.00, "start": 0.50, "phase": 0.00},
+		6: {"amp": 3.50, "freq": 5.00, "start": 0.50, "phase": 0.10},   # SCHOOLING
 	}
 
 
@@ -118,6 +121,18 @@ func force_state(state: int) -> void:
 	current_state = state
 	state_timer   = 0.0
 	state_changed.emit(current_state, get_wave_params(current_state))
+
+
+## Leaving a school: ease from the school's speed to a slow swim, then carry
+## on with the usual random states.
+func leave_school(speed_now: float) -> void:
+	var FS = _fish.FishState
+	state_locked = false
+	start_speed = speed_now
+	target_state = FS.SLOW_SWIM
+	current_state = FS.DECELERATING if speed_now > _fish.slow_speed else FS.ACCELERATING
+	state_changed.emit(current_state, get_wave_params(current_state))
+	schedule_next_state_change()
 
 
 func unlock_state() -> void:

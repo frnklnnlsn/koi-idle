@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
+[ext_resource type="Script" path="res://scripts/school_manager.gd" id="30_schools"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -93,6 +94,11 @@ script = ExtResource("8_7vram")
 [node name="FishContainerPond" type="Node2D" parent="PondViewportContainer/PondViewport" unique_id=104662166]
 unique_name_in_owner = true
 
+
+[node name="Schools" type="Node2D" parent="PondViewportContainer/PondViewport" node_paths=PackedStringArray("fish_container")]
+z_index = 30
+script = ExtResource("30_schools")
+fish_container = NodePath("../FishContainerPond")
 [node name="ForeGround" parent="PondViewportContainer/PondViewport" unique_id=592856925 instance=ExtResource("7_76rds")]
 
 [node name="PondArea" parent="PondViewportContainer/PondViewport" unique_id=749628175 instance=ExtResource("8_xc818")]

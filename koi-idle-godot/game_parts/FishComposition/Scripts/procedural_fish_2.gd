@@ -56,6 +56,13 @@ var start_heading: Vector2 = Vector2.ZERO
 ## Measured on swimming fish: median head-to-tail bend about 12 degrees.
 @export_range(0.0, 45.0, 0.5) var spawn_bend: float = 18.0
 const REMEMBER_INTERVAL := 0.5
+
+# --- School (set by SchoolManager) ---
+## The school this fish swims in, or null.
+var school = null
+## Speed the school asks for; the fish eases toward it (SCHOOL_EASE per second).
+var school_speed: float = 0.0
+const SCHOOL_EASE := 0.4
 var _remember_timer: float = 0.0
 
 # --- Live size (pond growth) ---
@@ -81,7 +88,9 @@ enum FishState {
 	SLOW_SWIM,
 	FAST_SWIM,
 	DECELERATING,
-	EATING
+	EATING,
+	## Swimming in a school (SchoolManager decides direction and speed).
+	SCHOOLING
 }
 
 
@@ -237,6 +246,8 @@ func _process(delta: float) -> void:
 			_swim(delta, current_speed)
 		FS.EATING:
 			_eat(delta)
+		FS.SCHOOLING:
+			_swim(delta, move_toward(current_speed, school_speed, SCHOOL_EASE * delta))
 
 	queue_redraw()
 
@@ -339,6 +350,57 @@ func _remember_place() -> void:
 	fish_res.swim_heading = current_direction
 
 
+# ------------------------------------------------------------------ Schooling
+# Used by SchoolManager (scripts/school_manager.gd).
+
+## Free to join a school: swimming normally (not entering from the pipe,
+## eating, held in a state, or already schooling).
+func can_join_school() -> bool:
+	if school != null or _steering.lock_heading or _steering.is_entering():
+		return false
+	if _state_machine.state_locked:
+		return false
+	return _state_machine.current_state != FishState.EATING
+
+
+func join_school(new_school) -> void:
+	school = new_school
+	school_speed = current_speed
+	_state_machine.force_state(FishState.SCHOOLING)
+
+
+## Back to swimming on its own, easing to a slow swim.
+func leave_school() -> void:
+	school = null
+	_steering.follow_dir = Vector2.ZERO
+	_state_machine.leave_school(current_speed)
+
+
+## Direction to steer toward while following (zero = wander as usual).
+func set_follow_direction(dir: Vector2) -> void:
+	_steering.follow_dir = dir
+
+
+## Head position in world (global) space.
+func head_global() -> Vector2:
+	return to_global(fish_body.get_point_position(0))
+
+
+## Middle of the body in world space (for keeping fish apart).
+func body_center_global() -> Vector2:
+	return to_global(fish_body.get_point_position(fish_body.get_point_count() / 2))
+
+
+## Head-to-tail length in pond pixels.
+func body_length() -> float:
+	return _body_chain.seg_length * (num_points - 1)
+
+
+## Pond pixels the head moves per frame at speed 1 (bigger fish go further).
+func step_length() -> float:
+	return _step_length()
+
+
 ## Grow or shrink the fish to `factor` × its normal size, easing there over
 ## `seconds` (0 = at once). Swim area and behaviour are unchanged.
 func set_size_factor(factor: float, seconds: float = 1.0) -> void:
@@ -416,7 +478,7 @@ func _draw() -> void:
 
 	var font      = ThemeDB.fallback_font
 	var font_size = 16
-	var state_names = ["VERY_SLOW", "ACCEL", "SLOW", "FAST", "DECEL", "EATING"]
+	var state_names = ["VERY_SLOW", "ACCEL", "SLOW", "FAST", "DECEL", "EATING", "SCHOOLING"]
 	var sm   = _state_machine
 	var text = "State: " + state_names[sm.current_state]
 	if sm.current_state in [FishState.ACCELERATING, FishState.DECELERATING]:
