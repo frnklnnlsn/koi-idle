@@ -373,12 +373,19 @@ func join_school(new_school) -> void:
 func leave_school() -> void:
 	school = null
 	_steering.follow_dir = Vector2.ZERO
+	_steering.fade_out_turn_radius(2.0)
 	_state_machine.leave_school(current_speed)
 
 
 ## Direction to steer toward while following (zero = wander as usual).
 func set_follow_direction(dir: Vector2) -> void:
 	_steering.follow_dir = dir
+
+
+## Tightest turn while schooling, radius in pond pixels (0 = no limit).
+func set_turn_radius(px: float) -> void:
+	_steering.turn_radius = px
+	_steering._radius_fade_left = 0.0
 
 
 ## Head position in world (global) space.

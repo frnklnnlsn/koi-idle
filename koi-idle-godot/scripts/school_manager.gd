@@ -59,8 +59,12 @@ extends Node2D
 ## Fastest a follower may go to catch up, as a multiple of the leader's pace.
 @export_range(1.0, 5.0, 0.05) var max_catch_up: float = 3.0
 ## Slowest a follower goes when it's ahead of its spot, as a multiple of the
-## leader's pace (it eases off instead of turning back).
+## leader's pace (it eases off instead of turning back). Never below the
+## fish's very slow swim, so it never stops and folds up.
 @export_range(0.0, 1.0, 0.05) var min_pace: float = 0.25
+## Tightest turn a school fish may make, as a radius in its body lengths.
+## Stops fish folding up on sharp turns (U-turns become arcs). 0 = no limit.
+@export_range(0.0, 2.0, 0.05) var turn_radius: float = 0.8
 ## A follower this many seconds far behind its spot leaves the school.
 @export var drop_after: float = 3.0
 
@@ -185,7 +189,11 @@ func _update(s: School, delta: float) -> void:
 		centers[m] = m.body_center_global()
 		min_step = minf(min_step, m.step_length())
 		L = maxf(L, m.body_length())
-	leader.school_speed = s.speed * min_step / maxf(leader.step_length(), 0.001)
+	# Never below a fish's very slow swim: a fish that stops while its body
+	# keeps waving and turning folds up on itself.
+	leader.school_speed = maxf(s.speed * min_step / maxf(leader.step_length(), 0.001), leader.very_slow_speed)
+	for m in members:
+		m.set_turn_radius(turn_radius * m.body_length())
 	var ldir: Vector2 = leader.current_direction
 	var side_dir := ldir.rotated(PI / 2)
 	var lhead: Vector2 = leader.head_global()
@@ -233,7 +241,7 @@ func _update(s: School, delta: float) -> void:
 		# turning back, slow while turning, faster once facing the spot.
 		var ahead := along if along > -1.5 * L else maxf(to_spot.dot(f.current_direction), 0.0)
 		var factor := clampf(1.0 + ahead / L, min_pace, max_catch_up)
-		f.school_speed = clampf(leader_px * factor / maxf(f.step_length(), 0.001), 0.01, f.fast_speed * 2.0)
+		f.school_speed = clampf(leader_px * factor / maxf(f.step_length(), 0.001), f.very_slow_speed, f.fast_speed * 2.0)
 
 		# Left far behind: drop out.
 		if dist > L * 6.0 + join_radius:
