@@ -23,7 +23,10 @@
 			"uuid": "38085f38-6094-4a53-a375-626890fd9fbe",
 			"title": "Doing",
 			"tasks": [
-				"752c2c71-4974-4987-b38c-ede0d1959edf"
+				"752c2c71-4974-4987-b38c-ede0d1959edf",
+				"bfd996d3-4092-415e-812c-910f75a1fa1a",
+				"b9167ac1-9efe-4534-913e-ffb3459d2ee5",
+				"1560fcec-7044-4f53-a954-dcee75bcb2b6"
 			]
 		},
 		{
@@ -159,6 +162,27 @@
 		{
 			"uuid": "752c2c71-4974-4987-b38c-ede0d1959edf",
 			"title": "New task",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "bfd996d3-4092-415e-812c-910f75a1fa1a",
+			"title": "fish school",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "b9167ac1-9efe-4534-913e-ffb3459d2ee5",
+			"title": "fishing mechanic design",
+			"description": "",
+			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
+			"steps": []
+		},
+		{
+			"uuid": "1560fcec-7044-4f53-a954-dcee75bcb2b6",
+			"title": "List design",
 			"description": "",
 			"category": "73e5a403-6d2a-441f-8da4-266d22539cf2",
 			"steps": []
