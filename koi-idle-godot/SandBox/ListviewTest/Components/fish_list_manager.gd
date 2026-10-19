@@ -20,15 +20,15 @@ func _init(list_vbox: VBoxContainer) -> void:
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-## Instantiate and populate a row for the given fish resource.
-## Pass in a FishViewportRenderer so the viewport is filled the same way cards are.
-func add_row(fish: fish_conf, renderer: FishViewportRenderer) -> Control:
+## Instantiate and populate a row for the given fish resource. `icons` (a
+## FishIconRenderer) draws the row's still fish picture.
+func add_row(fish: fish_conf, icons: FishIconRenderer) -> Control:
 	var row = row_scene.instantiate()
 	assert(row is PanelContainer and row.get_script() != null, 
 		   "fish_list_row.tscn root node is missing fish_list_row.gd script")
 
 	row.fish_resource = fish
-	renderer.place_fish_in_viewport(row.get_node("%FishViewport"), fish)
+	icons.request(fish, row.get_node("%FishIcon"))
 	_populate_row_labels(row, fish)
 	_connect_row_signals(row)
 	vbox.add_child(row)
@@ -36,10 +36,10 @@ func add_row(fish: fish_conf, renderer: FishViewportRenderer) -> Control:
 	return row
 
 ## Populate the list from an array of fish_conf resources in one call.
-func populate(fish_array: Array, renderer: FishViewportRenderer) -> void:
+func populate(fish_array: Array, icons: FishIconRenderer) -> void:
 	clear_all()
 	for fish in fish_array:
-		add_row(fish, renderer)
+		add_row(fish, icons)
 
 ## Remove rows whose fish_resource matches anything in fish_list.
 func remove_rows(fish_list: Array) -> void:
@@ -85,7 +85,7 @@ func _on_row_hovered(fish: fish_conf) -> void:
 func _on_row_clicked(fish: fish_conf) -> void:
 	row_clicked.emit(fish)
 	
-func merge(fish_array: Array, renderer: FishViewportRenderer) -> void:
+func merge(fish_array: Array, icons: FishIconRenderer) -> void:
 	var existing: Array = []
 	for child in vbox.get_children():
 		if child.get("fish_resource") != null:
@@ -93,4 +93,4 @@ func merge(fish_array: Array, renderer: FishViewportRenderer) -> void:
 	
 	for fish in fish_array:
 		if fish not in existing:
-			add_row(fish, renderer)
+			add_row(fish, icons)

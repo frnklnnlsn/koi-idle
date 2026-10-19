@@ -3,12 +3,22 @@
 [ext_resource type="Script" uid="uid://bkyojeyh7v6v5" path="res://SandBox/ListviewTest/list_ui.gd" id="1_jstvf"]
 [ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_q7idn"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="3_60prq"]
-[ext_resource type="PackedScene" uid="uid://c83nj3e08njta" path="res://fish_list_row.tscn" id="3_vhpe5"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_5oxw5"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gsvso"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
+bg_color = Color(0.054902, 0.066667, 0.176471, 1)
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 
-[node name="FishInterfaceList" type="Control" unique_id=1279328790]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_header"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+
+[node name="FishInterfaceList" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,7 +28,8 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("1_jstvf")
 
-[node name="PanelContainer" type="PanelContainer" parent="." unique_id=2064964449]
+[node name="Backdrop" type="PanelContainer" parent="."]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,123 +37,112 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
-theme_override_styles/panel = SubResource("StyleBoxEmpty_gsvso")
+theme_override_styles/panel = SubResource("StyleBoxFlat_backdrop")
 
-[node name="VBoxContainer" type="HBoxContainer" parent="PanelContainer" unique_id=1679356907]
+[node name="Columns" type="HBoxContainer" parent="Backdrop"]
 layout_mode = 2
-size_flags_stretch_ratio = 0.0
+theme_override_constants/separation = 12
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer" unique_id=1364824995]
-custom_minimum_size = Vector2(500, 0)
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 50
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 50
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer" unique_id=1660114668]
-layout_mode = 2
-
-[node name="ListContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1882436134]
+[node name="ListPanel" type="PanelContainer" parent="Backdrop/Columns"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.2
 
-[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer" unique_id=558069911]
+[node name="ListColumn" type="VBoxContainer" parent="Backdrop/Columns/ListPanel"]
 layout_mode = 2
+theme_override_constants/separation = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer" unique_id=418296922]
+[node name="Header" type="PanelContainer" parent="Backdrop/Columns/ListPanel/ListColumn"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_header")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer" unique_id=524157343]
+[node name="HeaderColumns" type="HBoxContainer" parent="Backdrop/Columns/ListPanel/ListColumn/Header"]
 layout_mode = 2
+theme_override_constants/separation = 8
 
-[node name="IconSpacer" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=1953305948]
+[node name="FishHeading" type="Label" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+text = "Fish"
+label_settings = ExtResource("1_q7idn")
+horizontal_alignment = 1
+clip_text = true
+
+[node name="IDLabelHeading" type="Label" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 2.0
-
-[node name="IDLabelHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=704975376]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(65, 0)
-layout_mode = 2
-size_flags_horizontal = 3
 text = "ID"
 label_settings = ExtResource("1_q7idn")
-horizontal_alignment = 1
+clip_text = true
 
-[node name="VSeparator" type="VSeparator" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=355755604]
-layout_mode = 2
-
-[node name="RankLableHeading2" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=1094672389]
+[node name="RankLabelHeading" type="Label" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.8
 text = "Rank"
 label_settings = ExtResource("1_q7idn")
 horizontal_alignment = 1
+clip_text = true
 
-[node name="VSeparator2" type="VSeparator" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=190969484]
-layout_mode = 2
-
-[node name="IncomeLabelHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=407379736]
+[node name="IncomeLabelHeading" type="Label" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.6
-text = "Income
-(coin/sec)"
+size_flags_stretch_ratio = 1.2
+text = "Income"
 label_settings = ExtResource("1_q7idn")
-horizontal_alignment = 1
+horizontal_alignment = 2
+clip_text = true
 
-[node name="MassLabelHeading" type="Label" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=1205184587]
+[node name="MassLabelHeading" type="Label" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(65, 0)
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.6
+size_flags_stretch_ratio = 1.2
 text = "Mass"
 label_settings = ExtResource("1_q7idn")
-horizontal_alignment = 1
+horizontal_alignment = 2
+clip_text = true
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer" unique_id=1331375993]
+[node name="ScrollPad" type="Control" parent="Backdrop/Columns/ListPanel/ListColumn/Header/HeaderColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HSeparator" type="HSeparator" parent="Backdrop/Columns/ListPanel/ListColumn"]
+layout_mode = 2
+
+[node name="ListScroll" type="ScrollContainer" parent="Backdrop/Columns/ListPanel/ListColumn"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="FishListVBox" type="VBoxContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/ScrollContainer" unique_id=2134818926]
+[node name="FishListVBox" type="VBoxContainer" parent="Backdrop/Columns/ListPanel/ListColumn/ListScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="Charts" type="VBoxContainer" parent="Backdrop/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="GrowthcurveList" parent="Backdrop/Columns/Charts" instance=ExtResource("3_60prq")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ListLineContainer" parent="PanelContainer/VBoxContainer/MarginContainer/HBoxContainer/ListContainer/PanelContainer/VBoxContainer/ScrollContainer/FishListVBox" unique_id=124020186 instance=ExtResource("3_vhpe5")]
+[node name="HistogramList" parent="Backdrop/Columns/Charts" instance=ExtResource("4_5oxw5")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
-
-[node name="HBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=827027784]
-layout_mode = 2
-size_flags_horizontal = 6
 size_flags_vertical = 3
-
-[node name="MarginContainer6" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=1845466250]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 10
-
-[node name="GrowthcurveList" parent="PanelContainer/VBoxContainer/HBoxContainer/MarginContainer6" unique_id=1874287774 instance=ExtResource("3_60prq")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 300)
-layout_mode = 2
-
-[node name="histogramContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer" unique_id=106750612]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 10
-
-[node name="HistogramList" parent="PanelContainer/VBoxContainer/HBoxContainer/histogramContainer" unique_id=1053880953 instance=ExtResource("4_5oxw5")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 300)
-layout_mode = 2

@@ -62,6 +62,7 @@ var _swim_area: SwimArea
 
 
 func _ready() -> void:
+	current = self
 	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
 	if swim_shape:
 		_swim_area = swim_shape.make_swim_area()
@@ -192,10 +193,33 @@ func _spawn_filtered(list: Array) -> void:
 
 ## How big a fish should look: 1 on entering the pond, more as it grows.
 func size_for(fish: fish_conf) -> float:
+	return growth_size(fish, size_exponent, max_size_factor)
+
+
+## The pond's size rule as a plain function: 1 on entering the pond (or not
+## in it yet), growth ^ exponent after, capped. Other screens (the fish list)
+## use it with the running pond's settings through Pond.size_of().
+static func growth_size(fish: fish_conf, exponent: float, cap: float) -> float:
 	if fish == null or fish.y_start <= 0.0:
 		return 1.0
 	var growth := maxf(fish.mass / fish.y_start, 1.0)
-	return clampf(pow(growth, size_exponent), 1.0, max_size_factor)
+	return clampf(pow(growth, exponent), 1.0, cap)
+
+
+## The running pond (for size_of / max_size), or null.
+static var current: Pond = null
+
+
+## How big `fish` is drawn in the pond (growth only, not depth).
+static func size_of(fish: fish_conf) -> float:
+	if current and is_instance_valid(current):
+		return current.size_for(fish)
+	return growth_size(fish, 0.333, 4.0)
+
+
+## The biggest size a fish can reach in the pond.
+static func max_size() -> float:
+	return current.max_size_factor if current and is_instance_valid(current) else 4.0
 
 
 func _update_sizes(seconds: float) -> void:
