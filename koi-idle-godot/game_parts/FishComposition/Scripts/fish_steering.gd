@@ -33,6 +33,27 @@ var swim_area: SwimArea = null
 ## Was 0.06; higher = less sliding along the edge.
 @export_range(0.0, 1.0, 0.01) var edge_bounce: float = 0.3
 
+# --- Schooling ---
+## Set every frame by the school while following (zero = wander on its own).
+var follow_dir: Vector2 = Vector2.ZERO
+## How strongly a follower steers toward follow_dir (wander uses wander_strength).
+@export var follow_strength: float = 1.2
+## Tightest turn allowed, as a radius in pond pixels (0 = no limit). Set while
+## schooling: the slower the fish, the less it can turn per frame, so it
+## swings round in an arc instead of folding its body in place.
+var turn_radius: float = 0.0
+var _radius_fade_from := 0.0
+var _radius_fade_left := 0.0
+var _radius_fade_time := 1.0
+
+
+## Let the turn limit go gradually (after leaving a school), so a fish
+## doesn't snap into a tight turn the moment it's on its own.
+func fade_out_turn_radius(seconds: float) -> void:
+	_radius_fade_from = turn_radius
+	_radius_fade_time = maxf(seconds, 0.01)
+	_radius_fade_left = _radius_fade_time
+
 # --- Live state (readable by coordinator) ---
 var current_direction:  Vector2 = Vector2.RIGHT
 var previous_direction: Vector2 = Vector2.RIGHT
@@ -63,6 +84,11 @@ func init(initial_direction: Vector2, fish_scale: float) -> void:
 # ------------------------------------------------------------------ Entry override
 
 ## Lock the fish onto a straight exit path immediately after spawning from a pipe.
+## Still swimming out of the pipe (begin_entry).
+func is_entering() -> bool:
+	return _entry_active
+
+
 func begin_entry(direction: Vector2, duration: float) -> void:
 	_entry_active    = true
 	_entry_timer     = 0.0
@@ -105,6 +131,11 @@ func _update_wander(head_global: Vector2, seg_length: float,
 		_wander_timer  = 0.0
 
 	var wander_force = Vector2(cos(_wander_angle), sin(_wander_angle)) * wander_strength
+	# In a school: head where the school says instead of wandering. Keep the
+	# wander angle in step so leaving the school doesn't jerk the fish round.
+	if follow_dir != Vector2.ZERO:
+		wander_force = follow_dir * follow_strength
+		_wander_angle = follow_dir.angle()
 
 	# Boundary avoidance
 	var boundary_force = Vector2.ZERO
@@ -133,6 +164,11 @@ func _update_wander(head_global: Vector2, seg_length: float,
 	var smoothed          = previous_direction.lerp(desired, 0.1 * turn_mult)
 	var angle_diff        = current_direction.angle_to(smoothed)
 	var max_turn          = max_turn_angle * turn_mult
+	if _radius_fade_left > 0.0:
+		_radius_fade_left = maxf(_radius_fade_left - get_process_delta_time(), 0.0)
+		turn_radius = _radius_fade_from * _radius_fade_left / _radius_fade_time
+	if turn_radius > 0.0:
+		max_turn = minf(max_turn, maxf(seg_length * speed / turn_radius, 0.002))
 	if abs(angle_diff) > max_turn:
 		smoothed = current_direction.rotated(sign(angle_diff) * max_turn)
 
