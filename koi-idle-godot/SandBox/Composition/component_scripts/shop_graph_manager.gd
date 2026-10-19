@@ -4,7 +4,8 @@ extends Node
 var distribution_graph
 var growth_curve
 var histogram_graph
-var is_pond: bool = false  # ← ADD THIS
+## Showing pond fish (list view): the growth chart marks their current growth.
+var is_pond: bool = false
 
 func _init(dist, growth, hist):
 	distribution_graph = dist
@@ -19,8 +20,11 @@ func update_for_fish(fish: fish_conf):
 			distribution_graph.set_fish_value(fish.value)
 	if growth_curve:
 		growth_curve.set_fish_growth(fish)
-		if is_pond:                             # ← ADD THIS
+		# Pond fish get a "Now" dot at their current growth; elsewhere none.
+		if is_pond:
 			growth_curve.set_progress_marker(fish)
+		elif growth_curve.has_method("clear_progress_marker"):
+			growth_curve.clear_progress_marker()
 	if histogram_graph: histogram_graph.set_fish_card_hover(fish)
 
 ## The current set of fish (shop batch, pond, ...). Charts that compare fish

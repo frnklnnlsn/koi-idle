@@ -29,6 +29,11 @@ var _all_view := true
 var _series_fish: Array = []   # series index -> fish (All view clicks)
 var _picked: Array = []   # box-selected fish (UIPalette picked colour)
 var _collection_mode := false   # given a collection (shop / fishing), not just one fish (list view)
+## Pond fish shown with a "Now" dot on their curve (their current growth):
+## the fish on the fishing line, or the fish picked in the pond list.
+var _now_fish: Array = []
+var _drawn_now: Array = []     # Vector2(hours, mass) per dot, as last drawn
+var _drawn_x_max := 1.0        # hours the x axis spanned when they were drawn
 var _caught: Array = []   # fishing: on the line now (accent)
 var _earlier: Array = []  # fishing: caught earlier this session (faded)
 
@@ -50,7 +55,7 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 	for h in xs:
 		mass.append(_mass(data, h))
 
-	var opts := {"y_log": true, "minimal": true, "hover_nearest": false, "colors": [UIPalette.get_palette().accent], "marker_color": UIPalette.get_palette().accent}
+	var opts := {"y_log": true, "minimal": true, "hover_nearest": false, "colors": [UIPalette.get_palette().accent], "marker_color": now_color()}
 	if hours_now >= 0.0:
 		opts["markers"] = {"Now": Vector2(hours_now, maxf(data.get("mass", base), base))}
 		opts["marker_drops"] = false
@@ -59,7 +64,8 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 
 
 ## Many fish. data: {"curves": Array of curve dicts (as draw()), "selected": int
-## (-1 = none), "picked": Array[int], "caught": Array[int], "earlier": Array[int]}.
+## (-1 = none), "picked": Array[int], "caught": Array[int], "earlier": Array[int],
+## "now": Array of [curve index, hours] (a dot on that curve at that age)}.
 ## The selected curve is drawn last, in colour; picked (box-selected) curves in
 ## the palette's picked colour; caught ones (fishing) in the accent colour,
 ## earlier catches faded.
@@ -73,10 +79,8 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	var picked: Array = data.get("picked", [])
 	var caught: Array = data.get("caught", [])
 	var earlier: Array = data.get("earlier", [])
-	var x_max := 1.0
-	for c in curves:
-		x_max = maxf(x_max, grown_hours(c))
-	x_max = minf(x_max, MAX_HOURS)
+	var now: Array = data.get("now", [])
+	var x_max := all_x_max(curves, now)
 	var xs := _hours(x_max)
 
 	var pal := UIPalette.get_palette()
@@ -107,7 +111,35 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	var opts := {"y_log": true, "minimal": true, "colors": colors, "hover_nearest": true}
 	if on_click.is_valid():
 		opts["on_click"] = on_click
+	# "Now" dots: on the curve at the fish's age (past the axis end: at the end).
+	var markers := {}
+	for k in now.size():
+		var i: int = now[k][0]
+		var h := minf(now[k][1], x_max)
+		markers["Now %d" % (k + 1)] = Vector2(h, _mass(curves[i], h))
+	if not markers.is_empty():
+		opts["markers"] = markers
+		opts["marker_color"] = now_color()
+		opts["marker_drops"] = false
 	TauCharts.line(p, "Growth · all fish", xs, series, opts)
+
+
+## Hours the All view's x axis spans: until the slowest curve is grown (at
+## most MAX_HOURS), stretched to fit "Now" dots within that cap.
+static func all_x_max(curves: Array, now: Array = []) -> float:
+	var x_max := 1.0
+	for c in curves:
+		x_max = maxf(x_max, grown_hours(c))
+	x_max = minf(x_max, MAX_HOURS)
+	for n in now:
+		x_max = maxf(x_max, minf(float(n[1]) * 1.05, MAX_HOURS))
+	return x_max
+
+
+## Colour of the "Now" dot: the palette's text colour, so it stands out on the
+## accent-coloured curve of the selected / caught fish.
+static func now_color() -> Color:
+	return UIPalette.get_palette().text
 
 
 ## Hours until the curve is ~99% grown.
@@ -150,6 +182,10 @@ static func data_for(fish) -> Dictionary:
 
 func _ready() -> void:
 	add_tabs(PackedStringArray(["All", "This fish"]), _on_view)
+	# As fish grow, move their "Now" dots (only redraws if a dot visibly moved).
+	var growth := get_node_or_null("/root/FishGrowthManager")
+	if growth and not Engine.is_editor_hint():
+		growth.growth_updated.connect(_on_growth_tick)
 	_redraw()
 
 
@@ -191,21 +227,54 @@ func set_fish_growth(fish_res) -> void:
 func clear_fish_growth() -> void:
 	_selected = null
 	_data = _DEFAULT.duplicate()
+	_now_fish = []
 	_redraw()
 
 
-## Show a dot at the fish's current mass (pond view).
+## Show a dot at the fish's current growth (pond list: the picked fish).
 func set_progress_marker(fish_res) -> void:
-	if fish_res:
-		_data["hours"] = fish_res.age * FishGrowthManager.TIME_SCALE / 3600.0
-		_data["mass"] = fish_res.mass
-		_redraw()
+	set_now_fish([fish_res] if fish_res else [])
 
 
 func clear_progress_marker() -> void:
-	_data["hours"] = -1.0
-	_data["mass"] = -1.0
+	set_now_fish([])
+
+
+## Pond fish to show with a "Now" dot on their curve, in both views (fishing:
+## the fish on the line). Fish that aren't in the pond yet get no dot.
+func set_now_fish(fish_array: Array) -> void:
+	var fish := fish_array.filter(func(f): return f is fish_conf and f.y_start > 0.0)
+	if fish == _now_fish and not _now_moved():
+		return
+	_now_fish = fish
 	_redraw()
+
+
+func _on_growth_tick() -> void:
+	if not _now_fish.is_empty() and is_visible_in_tree() and _now_moved():
+		_redraw()
+
+
+## Where a fish's dot goes: Vector2(hours in the pond, mass on its curve).
+static func now_point(fish: fish_conf) -> Vector2:
+	var h := FishGrowthManager.pond_hours(fish)
+	return Vector2(h, _mass(data_for(fish), h))
+
+
+## Has any dot moved enough to see since it was drawn (1% of the axis, or 2%
+## in mass)? Growth ticks every few seconds; redrawing a chart for an
+## invisible move would only make it blink.
+func _now_moved() -> bool:
+	if _now_fish.size() != _drawn_now.size():
+		return true
+	for k in _now_fish.size():
+		var a := now_point(_now_fish[k])
+		var b: Vector2 = _drawn_now[k]
+		if absf(a.x - b.x) > maxf(_drawn_x_max, 1.0) * 0.01:
+			return true
+		if absf(log(maxf(a.y, 0.0001) / maxf(b.y, 0.0001))) > 0.02:
+			return true
+	return false
 
 
 func _on_view(i: int) -> void:
@@ -244,19 +313,45 @@ func _redraw_now() -> void:
 				caught.append(i)
 			elif _fish[i] in _earlier:
 				earlier.append(i)
+		var now := []
+		_drawn_now.clear()
+		for f in _now_fish:
+			var i := _fish.find(f)
+			if i >= 0:
+				var pt := now_point(f)
+				now.append([i, pt.x])
+				_drawn_now.append(pt)
+		_drawn_x_max = all_x_max(curves, now)
 		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected), "picked": picked,
-			"caught": caught, "earlier": earlier}, _on_plot_clicked)
+			"caught": caught, "earlier": earlier, "now": now}, _on_plot_clicked)
 	else:
-		draw(plot, _data)
+		# One fish: the hovered / selected one, else the newest "Now" fish
+		# (fishing: the fish just caught), with its dot if it has one.
+		var shown: fish_conf = _selected
+		var data := _data.duplicate()
+		if shown == null and not _now_fish.is_empty():
+			shown = _now_fish.back()
+			data = data_for(shown)
+		_drawn_now.clear()
+		if shown != null and shown in _now_fish:
+			var pt := now_point(shown)
+			data["hours"] = pt.x
+			data["mass"] = pt.y
+			_drawn_now.append(pt)
+			_drawn_x_max = maxf(grown_hours(data), pt.x * 1.05)
+		draw(plot, data)
 
 
 func _on_plot_clicked(hits: Array) -> void:
 	if hits.is_empty() or not _all_view:
 		return
-	var best = hits[0]
+	# Curves are named "1", "2", ...; skip the "Now" dots.
+	var best = null
 	for h in hits:
-		if h.distance_px < best.distance_px:
+		if String(h.series_name).is_valid_int() and (best == null or h.distance_px < best.distance_px):
 			best = h
-	var i := int(best.series_name) - 1   # series are named "1", "2", ...
+	if best == null:
+		return
+	var i := int(best.series_name) - 1
 	if i >= 0 and i < _series_fish.size():
 		fish_clicked.emit.call_deferred(_series_fish[i])

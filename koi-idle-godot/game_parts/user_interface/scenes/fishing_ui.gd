@@ -218,13 +218,16 @@ func _refresh() -> void:
 		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
 
 
-## Every pond fish; the line's fish highlighted.
+## Every pond fish; the line's fish highlighted, with a "Now" dot on their
+## growth curves.
 func _update_charts(pond: Array) -> void:
 	if not is_visible_in_tree():
 		return
 	for chart in [_scatter, _growth, _bars]:
 		chart.set_fish_collection(pond)
 		chart.set_caught(line.chain, [])
+	# A dot on each line fish's growth curve at its current growth.
+	_growth.set_now_fish(line.chain)
 
 
 func _set_status(bbcode: String) -> void:
