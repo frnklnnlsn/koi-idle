@@ -1,29 +1,27 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://chr2uba2n6oeh"]
 
 [ext_resource type="Shader" uid="uid://bhq2gr2uohx5b" path="res://game_parts/FishComposition/shaders/pond_water.gdshader" id="1_water"]
-[ext_resource type="Texture2D" uid="uid://dtgyhc27mfirj" path="res://game_parts/FishComposition/resources/water_noise.tres" id="2_noise"]
 
 [resource]
 shader = ExtResource("1_water")
 shader_parameter/surface_layer = false
 shader_parameter/pixel_size = 2.0
 shader_parameter/water_color = Color(0.05, 0.07, 0.18, 0)
-shader_parameter/noise = ExtResource("2_noise")
 shader_parameter/noise_px = 256.0
 shader_parameter/rippling = 4.0
-shader_parameter/light_color = Color(0.44705883, 0.59607846, 0.9490196, 0.039215688)
-shader_parameter/highlight_color = Color(0.8, 0.9033333, 1, 0.039215688)
-shader_parameter/light_scale = 10.0
-shader_parameter/light_speed = 0.5
+shader_parameter/light_color = Color(0.11764706, 0.16078432, 0.25882354, 0.039215688)
+shader_parameter/highlight_color = Color(0.2509804, 0.28235295, 0.32156864, 0.039215688)
+shader_parameter/light_scale = 15.0
+shader_parameter/light_speed = 0.35000000521542
 shader_parameter/light_width = 0.38999999128272
 shader_parameter/band_at = 0.25
 shader_parameter/core_at = 0.7
-shader_parameter/sparkle_color = Color(1, 1, 1, 0.85)
+shader_parameter/sparkle_color = Color(1, 1, 1, 0.09411765)
 shader_parameter/sparkle_threshold = 0.55
 shader_parameter/sparkle_scale = 20.0
 shader_parameter/sparkles_only_on_light = true
 shader_parameter/foam_color = Color(0.85, 0.92, 1, 0.5)
-shader_parameter/foam_width = 6.0
+shader_parameter/foam_width = 0.0
 shader_parameter/foam_center = Vector2(0, 0)
 shader_parameter/foam_radii = Vector2(0, 0)
 shader_parameter/foam_rotation = 0.0

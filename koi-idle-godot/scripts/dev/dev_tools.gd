@@ -7,7 +7,7 @@
 # exactly like it would in play.
 extends Node
 
-const TOGGLE_KEY := KEY_F1
+const TOGGLE_KEY := KEY_P
 
 var _layer: CanvasLayer
 var _panel: PanelContainer

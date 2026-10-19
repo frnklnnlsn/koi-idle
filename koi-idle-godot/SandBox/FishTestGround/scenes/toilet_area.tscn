@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
 [ext_resource type="Script" uid="uid://cfmoa6hcvdirb" path="res://scripts/swim_shape.gd" id="3_swim"]
-[ext_resource type="Material" path="res://game_parts/FishComposition/resources/underwater_material.tres" id="4_under"]
+[ext_resource type="Material" uid="uid://bctf4keiggvit" path="res://game_parts/FishComposition/resources/underwater_material.tres" id="4_under"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -16,7 +16,7 @@ height = 254.0
 [node name="ToiletArea" type="Area2D" unique_id=1489680432]
 metadata/_edit_vertical_guides_ = [128.0]
 
-[node name="Underwater" type="Node2D" parent="."]
+[node name="Underwater" type="Node2D" parent="." unique_id=1639702239]
 z_index = -20
 material = ExtResource("4_under")
 
@@ -31,13 +31,14 @@ unique_name_in_owner = true
 position = Vector2(0, 1)
 shape = SubResource("CapsuleShape2D_lsxmt")
 
-[node name="AboveWater" type="Node2D" parent="."]
+[node name="AboveWater" type="Node2D" parent="." unique_id=776651440]
 z_index = 20
 
 [node name="Rim" type="Sprite2D" parent="AboveWater" unique_id=1500697648]
 texture = ExtResource("2_t615y")
 
 [node name="SwimShape" type="CollisionShape2D" parent="." unique_id=1964696330]
+visible = false
 shape = SubResource("CapsuleShape2D_r3384")
 debug_color = Color(0.6, 1, 0.38, 0.25)
 script = ExtResource("3_swim")
