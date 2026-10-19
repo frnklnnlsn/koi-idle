@@ -13,6 +13,9 @@ class_name Pond extends SubViewport
 @export var entry_swim_duration: float  = 2.5
 ## Seconds between each fish emerging — spread them out so it looks natural
 @export var spawn_stagger_sec:   float  = 0.35
+## Keep the water effects inside the swim area (off: the pond's water fills
+## the whole view).
+@export var clip_water_to_swim_area: bool = false
 
 # ── Growth → size ───────────────────────────────────────────────────────────
 # Every fish enters the pond at the same size, whatever its mass. As it grows
@@ -62,6 +65,9 @@ func _ready() -> void:
 	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
 	if swim_shape:
 		_swim_area = swim_shape.make_swim_area()
+		# Water layers get the pond's shape (for foam / clipping, see
+		# pond_water.gdshader). Not clipped: the pond's water fills the view.
+		_swim_area.setup_water_layers([get_node_or_null("WaterFloor"), get_node_or_null("WaterSurface"), get_node_or_null("Underwater")], clip_water_to_swim_area)
 		fish_container_pond.child_entered_tree.connect(func(n):
 			if "swim_area" in n:
 				n.swim_area = _swim_area)

@@ -134,3 +134,42 @@ func get_random_interior_point() -> Vector2:
 			var r     = sqrt(randf()) * size.x * 0.85
 			return _world(Vector2(cos(angle) * r, randf_range(-half, half) * 0.85 + sin(angle) * r))
 	return center
+
+
+## Sets up a view's water layers (nodes with a water ShaderMaterial): each
+## gets its own copy of its material (the toilet and pond can share one
+## material file but have different shapes), with this shape filled in.
+## clip = only draw inside the water (pond_water's clip_to_area).
+func setup_water_layers(nodes: Array, clip: bool) -> void:
+	for n in nodes:
+		var item := n as CanvasItem
+		if item == null or not (item.material is ShaderMaterial):
+			continue
+		var mat: ShaderMaterial = item.material.duplicate()
+		item.material = mat
+		apply_to_material(mat)
+		mat.set_shader_parameter("clip_to_area", clip)
+
+
+## Gives this shape to a water shader that includes water_area.gdshaderinc
+## (pond_water / underwater), so it can stay inside the water or draw along
+## the edge.
+func apply_to_material(mat: ShaderMaterial) -> void:
+	if mat == null:
+		return
+	var kind := 0
+	var s := size
+	match shape:
+		Shape.CIRCLE:
+			kind = 1
+			s = Vector2(size.x, size.x)
+		Shape.ELLIPSE:
+			kind = 1
+		Shape.CAPSULE:
+			kind = 2
+		Shape.RECTANGLE:
+			kind = 3
+	mat.set_shader_parameter("area_shape", kind)
+	mat.set_shader_parameter("area_center", center)
+	mat.set_shader_parameter("area_size", s)
+	mat.set_shader_parameter("area_rotation", rotation)

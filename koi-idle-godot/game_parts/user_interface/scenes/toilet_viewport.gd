@@ -6,6 +6,9 @@ extends SubViewport
 @export var flush_duration:         float   = 2.0
 @export var flush_hold_duration:    float   = 0.5
 @export var flush_stagger_per_frame: int    = 3
+## Keep the water effects (sparkles, underwater bend and light) inside the
+## swim area, so the porcelain around the water stays clean.
+@export var clip_water_to_swim_area: bool = true
 
 var _display:     FishDisplay
 var _is_flushing: bool  = false
@@ -26,6 +29,9 @@ func _ready() -> void:
 	var swim_shape := get_node_or_null("ToiletArea/SwimShape") as SwimShape
 	_base_area = swim_shape.make_swim_area() if swim_shape else _FALLBACK_AREA
 	_swim_area = _base_area.duplicate()
+	# Water layers (WaterSurface sparkles, ToiletArea/Underwater bowl bottom)
+	# get the bowl's shape. The full shape, not the one the flush shrinks.
+	_base_area.setup_water_layers([get_node_or_null("WaterSurface"), get_node_or_null("ToiletArea/Underwater")], clip_water_to_swim_area)
 	# Every toilet fish gets the toilet's boundary as it's added.
 	fish_container_toilet.child_entered_tree.connect(func(n):
 		if "swim_area" in n:

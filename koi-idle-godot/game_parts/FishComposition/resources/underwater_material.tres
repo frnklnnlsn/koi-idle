@@ -1,0 +1,26 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bctf4keiggvit"]
+
+[ext_resource type="Shader" uid="uid://d2evvq7rqgyal" path="res://game_parts/FishComposition/shaders/underwater.gdshader" id="1_under"]
+
+[resource]
+shader = ExtResource("1_under")
+shader_parameter/area_shape = 0
+shader_parameter/area_center = Vector2(0, 0)
+shader_parameter/area_size = Vector2(0, 0)
+shader_parameter/area_rotation = 0.0
+shader_parameter/amplitude = 1.5000000223518
+shader_parameter/wavelength = 36.0
+shader_parameter/speed = 0.9
+shader_parameter/cross_ripple = 0.6
+shader_parameter/light_strength = 0.05000000074506
+shader_parameter/light_color = Color(5.2582845e-06, 0.19862688, 0.29356682, 0.8117647)
+shader_parameter/light_scale = 26.0
+shader_parameter/light_speed = 0.45000000670554
+shader_parameter/light_width = 0.14
+shader_parameter/band_at = 0.25
+shader_parameter/core_at = 0.7
+shader_parameter/pixel_size = 2.0
+shader_parameter/noise_px = 256.0
+shader_parameter/rippling = 4.0
+shader_parameter/water_tint = Color(1, 1, 1, 0)
+shader_parameter/only_in_water = false
