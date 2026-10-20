@@ -388,7 +388,7 @@ func _selection_info() -> String:
 	var income := 0.0
 	var refund := 0.0
 	for f in _selection:
-		income += f.income
+		income += PassiveSystems.fish_income(f)
 		refund += PassiveSystems.recycle_refund(f)
 	var room := FishHandler.toilet_space()
 	return "%d fish selected\nIncome $%s/s together\nRecycle all for $%s\nToilet room %d%s" % [

@@ -64,7 +64,9 @@ func _build_fish(rank: int) -> fish_conf:
 	fish.cost = Ranks.price(rank)
 
 	var stats := roll_stats(rank_def, _rng)
-	fish.income = Tuning.apply(Tuning.INCOME, stats["income"])
+	# The fish's own income; skills / levels apply on top when paid
+	# (PassiveSystems.income_rate), so they reach fish you already own.
+	fish.income = stats["income"]
 	fish.income_z = stats["income_z"]
 	fish.mass = stats["mass"]
 	fish.mass_z = stats["mass_z"]
@@ -72,8 +74,9 @@ func _build_fish(rank: int) -> fish_conf:
 
 	var growth := roll_growth(fish.mass, rank_def, _rng)
 	fish.growth_rate = growth["growth_rate"]
-	# Growth potential through Tuning: scales how far above its start it grows.
-	fish.carrying_capacity = fish.mass + (growth["carrying_capacity"] - fish.mass) * Tuning.apply(Tuning.GROWTH_POTENTIAL, 1.0)
+	# The fish's own max mass; size skills / levels apply on top as it grows
+	# (FishGrowthManager.max_mass), so they reach fish already in the pond.
+	fish.carrying_capacity = growth["carrying_capacity"]
 	fish.mid_point = growth["mid_point"]
 	fish.size_z = growth["size_z"]
 	fish.x_start = _x_start(fish.growth_rate)

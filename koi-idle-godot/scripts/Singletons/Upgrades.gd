@@ -24,6 +24,16 @@ func _ready() -> void:
 	Tuning.add_source(self)
 	SaveManager.save_reset.connect(changed.emit)
 	Progression.points_changed.connect(changed.emit.unbind(1))
+	_drop_removed_skills()
+
+
+## A skill taken out of skill_tree.tres can't be refunded on its own (its
+## cost is gone), so if the save owns one, respec everything once.
+func _drop_removed_skills() -> void:
+	for id in SaveManager.load_saved_data().skills.keys():
+		if tree.find(id) == null:
+			respec()
+			return
 
 
 func skills() -> Array[SkillDef]:

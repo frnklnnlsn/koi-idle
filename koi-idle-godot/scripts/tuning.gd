@@ -16,10 +16,11 @@
 #
 # Knobs (where the game reads them):
 #   price             fish price (FishGenerator, shop, rank meter, fishing)
-#   income            a new fish's income (FishGenerator)
+#   income            every fish's income (PassiveSystems.income_rate / fish_income)
 #   bite_time         fishing bite times (FishingLine.bite_range)
 #   growth_speed      how fast pond fish age (FishGrowthManager)
-#   growth_potential  how big a new fish can grow (FishGenerator)
+#   growth_potential  how far above its start every fish can grow
+#                     (FishGrowthManager.max_mass)
 #   toilet_capacity   toilet slots (FishHandler.capacity)
 #   shop_pool         shop buy pool size (Ranks.pool_size)
 #   recycle_fee       share kept back on recycling (PassiveSystems)
@@ -45,10 +46,10 @@ const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
 ## How each knob is named to the player.
 const LABELS := {
 	PRICE: "Fish price",
-	INCOME: "New fish income",
+	INCOME: "Income",
 	BITE_TIME: "Bite time",
 	GROWTH_SPEED: "Pond growth speed",
-	GROWTH_POTENTIAL: "Growth potential",
+	GROWTH_POTENTIAL: "Max fish size",
 	TOILET_CAPACITY: "Toilet capacity",
 	SHOP_POOL: "Shop pool size",
 	RECYCLE_FEE: "Recycle fee",

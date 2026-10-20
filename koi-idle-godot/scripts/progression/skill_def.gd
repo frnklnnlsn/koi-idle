@@ -5,8 +5,9 @@
 #
 #   effect at level n = (extra_per_level × n, mult_per_level ^ n)
 #
-# e.g. toilet_capacity, extra 5          -> +5, +10, +15 slots
-#      recycle_fee, mult 0.5             -> fee x0.5, x0.25
+# e.g. income, mult 1.05                 -> +5%, +10.3%, +15.8% (each level
+#                                           multiplies again)
+#      toilet_capacity, extra 5          -> +5, +10, +15 slots
 class_name SkillDef
 extends Resource
 
@@ -19,7 +20,7 @@ extends Resource
 @export_group("Effect")
 ## The number this skill changes (see tuning.gd for where each is used).
 @export_enum("price", "income", "bite_time", "growth_speed", "growth_potential",
-	"toilet_capacity", "shop_pool", "recycle_fee", "pond_sale_rate") var knob: String = "toilet_capacity"
+	"toilet_capacity", "shop_pool", "recycle_fee", "pond_sale_rate") var knob: String = "income"
 ## Added per level (slots, seconds...; for shares like recycle_fee, 0.05 = 5%).
 @export var extra_per_level: float = 0.0
 ## Multiplies per level (1 = no change, 0.9 = 10% less each level).

@@ -55,7 +55,7 @@ func _apply_display_mode() -> void:
 	if _is_pond:
 		income_label.text = "%sg" % FishLabelDisplay.num(fish_resource.mass)
 	else:
-		income_label.text = "$%s/s" % FishLabelDisplay.num(fish_resource.income)
+		income_label.text = "$%s/s" % FishLabelDisplay.num(PassiveSystems.fish_income(fish_resource))
 	# Picture size: the fish's size in the pond (growth), 1 for toilet fish.
 	var f := Pond.size_of(fish_resource) if _is_pond else 1.0
 	var w := icon_base_length * f * float(FishIconRenderer.PICTURE_SIZE.x) / (27.0 * FishIconRenderer.RENDER_SCALE)

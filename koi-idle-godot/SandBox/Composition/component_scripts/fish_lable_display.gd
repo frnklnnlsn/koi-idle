@@ -22,7 +22,8 @@ func show(fish: fish_conf) -> void:
 		clear()
 		return
 	var rank_def := Ranks.get_rank(fish.rank)
-	var potential := fish.carrying_capacity / maxf(fish.y_start if fish.y_start > 0.0 else fish.mass, 0.0001)
+	var potential := FishGrowthManager.max_mass(fish) / maxf(fish.y_start if fish.y_start > 0.0 else fish.mass, 0.0001)
+	var income := PassiveSystems.fish_income(fish)
 	var details := "%sg %s · grows ×%s %s" % [num(fish.mass), _rarity(fish.mass_z),
 		num(potential), _rarity(fish.size_z)]
 	if is_fast_grower(fish):
@@ -31,9 +32,9 @@ func show(fish: fish_conf) -> void:
 	_put(fish_rank_label, "%s   (%s)" % [rank_def.display_name, details])
 	_put(fish_cost_label, "$" + num(fish.cost))
 	var payback := ""
-	if fish.income > 0.0:
-		payback = "   pays for itself in %s" % duration(fish.cost / fish.income)
-	_put(fish_income_label, "$%s/s %s%s" % [num(fish.income), _rarity(fish.income_z), payback])
+	if income > 0.0:
+		payback = "   pays for itself in %s" % duration(fish.cost / income)
+	_put(fish_income_label, "$%s/s %s%s" % [num(income), _rarity(fish.income_z), payback])
 	# Selling in the shop refunds the price; keeping it, then catching it from
 	# the pond later, pays its catch value (more once it has grown).
 	var catch_now := FishingLine.catch_value_of(fish)
@@ -46,13 +47,14 @@ static func describe(fish: fish_conf) -> String:
 		return ""
 	var rank_def := Ranks.get_rank(fish.rank)
 	var start := fish.y_start if fish.y_start > 0.0 else fish.mass
-	var potential := fish.carrying_capacity / maxf(start, 0.0001)
+	var potential := FishGrowthManager.max_mass(fish) / maxf(start, 0.0001)
+	var income := PassiveSystems.fish_income(fish)
 	var cz := FishStats.fish_combined_z(fish)
 	var lines := [
 		"%s · %s (%s overall)%s" % [rank_def.display_name, FishStats.tier_name(cz),
 			FishStats.rarity_label(cz), "   · fast grower!" if is_fast_grower(fish) else ""],
-		"Income  $%s/s %s   pays for itself in %s" % [num(fish.income), _rarity(fish.income_z),
-			duration(fish.cost / fish.income) if fish.income > 0.0 else "—"],
+		"Income  $%s/s %s   pays for itself in %s" % [num(income), _rarity(fish.income_z),
+			duration(fish.cost / income) if income > 0.0 else "—"],
 		"Size    %sg %s   grows ×%s %s" % [num(fish.mass), _rarity(fish.mass_z), num(potential), _rarity(fish.size_z)],
 		"Price   $%s   recycle $%s   catch now $%s" % [num(fish.cost), num(PassiveSystems.recycle_refund(fish)),
 			num(FishingLine.catch_value_of(fish))],

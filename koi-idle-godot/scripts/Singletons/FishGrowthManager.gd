@@ -66,7 +66,16 @@ static func mass_at(base: float, k: float, growth_rate: float, mid_point: float,
 
 
 static func mass_for(fish: fish_conf, hours: float) -> float:
-	return GrowthModel.mass_at(fish.y_start, float(fish.carrying_capacity), fish.growth_rate, fish.mid_point, hours)
+	return GrowthModel.mass_at(fish.y_start, max_mass(fish), fish.growth_rate, fish.mid_point, hours)
+
+
+## How big `fish` can grow, with Tuning growth_potential (size skills, the
+## level) stretching how far above its starting mass it goes. Applies to
+## every fish, already in the pond or not.
+static func max_mass(fish: fish_conf) -> float:
+	var base := fish.y_start if fish.y_start > 0.0 else fish.mass
+	var k := float(fish.carrying_capacity)
+	return base + maxf(k - base, 0.0) * maxf(Tuning.apply(Tuning.GROWTH_POTENTIAL, 1.0), 0.0)
 
 
 # --- Ticking ---------------------------------------------------------------

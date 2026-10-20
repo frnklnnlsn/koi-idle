@@ -56,12 +56,28 @@ func _apply_offline_earnings() -> void:
 	if seconds_away <= 0.0:
 		return
 
-	var earnings := income * seconds_away
+	var earnings := income_rate() * seconds_away
 	net_worth += earnings
 	last_offline = {"seconds": seconds_away, "coins": earnings}
 
+## Money per second right now: the toilet fish's own incomes, through Tuning
+## (income skills and the level apply to every fish, old and new). A knob
+## "extra" counts once per fish.
+func income_rate() -> float:
+	var m := Tuning.modifier(Tuning.INCOME)
+	if m == Vector2(0.0, 1.0):
+		return income
+	var n := SaveManager.load_saved_data().list_of_work_fish.size()
+	return maxf((income + m.x * n) * m.y, 0.0)
+
+
+## One fish's income with skills and the level applied (for labels).
+static func fish_income(fish: fish_conf) -> float:
+	return maxf(Tuning.apply(Tuning.INCOME, fish.income), 0.0)
+
+
 func _process(delta: float) -> void:
-	net_worth += income * delta
+	net_worth += income_rate() * delta
 
 	_save_timer += delta
 	if _save_timer >= SAVE_INTERVAL:

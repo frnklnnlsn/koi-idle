@@ -171,7 +171,7 @@ static func data_for(fish) -> Dictionary:
 		# Fish not yet in the pond haven't recorded a base; their mass is it.
 		"base": fish.y_start if fish.y_start > 0.0 else fish.mass,
 		"growth_rate": fish.growth_rate,
-		"carrying_capacity": fish.carrying_capacity,
+		"carrying_capacity": FishGrowthManager.max_mass(fish),
 		"mid_point": fish.mid_point,
 		"hours": -1.0,
 		"mass": -1.0,
