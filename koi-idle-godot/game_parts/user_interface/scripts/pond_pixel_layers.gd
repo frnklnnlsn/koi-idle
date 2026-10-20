@@ -5,7 +5,7 @@
 # The pond itself is drawn at low resolution and blown up (the container's
 # stretch_shrink), which pixelates everything by the same amount. A fish that
 # has grown 4× would look 4× smoother than a new one. So each fish is put in
-# a size group (Pond.pixel_steps) and every group gets its own view of the
+# a size group (Pond.pixel_step / max_pixel_scale) and every group gets its own view of the
 # same water at a lower resolution:
 #
 #   group 1 (normal size)   pond resolution        (pixels 1×)
@@ -62,7 +62,7 @@ func _ready() -> void:
 		push_warning("PondPixelLayers: no source set")
 		return
 	var pond: SubViewport = source.get_child(0)
-	var groups: int = pond.pixel_steps.size() + 1 if "pixel_steps" in pond else 1
+	var groups: int = pond.max_pixel_scale if "max_pixel_scale" in pond else 1
 	# The pond's own view keeps everything except the fish and what's above.
 	pond.canvas_cull_mask = 1
 	# Things above the fish (surface sparkles...) go to their own layer.

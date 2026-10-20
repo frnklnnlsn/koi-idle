@@ -49,11 +49,20 @@ class_name Pond extends SubViewport
 
 # ── Pixel size ──────────────────────────────────────────────────────────────
 # Bigger fish get bigger pixels so they keep the pixel-art look (see
-# pond_pixel_layers.gd). A fish's drawn size picks its group: below the
-# first step = normal pixels, below the second = 2×, and so on.
+# pond_pixel_layers.gd). Every time a fish gets pixel_step bigger than it was
+# when it entered the pond, its pixels go up by one, up to max_pixel_scale:
+#
+#   pixel_step 1.0:  size 1 → 1×,  size 2 → 2×,  size 3 → 3×,  size 4 → 4×
+#   pixel_step 0.5:  size 1 → 1×,  1.5 → 2×,  2 → 3×,  2.5 → 4× (chunky sooner)
+#
+# "Size" is how big the fish is drawn: 1 on entering the pond, up to
+# max_size_factor when fully grown (smaller for deeper fish).
 @export_group("Pixel size")
-## Size where each next pixel size starts (3 steps = 4 groups: 1×, 2×, 3×, 4×).
-@export var pixel_steps: PackedFloat32Array = PackedFloat32Array([1.5, 2.5, 3.5])
+## How much bigger a fish must get for each next pixel size.
+@export_range(0.1, 4.0, 0.05) var pixel_step: float = 1.0
+## Biggest pixels a fish can get (× normal). Also how many pixel layers the
+## pond draws, so keep it small.
+@export_range(1, 8) var max_pixel_scale: int = 4
 ## Blend the body pattern on big-pixel fish into average colours (calmer but
 ## muddier). Off = crisp palette colours, busy patterns may look speckled.
 @export var smooth_big_patterns: bool = false
@@ -254,13 +263,12 @@ func _size_fish(node: Node, seconds: float) -> void:
 	node.modulate = Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
 
 
-## Pixel size group for a fish drawn `drawn` × normal size (0 = normal pixels).
+## Pixel size group for a fish drawn `drawn` × normal size: 0 = normal
+## pixels, 1 = 2×, ... (one more for every pixel_step it has grown).
 func pixel_group(drawn: float) -> int:
-	var g := 0
-	for step in pixel_steps:
-		if drawn >= step:
-			g += 1
-	return g
+	# A little slack: growth ^ 0.333 lands just under whole sizes (8^0.333 = 1.9986).
+	var g := floori((drawn - 1.0 + 0.01) / maxf(pixel_step, 0.01))
+	return clampi(g, 0, max_pixel_scale - 1)
 
 
 ## The fish's depth level, picking one at random the first time.
