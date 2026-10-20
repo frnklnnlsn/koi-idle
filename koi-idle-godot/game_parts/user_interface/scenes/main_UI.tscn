@@ -26,6 +26,8 @@
 [ext_resource type="Material" uid="uid://chr2uba2n6oeh" path="res://game_parts/FishComposition/resources/pond_water_floor.tres" id="24_waterfloor"]
 [ext_resource type="Material" uid="uid://cl360n1m31cq2" path="res://game_parts/FishComposition/resources/pond_water_surface.tres" id="25_watersurface"]
 [ext_resource type="Script" uid="uid://bmmn0wjuletum" path="res://scripts/school_manager.gd" id="30_schools"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/skill_tree_ui.tscn" id="31_skilltree"]
+[ext_resource type="Texture2D" path="res://art/ui_icons/skills.png" id="32_ic_skills"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -177,8 +179,9 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
-tooltip_text = "Skill points to spend. The first fish bought of each rank earns one, again on every prestige level."
-mouse_filter = 1
+tooltip_text = "Skill points to spend in the skill tree (click or T). The first fish bought of each rank earns one, again on every prestige level."
+mouse_filter = 0
+mouse_default_cursor_shape = 2
 theme_type_variation = &"MoneyBox"
 theme_override_font_sizes/font_size = 16
 text = "0 skill points"
@@ -199,6 +202,12 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 
 [node name="FishingUI" parent="VBoxContainer" unique_id=1860266520 instance=ExtResource("10_y4jyc")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SkillTreeUI" parent="VBoxContainer" instance=ExtResource("31_skilltree")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -263,6 +272,14 @@ layout_mode = 2
 tooltip_text = "Go fishing"
 focus_mode = 0
 icon = ExtResource("18_ic_fish")
+icon_alignment = 1
+
+[node name="Skills" type="Button" parent="Sidebar/Buttons"]
+custom_minimum_size = Vector2(34, 34)
+layout_mode = 2
+tooltip_text = "Skill tree  (t)"
+focus_mode = 0
+icon = ExtResource("32_ic_skills")
 icon_alignment = 1
 
 [node name="ShopBar" type="PanelContainer" parent="." unique_id=1971783586]
@@ -337,6 +354,7 @@ unique_name_in_owner = true
 layout_mode = 1
 
 [connection signal="pressed" from="Sidebar/Buttons/Flush" to="." method="_on_flush_pressed"]
+[connection signal="pressed" from="Sidebar/Buttons/Skills" to="." method="_on_skills_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/View" to="." method="_on_view_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/List" to="." method="_on_list_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Shop" to="." method="_on_shop_pressed"]

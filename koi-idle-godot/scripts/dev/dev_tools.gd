@@ -55,6 +55,16 @@ func _add_money(amount: float) -> void:
 	_say("Added $%s" % _commas(amount))
 
 
+func _add_points(n: int) -> void:
+	Progression.refund(n)
+	_say("Added %d skill point%s (%d to spend)" % [n, "" if n == 1 else "s", Progression.points()])
+
+
+func _respec() -> void:
+	var back := Upgrades.respec()
+	_say("Skills reset, %d point%s back" % [back, "" if back == 1 else "s"])
+
+
 func _zero_money() -> void:
 	PassiveSystems.net_worth = 0.0
 	PassiveSystems._flush_to_save()
@@ -245,6 +255,9 @@ func _build_ui() -> void:
 	_count.value = 3
 	pick.add_child(_count)
 	_row(box, [["→ Shop (free)", _spawn_shop], ["→ Toilet", _spawn_toilet], ["→ Pond", _spawn_pond]])
+
+	_section(box, "Skill points")
+	_row(box, [["+1 point", _add_points.bind(1)], ["+5 points", _add_points.bind(5)], ["Respec (refund all)", _respec]])
 
 	_section(box, "Time away (real offline catch-up)")
 	_row(box, [["10 min", _away.bind(600.0)], ["1 hour", _away.bind(3600.0)], ["8 hours", _away.bind(8.0 * 3600.0)]])

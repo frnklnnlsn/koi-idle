@@ -7,6 +7,8 @@ extends Control
 @onready var toilet:          SubViewportContainer = %ToiletViewportContainer
 @onready var pond:            SubViewportContainer = %PondViewportContainer
 @onready var fishing_ui: Control = %FishingUI
+## The skill tree screen (skill_tree_ui.tscn). T or the Skills button.
+@onready var skill_tree_ui: SkillTreeUI = %SkillTreeUI
 
 ## The keyboard terminal along the bottom (command_line.tscn); style and size
 ## it in the editor. The rest of the UI is kept above it.
@@ -33,20 +35,31 @@ const ESC_CLOSES := "esc_closes"
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	# Keys drive the shop while it's open.
-	command_line.target_provider = func(): return shop_ui if shop_ui.visible else null
+	# Keys drive the skill tree while it's open.
+	command_line.target_provider = func():
+		if shop_ui.visible:
+			return shop_ui
+		return skill_tree_ui if skill_tree_ui.visible else null
 	command_line.resized.connect(_fit_above_terminal)
 	# S opens / closes the shop from anywhere.
 	command_line.global_keys["s"] = _on_shop_pressed
 	# V switches between the toilet and the pond, like the View button.
 	command_line.global_keys["v"] = _on_view_pressed
+	# T opens / closes the skill tree.
+	command_line.global_keys["t"] = _on_skills_pressed
 	# Esc closes the open panel (once nothing is half typed in the terminal).
 	command_line.global_keys["escape"] = close_open_panel
-	for panel in [shop_ui, list_ui, fishing_ui]:
+	for panel in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
 		panel.add_to_group(ESC_CLOSES)
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
 	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
+	skill_tree_ui.action_message.connect(command_line.say)
+	# Clicking the points counter opens the tree.
+	skill_points_label.gui_input.connect(func(e):
+		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
+			_on_skills_pressed())
 	Progression.points_changed.connect(_show_skill_points.unbind(1))
 	Progression.milestone_earned.connect(_on_milestone_earned)
 	Progression.credited_existing.connect(_on_credited_existing)
@@ -108,7 +121,7 @@ func _on_milestone_earned(title: String, points: int, first_ever: bool) -> void:
 	# Deferred: the purchase's own "Bought ..." message comes right after this
 	# and would hide it.
 	if first_ever:
-		command_line.say.call_deferred("Skill point earned: %s! The first fish of each rank earns one (skill tree coming soon)" % title.to_lower())
+		command_line.say.call_deferred("Skill point earned: %s! The first fish of each rank earns one. Spend them in the skill tree (t)" % title.to_lower())
 	else:
 		command_line.say.call_deferred("+%d skill point%s: %s  (%d to spend)" % [points, "" if points == 1 else "s", title.to_lower(), Progression.points()])
 
@@ -161,16 +174,23 @@ static func _with_commas(n: int) -> String:
 	return ("-" if n < 0 else "") + digits + out
 
 # ── Button handlers ───────────────────────────────────────────────────────────
+## Opens `panel` (closing the other panels), or closes it if it's open.
+## Returns true if it's now open.
+func _toggle_panel(panel: Control) -> bool:
+	var open := not panel.visible
+	for p in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
+		if p != panel and open:
+			p.visible = false
+	panel.visible = open
+	return open
+
+
 func _on_shop_pressed() -> void:
-	shop_ui.visible = not shop_ui.visible
-	if shop_ui.visible:
-		list_ui.visible = false
-		fishing_ui.visible = false
+	_toggle_panel(shop_ui)
+func _on_skills_pressed() -> void:
+	_toggle_panel(skill_tree_ui)
 func _on_list_pressed() -> void:
-	list_ui.visible = not list_ui.visible
-	if list_ui.visible:
-		shop_ui.visible = false
-		fishing_ui.visible = false
+	if _toggle_panel(list_ui):
 		list_ui.refresh(pond.visible)
 func _on_view_pressed() -> void:
 	pond.visible   = not pond.visible
@@ -194,7 +214,4 @@ func _on_flush_pressed() -> void:
 
 
 func _on_go_fishing_pressed() -> void:
-	fishing_ui.visible = not fishing_ui.visible
-	if fishing_ui.visible:
-		shop_ui.visible = false
-		list_ui.visible = false
+	_toggle_panel(fishing_ui)

@@ -22,6 +22,10 @@ const CURRENT_VERSION := 1
 @export var points_earned: int = 0
 ## Milestones already earned (keys from Progression).
 @export var claimed_milestones: PackedStringArray = PackedStringArray()
+## Skill levels bought: skill id -> level (Upgrades).
+@export var skills: Dictionary = {}
+## Points spent on those, given back on a respec.
+@export var skill_points_spent: int = 0
 ## False on saves from before skill points: Progression then credits the
 ## ranks already owned, once.
 @export var progression_started: bool = false

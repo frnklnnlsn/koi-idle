@@ -12,6 +12,8 @@
 #     func tuning_modifier(knob: String) -> Vector2   # x = extra, y = multiplier
 # registered with Tuning.add_source(). Return Vector2(0, 1) for "no change".
 #
+# Sources so far: Upgrades (the skill tree). Next: the prestige level.
+#
 # Knobs (where the game reads them):
 #   price             fish price (FishGenerator, shop, rank meter, fishing)
 #   income            a new fish's income (FishGenerator)
@@ -36,6 +38,24 @@ const TOILET_CAPACITY := "toilet_capacity"
 const SHOP_POOL := "shop_pool"
 const RECYCLE_FEE := "recycle_fee"
 const POND_SALE_RATE := "pond_sale_rate"
+
+## Every knob, for pickers in the Inspector (SkillDef.knob uses the same list).
+const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
+	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE]
+## How each knob is named to the player.
+const LABELS := {
+	PRICE: "Fish price",
+	INCOME: "New fish income",
+	BITE_TIME: "Bite time",
+	GROWTH_SPEED: "Pond growth speed",
+	GROWTH_POTENTIAL: "Growth potential",
+	TOILET_CAPACITY: "Toilet capacity",
+	SHOP_POOL: "Shop pool size",
+	RECYCLE_FEE: "Recycle fee",
+	POND_SALE_RATE: "Pond sale rate",
+}
+## Knobs that are shares (0..1): an extra on these shows as percentage points.
+const SHARES := [RECYCLE_FEE, POND_SALE_RATE]
 
 static var _sources: Array = []
 
@@ -77,3 +97,21 @@ static func apply_int(knob: String, base: int, minimum: int = 0) -> int:
 ## The same for a share (0..1), kept in range.
 static func apply_share(knob: String, base: float) -> float:
 	return clampf(apply(knob, base), 0.0, 1.0)
+
+
+## A change in words, e.g. "Toilet capacity +5", "Recycle fee -50%".
+static func describe(knob: String, mod: Vector2) -> String:
+	var parts: PackedStringArray = []
+	if not is_zero_approx(mod.x):
+		var x := mod.x * 100.0 if knob in SHARES else mod.x
+		parts.append("%s%s%s" % ["+" if x > 0 else "-", _num(absf(x)), "%" if knob in SHARES else ""])
+	if not is_equal_approx(mod.y, 1.0):
+		var pct := (mod.y - 1.0) * 100.0
+		parts.append("%s%s%%" % ["+" if pct > 0 else "-", _num(absf(pct))])
+	if parts.is_empty():
+		parts.append("no change")
+	return "%s %s" % [LABELS.get(knob, knob), ", ".join(parts)]
+
+
+static func _num(x: float) -> String:
+	return str(snappedf(x, 0.1)).trim_suffix(".0")
