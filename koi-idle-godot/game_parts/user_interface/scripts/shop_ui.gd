@@ -450,7 +450,7 @@ func _keep(list: Array) -> int:
 ## Buys up to `n` fish of the current rank, limited by the pool and money.
 ## Returns how many were bought.
 func _buy(n: int) -> int:
-	var cost: float = Ranks.get_rank(rank).cost
+	var cost: float = Ranks.price(rank)
 	var can: int = mini(n, FishHandler.pool_space())
 	if cost > 0.0:
 		can = mini(can, int(PassiveSystems.net_worth / cost))
@@ -530,7 +530,7 @@ func run_command(cmd: Dictionary) -> String:
 			sell.emit(fish)
 			return "Recycled %d fish for $%s" % [fish.size(), FishLabelDisplay.num(refund)]
 		"buy", "fill":
-			var want: int = cmd.get("count", 1) if cmd["cmd"] == "buy" else Ranks.table().shop_pool_size
+			var want: int = cmd.get("count", 1) if cmd["cmd"] == "buy" else Ranks.pool_size()
 			var got := _buy(want)
 			if got == 0:
 				return "Pool full" if FishHandler.pool_space() == 0 else "Can't afford a %s" % Ranks.get_rank(rank).display_name
@@ -538,7 +538,7 @@ func run_command(cmd: Dictionary) -> String:
 		"rank":
 			var to: int = cmd["to"] if cmd.has("to") else rank + cmd["by"]
 			to = clampi(to, 0, Ranks.max_rank())
-			if PassiveSystems.net_worth < Ranks.get_rank(to).cost:
+			if PassiveSystems.net_worth < Ranks.price(to):
 				return "Can't afford %s yet" % Ranks.get_rank(to).display_name
 			rank = to
 			_refresh_affordability()
@@ -580,8 +580,8 @@ func command_info() -> String:
 
 func command_status() -> String:
 	var r := Ranks.get_rank(rank)
-	return "%s $%s · pool %d/%d · toilet %d/%d" % [r.display_name, FishLabelDisplay.num(r.cost),
-		Ranks.table().shop_pool_size - FishHandler.pool_space(), Ranks.table().shop_pool_size,
+	return "%s $%s · pool %d/%d · toilet %d/%d" % [r.display_name, FishLabelDisplay.num(Ranks.price(rank)),
+		Ranks.pool_size() - FishHandler.pool_space(), Ranks.pool_size(),
 		FishHandler.work_count(), FishHandler.capacity]
 
 
@@ -619,7 +619,7 @@ func _place_cards() -> void:
 
 ## Drops the selected rank to the best one you can afford.
 func _refresh_affordability() -> void:
-	while rank > 0 and PassiveSystems.net_worth < Ranks.get_rank(rank).cost:
+	while rank > 0 and PassiveSystems.net_worth < Ranks.price(rank):
 		rank -= 1
 
 func _on_new_fish(arr: Array) -> void:

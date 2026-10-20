@@ -36,7 +36,7 @@ func show(fish: fish_conf) -> void:
 	_put(fish_income_label, "$%s/s %s%s" % [num(fish.income), _rarity(fish.income_z), payback])
 	# Selling in the shop refunds the price; keeping it, then catching it from
 	# the pond later, pays its catch value (more once it has grown).
-	var catch_now := FishingLine.catch_value(rank_def, fish.mass, Ranks.table().catch_return)
+	var catch_now := FishingLine.catch_value_of(fish)
 	_put(sell_value_label, "$%s recycle   (catch $%s)" % [num(PassiveSystems.recycle_refund(fish)), num(catch_now)])
 
 
@@ -55,7 +55,7 @@ static func describe(fish: fish_conf) -> String:
 			duration(fish.cost / fish.income) if fish.income > 0.0 else "—"],
 		"Size    %sg %s   grows ×%s %s" % [num(fish.mass), _rarity(fish.mass_z), num(potential), _rarity(fish.size_z)],
 		"Price   $%s   recycle $%s   catch now $%s" % [num(fish.cost), num(PassiveSystems.recycle_refund(fish)),
-			num(FishingLine.catch_value(rank_def, fish.mass, Ranks.table().catch_return))],
+			num(FishingLine.catch_value_of(fish))],
 	]
 	return "\n".join(lines)
 

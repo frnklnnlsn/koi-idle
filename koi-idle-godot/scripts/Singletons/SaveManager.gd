@@ -118,6 +118,7 @@ func _fresh(starting_net_worth: float) -> SaveData:
 	save_data.list_of_work_fish = []
 	save_data.list_of_shop_fish = []
 	save_data.list_of_retired_fish = []
+	save_data.progression_started = true   # nothing owned yet to credit
 	return save_data
 
 

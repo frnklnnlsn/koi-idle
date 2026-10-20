@@ -172,6 +172,19 @@ text = "$ 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="SkillPoints" type="Label" parent="VBoxContainer/Panel/HBoxContainer2"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+tooltip_text = "Skill points to spend. The first fish bought of each rank earns one, again on every prestige level."
+mouse_filter = 1
+theme_type_variation = &"MoneyBox"
+theme_override_font_sizes/font_size = 16
+text = "0 skill points"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ListUI" parent="VBoxContainer" unique_id=668367678 instance=ExtResource("11_o70p8")]
 unique_name_in_owner = true
 visible = false

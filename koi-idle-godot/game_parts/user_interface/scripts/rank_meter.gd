@@ -168,4 +168,4 @@ func _get_tooltip(at_position: Vector2) -> String:
 		return "Rank: click a bar or scroll"
 	var r := Ranks.get_rank(i)
 	var note := "" if i < affordable else "  (can't afford yet)"
-	return "%s · $%s%s" % [r.display_name, FishLabelDisplay.num(r.cost), note]
+	return "%s · $%s%s" % [r.display_name, FishLabelDisplay.num(Ranks.price(i)), note]

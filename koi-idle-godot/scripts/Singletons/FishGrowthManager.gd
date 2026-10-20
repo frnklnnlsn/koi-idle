@@ -76,9 +76,12 @@ func _apply_growth_to_retired_fish(extra_seconds: float) -> void:
 	if not save_data or save_data.list_of_retired_fish.is_empty():
 		return
 
+	# Tuning growth_speed: pond time passes faster or slower (from now on;
+	# ages already reached stay as they are).
+	var aged := extra_seconds * Tuning.apply(Tuning.GROWTH_SPEED, 1.0)
 	for fish in save_data.list_of_retired_fish:
 		if fish is fish_conf:
-			fish.age += extra_seconds
+			fish.age += aged
 			fish.mass = mass_for(fish, pond_hours(fish))
 
 	SaveManager.save_current_data(save_data)

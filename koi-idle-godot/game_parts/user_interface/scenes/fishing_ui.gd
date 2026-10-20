@@ -186,7 +186,7 @@ func _refresh() -> void:
 		if line.chain.size() > 1:
 			text += "   (separately $%s)" % _commas(floori(line.value_if_separate()))
 		else:
-			text += "   (shop price $%s)" % _commas(Ranks.get_rank(line.top().rank).cost)
+			text += "   (shop price $%s)" % _commas(floori(Ranks.price(line.top().rank)))
 		fish_stats.text = text
 
 	# Bite timer: a range for the rank you'd catch next, or ∞ if nothing can bite.

@@ -61,10 +61,10 @@ func _build_fish(rank: int) -> fish_conf:
 
 	fish.ID = _generate_id(15)
 	fish.rank = rank
-	fish.cost = rank_def.cost
+	fish.cost = Ranks.price(rank)
 
 	var stats := roll_stats(rank_def, _rng)
-	fish.income = stats["income"]
+	fish.income = Tuning.apply(Tuning.INCOME, stats["income"])
 	fish.income_z = stats["income_z"]
 	fish.mass = stats["mass"]
 	fish.mass_z = stats["mass_z"]
@@ -72,7 +72,8 @@ func _build_fish(rank: int) -> fish_conf:
 
 	var growth := roll_growth(fish.mass, rank_def, _rng)
 	fish.growth_rate = growth["growth_rate"]
-	fish.carrying_capacity = growth["carrying_capacity"]
+	# Growth potential through Tuning: scales how far above its start it grows.
+	fish.carrying_capacity = fish.mass + (growth["carrying_capacity"] - fish.mass) * Tuning.apply(Tuning.GROWTH_POTENTIAL, 1.0)
 	fish.mid_point = growth["mid_point"]
 	fish.size_z = growth["size_z"]
 	fish.x_start = _x_start(fish.growth_rate)

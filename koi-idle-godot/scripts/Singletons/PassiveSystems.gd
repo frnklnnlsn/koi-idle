@@ -120,7 +120,7 @@ func remove_fish(fish_res: fish_conf) -> void:
 
 
 static func recycle_refund(fish_res: fish_conf) -> float:
-	return fish_res.cost * (1.0 - Ranks.table().recycle_fee)
+	return fish_res.cost * (1.0 - Tuning.apply_share(Tuning.RECYCLE_FEE, Ranks.table().recycle_fee))
 
 func _debug_print() -> void:
 	#print("income: %.2f | net_worth: %.2f" % [income, net_worth])

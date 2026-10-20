@@ -27,6 +27,7 @@ FishHandler="*res://scripts/Singletons/FishHandler.gd"
 DisplayManager="*res://scripts/Singletons/DisplayManager.gd"
 FishGrowthManager="*res://scripts/Singletons/FishGrowthManager.gd"
 PassiveSystems="*res://scripts/Singletons/PassiveSystems.gd"
+Progression="*res://scripts/Singletons/Progression.gd"
 DevTools="*res://scripts/dev/dev_tools.gd"
 
 [display]

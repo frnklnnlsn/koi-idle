@@ -65,7 +65,8 @@ func candidates(pond_fish: Array) -> Array:
 
 
 func bite_range() -> Vector2:
-	return Ranks.get_rank(target_rank()).bite_seconds
+	var r: Vector2 = Ranks.get_rank(target_rank()).bite_seconds
+	return Vector2(Tuning.apply(Tuning.BITE_TIME, r.x), Tuning.apply(Tuning.BITE_TIME, r.y))
 
 
 func roll_bite_time() -> float:
@@ -82,7 +83,15 @@ func clear() -> void:
 
 
 func worth(fish: fish_conf) -> float:
-	return catch_value(Ranks.get_rank(fish.rank), fish.mass, Ranks.table().catch_return)
+	return catch_value_of(fish)
+
+
+## What `fish` pays if caught now: like catch_value, but from the price this
+## fish was bought at (so a harder level's prices carry through).
+static func catch_value_of(fish: fish_conf) -> float:
+	var rank_def := Ranks.get_rank(fish.rank)
+	var price: float = fish.cost if fish.cost > 0.0 else Ranks.price(fish.rank)
+	return price * Ranks.table().catch_return * fish.mass / avg_start_mass(rank_def)
 
 
 ## What a caught fish of `rank_def` weighing `mass` pays when kept on its own.
@@ -118,4 +127,4 @@ func pond_sale_value(pond_fish: Array) -> float:
 	for f in pond_fish:
 		if f is fish_conf:
 			v += worth(f)
-	return v * POND_SALE_RATE
+	return v * Tuning.apply_share(Tuning.POND_SALE_RATE, POND_SALE_RATE)

@@ -1,5 +1,7 @@
 extends Control
 @onready var net_worth_label: Label               = %net_worth
+## Skill points to spend, next to the money (hidden until the first point).
+@onready var skill_points_label: Label = %SkillPoints
 @onready var list_ui:         Control             = %ListUI
 @onready var shop_ui:         Control             = %ShopUI
 @onready var toilet:          SubViewportContainer = %ToiletViewportContainer
@@ -45,6 +47,10 @@ func _ready() -> void:
 	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
+	Progression.points_changed.connect(_show_skill_points.unbind(1))
+	Progression.milestone_earned.connect(_on_milestone_earned)
+	Progression.credited_existing.connect(_on_credited_existing)
+	_show_skill_points()
 	_rank_meter.rank_clicked.connect(_on_rank_clicked)
 	_rank_meter.rank_scrolled.connect(_on_rank_scrolled)
 	_on_shop_visibility()
@@ -90,6 +96,28 @@ func _on_drag_zone(zone: String) -> void:
 	_trash_light.modulate = pal.trash.lightened(0.2) if zone == "trash" else off
 
 
+# ── Skill points ──────────────────────────────────────────────────────────────
+func _show_skill_points() -> void:
+	var p := Progression.points()
+	skill_points_label.visible = Progression.points_earned() > 0
+	skill_points_label.text = "%d skill point%s" % [p, "" if p == 1 else "s"]
+
+
+func _on_milestone_earned(title: String, points: int, first_ever: bool) -> void:
+	_show_skill_points()
+	# Deferred: the purchase's own "Bought ..." message comes right after this
+	# and would hide it.
+	if first_ever:
+		command_line.say.call_deferred("Skill point earned: %s! The first fish of each rank earns one (skill tree coming soon)" % title.to_lower())
+	else:
+		command_line.say.call_deferred("+%d skill point%s: %s  (%d to spend)" % [points, "" if points == 1 else "s", title.to_lower(), Progression.points()])
+
+
+func _on_credited_existing(count: int, points: int) -> void:
+	_show_skill_points()
+	command_line.say("Skill points: +%d for the %d rank%s you already own. Each new rank's first fish earns another" % [points, count, "" if count == 1 else "s"])
+
+
 func _on_buy_pressed() -> void:
 	command_line.say(shop_ui.buy_one())
 
@@ -108,7 +136,7 @@ func _process(_delta: float) -> void:
 ## Shows the shop's rank and how many ranks your money covers.
 func _update_rank_meter() -> void:
 	var n := 0
-	while n < Ranks.count() and PassiveSystems.net_worth >= Ranks.get_rank(n).cost:
+	while n < Ranks.count() and PassiveSystems.net_worth >= Ranks.price(n):
 		n += 1
 	_rank_meter.affordable = n
 	_rank_meter.rank = shop_ui.rank
