@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/skill_tree_ui.tscn" id="31_skilltree"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/skills.png" id="32_ic_skills"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/fish_peek.tscn" id="33_peek"]
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/pond_pixel_layers.gd" id="34_pixlayers"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -134,6 +135,18 @@ fish_container = NodePath("../FishContainerPond")
 [node name="ForeGround" parent="PondViewportContainer/PondViewport" unique_id=592856925 instance=ExtResource("7_76rds")]
 
 [node name="PondArea" parent="PondViewportContainer/PondViewport" unique_id=749628175 instance=ExtResource("8_xc818")]
+
+[node name="PondPixelLayers" type="Control" parent="." node_paths=PackedStringArray("source")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("34_pixlayers")
+source = NodePath("../PondViewportContainer")
 
 [node name="ShopBackdrop" type="ColorRect" parent="." unique_id=2114121382]
 unique_name_in_owner = true

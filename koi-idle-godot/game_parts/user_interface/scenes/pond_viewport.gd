@@ -47,6 +47,17 @@ class_name Pond extends SubViewport
 ## How far toward depth_tint each level goes: 0.28 = level 3 is 84% of the way.
 @export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.28
 
+# ── Pixel size ──────────────────────────────────────────────────────────────
+# Bigger fish get bigger pixels so they keep the pixel-art look (see
+# pond_pixel_layers.gd). A fish's drawn size picks its group: below the
+# first step = normal pixels, below the second = 2×, and so on.
+@export_group("Pixel size")
+## Size where each next pixel size starts (3 steps = 4 groups: 1×, 2×, 3×, 4×).
+@export var pixel_steps: PackedFloat32Array = PackedFloat32Array([1.5, 2.5, 3.5])
+## Blend the body pattern on big-pixel fish into average colours (calmer but
+## muddier). Off = crisp palette colours, busy patterns may look speckled.
+@export var smooth_big_patterns: bool = false
+
 # ── Internal ────────────────────────────────────────────────────────────────
 var _display:              FishDisplay
 var _pending_display_list: Array = []
@@ -231,9 +242,25 @@ func _size_fish(node: Node, seconds: float) -> void:
 	if not (node.has_method("set_size_factor") and "fish_res" in node) or node.fish_res == null:
 		return
 	var level := depth_of(node.fish_res)
-	node.set_size_factor(size_for(node.fish_res) * maxf(1.0 - depth_size_loss * level, 0.05), seconds)
+	var drawn := size_for(node.fish_res) * maxf(1.0 - depth_size_loss * level, 0.05)
+	node.set_size_factor(drawn, seconds)
+	PondPixelLayers.set_layers(node, PondPixelLayers.fish_bit(pixel_group(drawn)))
+	# Bigger pixels sample the body pattern more sparsely: with mipmaps they
+	# take the pattern's average colour per pixel instead of a speckle.
+	var body: CanvasItem = node.get_node_or_null("%FishBody")
+	if body and smooth_big_patterns:
+		body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	node.z_index = -level   # deeper fish drawn behind
 	node.modulate = Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
+
+
+## Pixel size group for a fish drawn `drawn` × normal size (0 = normal pixels).
+func pixel_group(drawn: float) -> int:
+	var g := 0
+	for step in pixel_steps:
+		if drawn >= step:
+			g += 1
+	return g
 
 
 ## The fish's depth level, picking one at random the first time.
