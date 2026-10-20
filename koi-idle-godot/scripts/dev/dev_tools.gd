@@ -65,6 +65,26 @@ func _respec() -> void:
 	_say("Skills reset, %d point%s back" % [back, "" if back == 1 else "s"])
 
 
+func _boss_scene() -> void:
+	var ui = get_tree().get_first_node_in_group("main_ui")
+	if ui and Prestige.current().has_boss():
+		_panel.visible = false
+		ui._play_boss()
+	else:
+		_say("No boss on this level")
+
+
+func _next_level() -> void:
+	if Prestige.has_next():
+		Prestige.jump_to(Prestige.level() + 1)
+	else:
+		_say("Already on the last level")
+
+
+func _level_one() -> void:
+	Prestige.jump_to(0)
+
+
 func _zero_money() -> void:
 	PassiveSystems.net_worth = 0.0
 	PassiveSystems._flush_to_save()
@@ -258,6 +278,9 @@ func _build_ui() -> void:
 
 	_section(box, "Skill points")
 	_row(box, [["+1 point", _add_points.bind(1)], ["+5 points", _add_points.bind(5)], ["Respec (refund all)", _respec]])
+
+	_section(box, "Prestige")
+	_row(box, [["Boss scene", _boss_scene], ["Next level", _next_level], ["Level 1", _level_one]])
 
 	_section(box, "Time away (real offline catch-up)")
 	_row(box, [["10 min", _away.bind(600.0)], ["1 hour", _away.bind(3600.0)], ["8 hours", _away.bind(8.0 * 3600.0)]])

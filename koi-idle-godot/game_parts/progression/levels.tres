@@ -1,0 +1,223 @@
+[gd_resource type="Resource" script_class="LevelTable" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/level_table.gd" id="1_table"]
+[ext_resource type="Script" path="res://scripts/progression/level_def.gd" id="2_level"]
+[ext_resource type="Script" path="res://scripts/progression/boss_def.gd" id="3_boss"]
+[ext_resource type="Script" path="res://scripts/progression/knob_change.gd" id="4_knob"]
+
+[sub_resource type="Resource" id="Boss_0"]
+script = ExtResource("3_boss")
+boss_name = "Old Whiskers"
+weight_grams = 4200.0
+look_rank = 2
+look_seed = 11
+colors = PackedColorArray(0.7882, 0.7647, 0.698, 1, 0.2275, 0.2078, 0.1882, 1)
+size = 12.0
+dialogue = PackedStringArray("...You pulled me out of my porcelain throne.", "you: You're the biggest fish I've ever seen.", "Big? I'm the oldest. Every koi in this bowl swims in my wake.", "you: What happens now?", "Now you go somewhere bigger. The water gets harder from here, little keeper.", "Take what you've learned. Leave the money. It never swims far anyway.")
+
+[sub_resource type="Resource" id="Level_0"]
+script = ExtResource("2_level")
+title = "The Bathroom"
+boss_mass = 1000.0
+boss = SubResource("Boss_0")
+
+[sub_resource type="Resource" id="Knob_1_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 1.25
+
+[sub_resource type="Resource" id="Boss_1"]
+script = ExtResource("3_boss")
+boss_name = "The Porcelain Queen"
+weight_grams = 18000.0
+look_rank = 3
+look_seed = 27
+colors = PackedColorArray(1.0, 1.0, 1.0, 1, 0.8471, 0.1569, 0.1647, 1)
+size = 13.0
+dialogue = PackedStringArray("How rude. I was in the middle of a nap.", "you: You're... beautiful.", "Of course I am. Red on white, the oldest pattern there is.", "you: Will you teach me?", "Patience teaches. The bites come slower where you're going.", "Off you go. Mind the herons.")
+
+[sub_resource type="Resource" id="Level_1"]
+script = ExtResource("2_level")
+title = "The Garden Pond"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_1_0")])
+boss_mass = 5000.0
+boss = SubResource("Boss_1")
+
+[sub_resource type="Resource" id="Knob_2_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 1.5
+
+[sub_resource type="Resource" id="Knob_2_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.9
+
+[sub_resource type="Resource" id="Boss_2"]
+script = ExtResource("3_boss")
+boss_name = "Grandfather Carp"
+weight_grams = 61000.0
+look_rank = 3
+look_seed = 42
+colors = PackedColorArray(0.1686, 0.1686, 0.1686, 1, 0.8784, 0.6275, 0.1882, 1, 0.949, 0.9373, 0.8941, 1)
+size = 14.0
+dialogue = PackedStringArray("Ah. Another keeper climbs the ladder.", "you: Did others come before me?", "Many. Most stopped at the toilet. You did not.", "Fish grow slower in sacred water. Be gentle with them.", "you: I will.", "Then go. The river is waiting.")
+
+[sub_resource type="Resource" id="Level_2"]
+script = ExtResource("2_level")
+title = "The Temple Pool"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_2_0"), SubResource("Knob_2_1")])
+boss_mass = 25000.0
+boss = SubResource("Boss_2")
+
+[sub_resource type="Resource" id="Knob_3_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 1.75
+
+[sub_resource type="Resource" id="Knob_3_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.85
+
+[sub_resource type="Resource" id="Knob_3_2"]
+script = ExtResource("4_knob")
+knob = "price"
+multiplier = 1.2
+
+[sub_resource type="Resource" id="Boss_3"]
+script = ExtResource("3_boss")
+boss_name = "Mudmouth"
+weight_grams = 240000.0
+look_rank = 4
+look_seed = 73
+colors = PackedColorArray(0.3529, 0.2902, 0.1804, 1, 0.1216, 0.102, 0.0706, 1)
+size = 15.0
+dialogue = PackedStringArray("Blub. You found me under all that mud.", "you: Nobody can see anything down there.", "That's the point. Fish here cost more and hide better.", "you: Is it worth it?", "Ask me again when you're downstream. Blub.")
+
+[sub_resource type="Resource" id="Level_3"]
+script = ExtResource("2_level")
+title = "The Muddy River"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_3_0"), SubResource("Knob_3_1"), SubResource("Knob_3_2")])
+boss_mass = 100000.0
+boss = SubResource("Boss_3")
+
+[sub_resource type="Resource" id="Knob_4_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 2.0
+
+[sub_resource type="Resource" id="Knob_4_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.8
+
+[sub_resource type="Resource" id="Knob_4_2"]
+script = ExtResource("4_knob")
+knob = "price"
+multiplier = 1.4
+
+[sub_resource type="Resource" id="Boss_4"]
+script = ExtResource("3_boss")
+boss_name = "The Gilded One"
+weight_grams = 1300000.0
+look_rank = 5
+look_seed = 101
+colors = PackedColorArray(0.949, 0.7882, 0.298, 1, 0.7216, 0.5255, 0.0431, 1, 1.0, 0.9529, 0.7686, 1)
+size = 16.0
+dialogue = PackedStringArray("Every scale of mine is worth more than your whole first pond.", "you: So why let me catch you?", "Let you? I was curious who keeps coming back.", "Gold is heavy, keeper. The lake will ask more of you.", "you: I'm ready.", "We'll see. Swim on.")
+
+[sub_resource type="Resource" id="Level_4"]
+script = ExtResource("2_level")
+title = "The Imperial Lake"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_4_0"), SubResource("Knob_4_1"), SubResource("Knob_4_2")])
+boss_mass = 500000.0
+boss = SubResource("Boss_4")
+
+[sub_resource type="Resource" id="Knob_5_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 2.25
+
+[sub_resource type="Resource" id="Knob_5_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.75
+
+[sub_resource type="Resource" id="Knob_5_2"]
+script = ExtResource("4_knob")
+knob = "price"
+multiplier = 1.6
+
+[sub_resource type="Resource" id="Boss_5"]
+script = ExtResource("3_boss")
+boss_name = "Moonscale"
+weight_grams = 7000000.0
+look_rank = 5
+look_seed = 133
+colors = PackedColorArray(0.7843, 0.8392, 1.0, 1, 0.1059, 0.1647, 0.3608, 1, 1.0, 1.0, 1.0, 1)
+size = 17.0
+dialogue = PackedStringArray("Shh. The tide is listening.", "you: You glow like the moon.", "I am what's left of every fish that tried the waterfall and fell.", "you: The waterfall?", "The Dragon Gate. Only one more water stands before it.", "Go. Climb.")
+
+[sub_resource type="Resource" id="Level_5"]
+script = ExtResource("2_level")
+title = "The Moonlit Sea"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_5_0"), SubResource("Knob_5_1"), SubResource("Knob_5_2")])
+boss_mass = 2500000.0
+boss = SubResource("Boss_5")
+
+[sub_resource type="Resource" id="Knob_6_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 2.5
+
+[sub_resource type="Resource" id="Knob_6_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.7
+
+[sub_resource type="Resource" id="Knob_6_2"]
+script = ExtResource("4_knob")
+knob = "price"
+multiplier = 1.8
+
+[sub_resource type="Resource" id="Boss_6"]
+script = ExtResource("3_boss")
+boss_name = "The Dragon Gate"
+weight_grams = 88000000.0
+look_rank = 6
+look_seed = 168
+colors = PackedColorArray(0.8471, 0.1569, 0.1647, 1, 0.949, 0.7882, 0.298, 1, 0.102, 0.102, 0.102, 1)
+size = 18.0
+dialogue = PackedStringArray("So. A keeper reaches the falls.", "you: They say a koi that climbs this water becomes a dragon.", "They say many things. Most koi never try.", "You raised them, fed them, let them go, and came back every time.", "you: What's above the falls?", "Something new. Go and see.")
+
+[sub_resource type="Resource" id="Level_6"]
+script = ExtResource("2_level")
+title = "The Dragon Gate"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_6_0"), SubResource("Knob_6_1"), SubResource("Knob_6_2")])
+boss_mass = 10000000.0
+boss = SubResource("Boss_6")
+
+[sub_resource type="Resource" id="Knob_7_0"]
+script = ExtResource("4_knob")
+knob = "bite_time"
+multiplier = 2.5
+
+[sub_resource type="Resource" id="Knob_7_1"]
+script = ExtResource("4_knob")
+knob = "growth_speed"
+multiplier = 0.7
+
+[sub_resource type="Resource" id="Knob_7_2"]
+script = ExtResource("4_knob")
+knob = "price"
+multiplier = 1.8
+
+[sub_resource type="Resource" id="Level_7"]
+script = ExtResource("2_level")
+title = "Above the Falls"
+knob_changes = Array[ExtResource("4_knob")]([SubResource("Knob_7_0"), SubResource("Knob_7_1"), SubResource("Knob_7_2")])
+
+[resource]
+script = ExtResource("1_table")
+levels = Array[ExtResource("2_level")]([SubResource("Level_0"), SubResource("Level_1"), SubResource("Level_2"), SubResource("Level_3"), SubResource("Level_4"), SubResource("Level_5"), SubResource("Level_6"), SubResource("Level_7")])

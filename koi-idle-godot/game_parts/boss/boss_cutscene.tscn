@@ -1,0 +1,208 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game_parts/boss/boss_cutscene.gd" id="1_cut"]
+[ext_resource type="Shader" path="res://game_parts/boss/boss_water.gdshader" id="2_water"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+shader = ExtResource("2_water")
+shader_parameter/surface_color = Color(0.1, 0.26, 0.36, 1)
+shader_parameter/deep_color = Color(0.01, 0.03, 0.08, 1)
+shader_parameter/light_color = Color(0.75, 0.95, 1, 1)
+shader_parameter/light_strength = 0.22
+shader_parameter/light_scale = 220.0
+shader_parameter/light_speed = 0.35
+shader_parameter/light_width = 0.12
+shader_parameter/depth = 1.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dialogue"]
+bg_color = Color(0.0431373, 0.0509804, 0.141176, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.701961, 0.615686, 0.145098, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+
+[node name="BossCutscene" type="CanvasLayer"]
+layer = 60
+script = ExtResource("1_cut")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Water" type="ColorRect" parent="Root"]
+unique_name_in_owner = true
+material = SubResource("ShaderMaterial_water")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Shaker" type="Node2D" parent="Root"]
+unique_name_in_owner = true
+
+[node name="FishingLine" type="Line2D" parent="Root/Shaker"]
+unique_name_in_owner = true
+width = 2.0
+default_color = Color(0.9, 0.95, 1, 0.75)
+
+[node name="Stage" type="Node2D" parent="Root/Shaker"]
+unique_name_in_owner = true
+
+[node name="Narration" type="RichTextLabel" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 40.0
+offset_bottom = 110.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 30
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Reel" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -80.0
+offset_right = 220.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="ReelLabel" type="Label" parent="Root/Reel"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+text = "Reeling in..."
+horizontal_alignment = 1
+
+[node name="ReelBar" type="ProgressBar" parent="Root/Reel"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="Reveal" type="VBoxContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 30.0
+offset_bottom = 130.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="BossName" type="Label" parent="Root/Reveal"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Prompt"
+theme_override_font_sizes/font_size = 44
+text = "The Boss"
+horizontal_alignment = 1
+
+[node name="BossWeight" type="Label" parent="Root/Reveal"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "1 kg"
+horizontal_alignment = 1
+
+[node name="Dialogue" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 120.0
+offset_top = -170.0
+offset_right = -120.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dialogue")
+
+[node name="Lines" type="VBoxContainer" parent="Root/Dialogue"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Speaker" type="Label" parent="Root/Dialogue/Lines"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"Prompt"
+theme_override_font_sizes/font_size = 20
+text = "The Boss"
+
+[node name="LineText" type="RichTextLabel" parent="Root/Dialogue/Lines"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 22
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="Root/Dialogue/Lines"]
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 12
+text = "click or space to go on"
+horizontal_alignment = 2
+
+[node name="NextLevel" type="Button" parent="Root"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 48)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -230.0
+offset_right = 160.0
+offset_bottom = -182.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 20
+text = "Begin Level 2"
+
+[node name="Flash" type="ColorRect" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)

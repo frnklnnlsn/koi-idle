@@ -29,6 +29,7 @@ FishGrowthManager="*res://scripts/Singletons/FishGrowthManager.gd"
 PassiveSystems="*res://scripts/Singletons/PassiveSystems.gd"
 Progression="*res://scripts/Singletons/Progression.gd"
 Upgrades="*res://scripts/Singletons/Upgrades.gd"
+Prestige="*res://scripts/Singletons/Prestige.gd"
 DevTools="*res://scripts/dev/dev_tools.gd"
 
 [display]

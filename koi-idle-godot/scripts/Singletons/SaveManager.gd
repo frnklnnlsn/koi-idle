@@ -95,6 +95,25 @@ func reset_save_data(starting_net_worth: float = STARTING_COINS, reload_scene: b
 		reload_scene_once()
 
 
+## Prestige: clear money and fish but keep progression (level, skill points,
+## skills, milestones), reload every system, and restart the scene.
+func wipe_run(starting_net_worth: float) -> void:
+	var d := load_saved_data()
+	d.list_of_work_fish = []
+	d.list_of_shop_fish = []
+	d.list_of_retired_fish = []
+	d.income = 0.0
+	d.net_worth = starting_net_worth
+	save_current_data(d)
+	save_timestamp()
+	PassiveSystems.reload()
+	FishHandler.list_of_shop_fish = d.list_of_shop_fish
+	DisplayManager.is_flushing = false
+	save_reset.emit()
+	if get_tree().current_scene != null:
+		reload_scene_once()
+
+
 var _reload_queued := false
 
 ## Reload the current scene at the end of the frame, once, however many

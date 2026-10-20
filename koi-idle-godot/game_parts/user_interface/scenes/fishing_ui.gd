@@ -8,10 +8,17 @@
 #   Leave On  keep the new catch on the line as bait for the next rank up
 #   Sell Pond fail-safe: sell every pond fish at a discount (click twice to confirm)
 #
+# Boss: with a fish on the line at least as heavy as the level's boss_mass
+# (Prestige), Cast turns into "Challenge the boss" (click twice to confirm).
+# That emits boss_challenged; main_ui plays the boss cut scene.
+#
 # Below the panel, the shop's three charts show every pond fish. Fish on the
 # line are drawn in the accent colour. Keep or Release clears the highlight:
 # kept fish leave the pond (and the charts), released ones look normal again.
 extends Control
+
+## "Challenge the boss" confirmed: main_ui plays the cut scene.
+signal boss_challenged
 
 @onready var fishing_status: RichTextLabel = %FishingStatus
 @onready var fish_stats:     Label         = %FishStats
@@ -24,6 +31,8 @@ extends Control
 @onready var leave_on_button: Button       = %LeaveOnButton
 @onready var fishing_timer:  Timer         = $FishingTimer
 @onready var sell_pond_button: Button      = %SellPondButton
+## The level's boss goal, under the title.
+@onready var boss_hint: Label              = %BossHint
 # Charts along the bottom half (Charts node in fishing_ui.tscn).
 @onready var _scatter: FishScatterChart    = %Scatter
 @onready var _growth:  GrowthChart         = %Growth
@@ -37,6 +46,8 @@ var _waiting     := false   # cast is out, waiting for a bite
 var _just_caught := false   # a fresh catch: choose Keep / Release / Leave On
 var _sell_armed  := false   # Sell Pond clicked once; next click within SELL_CONFIRM_SECONDS sells
 var _sell_arm_id := 0       # so an old timeout can't disarm a newer confirmation
+var _boss_armed  := false   # Challenge the boss clicked once
+var _boss_arm_id := 0
 
 
 func _ready() -> void:
@@ -81,6 +92,9 @@ func _process(_delta: float) -> void:
 # --- Buttons ------------------------------------------------------------------
 
 func _on_fishing_button_pressed() -> void:
+	if not _waiting and Prestige.boss_ready(line.top()):
+		_on_boss_pressed()
+		return
 	if _waiting or _just_caught:
 		return
 	if not line.can_climb() or line.candidates(_pond_fish()).is_empty():
@@ -104,7 +118,10 @@ func _on_fishing_timer_timeout() -> void:
 	var fish: fish_conf = pool[randi() % pool.size()]
 	line.hook(fish)
 	_just_caught = true
-	_set_status("Caught a rank %d!  %sg" % [fish.rank, _commas(roundi(fish.mass))])
+	if Prestige.boss_ready(fish):
+		_set_status("[shake rate=20 level=8]A %s monster! Something bigger stirs below...[/shake]" % Prestige.mass_text(fish.mass))
+	else:
+		_set_status("Caught a rank %d!  %sg" % [fish.rank, _commas(roundi(fish.mass))])
 	_refresh()
 
 
@@ -169,6 +186,23 @@ func _on_sell_pond_pressed() -> void:
 	_refresh()
 
 
+## First click arms the challenge (it ends the level); the second starts it.
+func _on_boss_pressed() -> void:
+	if not _boss_armed:
+		_boss_armed = true
+		_boss_arm_id += 1
+		var my_id := _boss_arm_id
+		_refresh()
+		await get_tree().create_timer(SELL_CONFIRM_SECONDS).timeout
+		if is_inside_tree() and _boss_armed and _boss_arm_id == my_id:
+			_boss_armed = false
+			_refresh()
+		return
+	_boss_armed = false
+	_refresh()
+	boss_challenged.emit()
+
+
 # --- Display ------------------------------------------------------------------
 
 func _refresh() -> void:
@@ -201,7 +235,16 @@ func _refresh() -> void:
 			var r := line.bite_range()
 			bite_label.text = "Next bite: %s–%ss   (rank %d)" % [_secs(r.x), _secs(r.y), line.target_rank()]
 
-	fishing_button.disabled = _waiting or _just_caught or not can_cast
+	var boss := not _waiting and Prestige.boss_ready(line.top())
+	if not boss:
+		_boss_armed = false
+	fishing_button.disabled = (_waiting or _just_caught or not can_cast) and not boss
+	if boss:
+		fishing_button.text = "Confirm: end %s? Money and fish are wiped" % Prestige.level_name() if _boss_armed \
+			else "Challenge the boss"
+	else:
+		fishing_button.text = "Cast"
+	_show_boss_hint()
 	keep_button.disabled = _waiting or line.is_empty()
 	release_button.disabled = _waiting or line.is_empty()
 	leave_on_button.disabled = not _just_caught
@@ -216,6 +259,19 @@ func _refresh() -> void:
 		sell_pond_button.text = "Confirm: sell %d fish for $%s?" % [pond.size(), _commas(floori(line.pond_sale_value(pond)))]
 	else:
 		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
+
+
+## The level's boss goal and the biggest pond fish so far.
+func _show_boss_hint() -> void:
+	var lvl := Prestige.current()
+	if not lvl.has_boss() or not Prestige.has_next():
+		boss_hint.text = "%s: no boss here yet" % Prestige.level_name()
+		return
+	var biggest := 0.0
+	for f in _pond_fish():
+		if f is fish_conf:
+			biggest = maxf(biggest, f.mass)
+	boss_hint.text = "Boss: hook a fish of %s  (biggest in pond %s)" % [Prestige.mass_text(lvl.boss_mass), Prestige.mass_text(biggest)]
 
 
 ## Every pond fish; the line's fish highlighted, with a "Now" dot on their

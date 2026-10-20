@@ -2,6 +2,10 @@ extends Control
 @onready var net_worth_label: Label               = %net_worth
 ## Skill points to spend, next to the money (hidden until the first point).
 @onready var skill_points_label: Label = %SkillPoints
+## Prestige level, left of the money (tooltip: the level's boss goal).
+@onready var level_label: Label = %LevelLabel
+## The boss cut scene, played over everything when the boss is challenged.
+@export var boss_cutscene: PackedScene = preload("res://game_parts/boss/boss_cutscene.tscn")
 @onready var list_ui:         Control             = %ListUI
 @onready var shop_ui:         Control             = %ShopUI
 @onready var toilet:          SubViewportContainer = %ToiletViewportContainer
@@ -64,6 +68,12 @@ func _ready() -> void:
 	Progression.milestone_earned.connect(_on_milestone_earned)
 	Progression.credited_existing.connect(_on_credited_existing)
 	_show_skill_points()
+	_show_level()
+	fishing_ui.boss_challenged.connect(_play_boss)
+	add_to_group("main_ui")
+	if Prestige.just_advanced:
+		Prestige.just_advanced = false
+		command_line.say.call_deferred("Welcome to %s. Money and fish start over; your %d skill points are back to spend (t)" % [Prestige.level_name(), Progression.points()])
 	_rank_meter.rank_clicked.connect(_on_rank_clicked)
 	_rank_meter.rank_scrolled.connect(_on_rank_scrolled)
 	_on_shop_visibility()
@@ -107,6 +117,28 @@ func _on_drag_zone(zone: String) -> void:
 	var off := Color(pal.text_dim, 0.6)
 	_keep_light.modulate = pal.keep.lightened(0.15) if zone == "keep" else off
 	_trash_light.modulate = pal.trash.lightened(0.2) if zone == "trash" else off
+
+
+# ── Prestige ──────────────────────────────────────────────────────────────────
+func _show_level() -> void:
+	var lvl := Prestige.current()
+	level_label.text = "Level %d" % (Prestige.level() + 1)
+	var goal := "Boss: hook a fish of %s, then challenge it from the fishing panel." % Prestige.mass_text(lvl.boss_mass) \
+		if lvl.has_boss() and Prestige.has_next() else "No boss here yet."
+	level_label.tooltip_text = "%s\n%s" % [Prestige.level_name(), goal]
+
+
+## Plays the boss cut scene; its last button starts the next level.
+func _play_boss() -> void:
+	var boss := Prestige.current().boss
+	if boss == null:
+		return
+	for p in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
+		p.visible = false
+	var scene: BossCutscene = boss_cutscene.instantiate()
+	scene.setup(boss)
+	scene.finished.connect(Prestige.advance)
+	add_child(scene)
 
 
 # ── Skill points ──────────────────────────────────────────────────────────────
