@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/fish_peek.gd" id="1_peek"]
+
+[node name="FishPeek" type="PanelContainer"]
+custom_minimum_size = Vector2(340, 0)
+offset_right = 340.0
+offset_bottom = 260.0
+script = ExtResource("1_peek")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="Column" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PeekBar" type="HBoxContainer" parent="Margin/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 13
+
+[node name="PeekTitle" type="Label" parent="Margin/Column/PeekBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+text = "Rank 0 · ABC"
+clip_text = true
+
+[node name="PeekClose" type="Button" parent="Margin/Column/PeekBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+tooltip_text = "Close  (Esc)"
+focus_mode = 0
+text = "×"
+
+[node name="ViewFrame" type="SubViewportContainer" parent="Margin/Column"]
+custom_minimum_size = Vector2(320, 180)
+layout_mode = 2
+mouse_filter = 2
+stretch = true
+
+[node name="PeekView" type="SubViewport" parent="Margin/Column/ViewFrame"]
+unique_name_in_owner = true
+disable_3d = true
+handle_input_locally = false
+size = Vector2i(320, 180)
+render_target_update_mode = 4
+
+[node name="PeekCamera" type="Camera2D" parent="Margin/Column/ViewFrame/PeekView"]
+unique_name_in_owner = true
+
+[node name="PeekInfo" type="Label" parent="Margin/Column"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+theme_override_font_sizes/font_size = 13
+text = "1.2 kg · $3/s"
+horizontal_alignment = 1

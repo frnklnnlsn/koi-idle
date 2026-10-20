@@ -110,6 +110,8 @@ static func mass_text(grams: float) -> String:
 		return "%s t" % _short(grams / 1_000_000.0)
 	if grams >= 1000.0:
 		return "%s kg" % _short(grams / 1000.0)
+	if grams < 10.0:
+		return "%s g" % str(snappedf(grams, 0.1)).trim_suffix(".0")
 	return "%d g" % roundi(grams)
 
 

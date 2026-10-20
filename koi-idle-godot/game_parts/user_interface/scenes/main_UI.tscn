@@ -28,6 +28,7 @@
 [ext_resource type="Script" uid="uid://bmmn0wjuletum" path="res://scripts/school_manager.gd" id="30_schools"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/skill_tree_ui.tscn" id="31_skilltree"]
 [ext_resource type="Texture2D" path="res://art/ui_icons/skills.png" id="32_ic_skills"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/fish_peek.tscn" id="33_peek"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -363,6 +364,11 @@ mouse_filter = 2
 [node name="CommandLine" parent="." unique_id=1830276273 instance=ExtResource("12_cmdl")]
 unique_name_in_owner = true
 layout_mode = 1
+
+[node name="FishPeek" parent="." instance=ExtResource("33_peek")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
 
 [connection signal="pressed" from="Sidebar/Buttons/Flush" to="." method="_on_flush_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Skills" to="." method="_on_skills_pressed"]

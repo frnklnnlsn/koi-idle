@@ -4,6 +4,11 @@ extends Control
 @onready var skill_points_label: Label = %SkillPoints
 ## Prestige level, left of the money (tooltip: the level's boss goal).
 @onready var level_label: Label = %LevelLabel
+## Close-up window of one fish: click a fish in the toilet or pond.
+@onready var fish_peek: FishPeek = %FishPeek
+## How close (in water pixels, beyond the fish's own width) a click must be
+## to a fish to pick it.
+@export var peek_pick_margin := 4.0
 ## The boss cut scene, played over everything when the boss is challenged.
 @export var boss_cutscene: PackedScene = preload("res://game_parts/boss/boss_cutscene.tscn")
 @onready var list_ui:         Control             = %ListUI
@@ -53,6 +58,8 @@ func _ready() -> void:
 	command_line.global_keys["t"] = _on_skills_pressed
 	# Esc closes the open panel (once nothing is half typed in the terminal).
 	command_line.global_keys["escape"] = close_open_panel
+	# The close-up window first, so Esc closes it before the panel under it.
+	fish_peek.add_to_group(ESC_CLOSES)
 	for panel in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
 		panel.add_to_group(ESC_CLOSES)
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
@@ -117,6 +124,45 @@ func _on_drag_zone(zone: String) -> void:
 	var off := Color(pal.text_dim, 0.6)
 	_keep_light.modulate = pal.keep.lightened(0.15) if zone == "keep" else off
 	_trash_light.modulate = pal.trash.lightened(0.2) if zone == "trash" else off
+
+
+# ── Fish close-up ─────────────────────────────────────────────────────────────
+## A left click on the water (nothing else under the mouse) picks the fish
+## nearest the click and opens the close-up on it. Clicks on buttons, panels
+## and the close-up itself go to them as usual.
+func _input(event: InputEvent) -> void:
+	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+		return
+	var hovered := get_viewport().gui_get_hovered_control()
+	if hovered not in [null, self, _main_column, toilet, pond]:
+		return
+	var container: SubViewportContainer = pond if pond.visible else toilet
+	var fish := fish_at(container, event.position)
+	if fish:
+		fish_peek.open(fish, container.get_child(0), event.position)
+		get_viewport().set_input_as_handled()
+
+
+## The fish under `screen_pos` in `container`'s water, or null.
+func fish_at(container: SubViewportContainer, screen_pos: Vector2) -> Node2D:
+	var vp: SubViewport = container.get_child(0)
+	var local := (screen_pos - container.global_position) / maxf(container.stretch_shrink, 1)
+	var world := vp.get_canvas_transform().affine_inverse() * local
+	var best: Node2D = null
+	var best_d := INF
+	for f in get_tree().get_nodes_in_group("fish"):
+		if f.get_viewport() != vp or not f.is_visible_in_tree():
+			continue
+		var body: Line2D = f.get_node_or_null("%FishBody")
+		if body == null:
+			continue
+		var reach := body.width * 0.5 + peek_pick_margin
+		for i in body.get_point_count():
+			var d := world.distance_to(body.to_global(body.get_point_position(i)))
+			if d < reach and d < best_d:
+				best_d = d
+				best = f
+	return best
 
 
 # ── Prestige ──────────────────────────────────────────────────────────────────
@@ -225,6 +271,7 @@ func _on_list_pressed() -> void:
 	if _toggle_panel(list_ui):
 		list_ui.refresh(pond.visible)
 func _on_view_pressed() -> void:
+	fish_peek.close()
 	pond.visible   = not pond.visible
 	toilet.visible = not toilet.visible
 	if list_ui.visible:
