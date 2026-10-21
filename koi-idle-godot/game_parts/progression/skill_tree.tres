@@ -139,6 +139,58 @@ requires = [SubResource("Skill_night_shift")]
 branch = "passive"
 grid_pos = Vector2i(1, 2)
 
+[sub_resource type="Resource" id="Skill_patient_angler"]
+script = ExtResource("1_def")
+id = "patient_angler"
+title = "Patient Angler"
+description = "A fish whose bite took a long time pays more when kept. Lone big fish are worth the wait."
+knob = "patient_angler"
+extra_per_level = 0.1
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_big_appetite")]
+branch = "passive"
+grid_pos = Vector2i(1, 1)
+
+[sub_resource type="Resource" id="Skill_welcome_back"]
+script = ExtResource("1_def")
+id = "welcome_back"
+title = "Welcome Back"
+description = "Your first Keep after coming back from an hour or more away pays extra."
+knob = "welcome_back"
+extra_per_level = 0.5
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_slow_food")]
+branch = "passive"
+grid_pos = Vector2i(1, 3)
+
+[sub_resource type="Resource" id="Skill_hot_streak"]
+script = ExtResource("1_def")
+id = "hot_streak"
+title = "Hot Streak"
+description = "Hook fish one after another to build a streak. Each catch in time adds to the bonus; the window grows with the rank's bite time."
+knob = "hot_streak"
+extra_per_level = 0.05
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_quick_hands")]
+branch = "active"
+grid_pos = Vector2i(4, 1)
+
+[sub_resource type="Resource" id="Skill_empty_bowl"]
+script = ExtResource("1_def")
+id = "empty_bowl"
+title = "Empty Bowl"
+description = "Catches pay more while the toilet is empty: give up idle income for fishing income."
+knob = "empty_bowl"
+extra_per_level = 0.25
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_fat_fry")]
+branch = "active"
+grid_pos = Vector2i(4, 3)
+
 [resource]
 script = ExtResource("2_tree")
-skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait"), SubResource("Skill_old_timers"), SubResource("Skill_full_house")]
+skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait"), SubResource("Skill_old_timers"), SubResource("Skill_full_house"), SubResource("Skill_patient_angler"), SubResource("Skill_welcome_back"), SubResource("Skill_hot_streak"), SubResource("Skill_empty_bowl")]

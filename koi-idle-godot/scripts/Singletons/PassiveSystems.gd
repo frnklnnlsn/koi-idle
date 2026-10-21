@@ -11,6 +11,9 @@ var _save_timer: float = 0.0
 ## What the last offline catch-up paid: {"seconds": away time used, "coins": earned}.
 ## Read it to show a "while you were away" message.
 var last_offline := {"seconds": 0.0, "coins": 0.0}
+## Welcome Back: true after coming back from an hour+ away (RankTable
+## welcome_back_hours), until the next Keep uses it.
+var welcome_back_pending := false
 
 func _ready() -> void:
 	_load_from_save()
@@ -85,6 +88,8 @@ func _apply_offline_earnings() -> void:
 	var earnings := _offline_income(seconds_away) * maxf(Tuning.apply(Tuning.OFFLINE_INCOME, 1.0), 0.0)
 	net_worth += earnings
 	last_offline = {"seconds": seconds_away, "coins": earnings}
+	if seconds_away >= Ranks.table().welcome_back_hours * 3600.0:
+		welcome_back_pending = true
 
 ## Money per second right now: the toilet fish's own incomes, through Tuning
 ## (income skills and the level apply to every fish, old and new; a knob

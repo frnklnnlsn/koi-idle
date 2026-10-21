@@ -82,8 +82,9 @@ func _set_idle_status() -> void:
 
 func _process(delta: float) -> void:
 	line.tick(delta)
-	# The Swift Ladder pace changes every moment while a chain is out.
-	if not line.is_empty() and Tuning.apply(Tuning.SWIFT_LADDER, 0.0) > 0.0:
+	# Pace and streak change every moment.
+	if (not line.is_empty() and Tuning.apply(Tuning.SWIFT_LADDER, 0.0) > 0.0) \
+			or Tuning.apply(Tuning.HOT_STREAK, 0.0) > 0.0:
 		fish_stats.text = _stats_text()
 	if not _waiting:
 		return
@@ -124,7 +125,7 @@ func _on_fishing_timer_timeout() -> void:
 		_refresh()
 		return
 	var fish: fish_conf = pool[randi() % pool.size()]
-	line.hook(fish)
+	line.hook(fish, fishing_timer.wait_time, _instant)
 	_just_caught = true
 	if Prestige.boss_ready(fish):
 		_set_status("[shake rate=20 level=8]A %s monster! Something bigger stirs below...[/shake]" % Prestige.mass_text(fish.mass))
@@ -138,7 +139,7 @@ func _on_fishing_timer_timeout() -> void:
 func _on_keep_pressed() -> void:
 	if line.is_empty() or _waiting:
 		return
-	var speed := line.speed_multiplier()
+	var bonuses := line.bonuses()
 	var paid := line.payout()
 	var count := line.chain.size()
 	var top: int = line.top().rank
@@ -149,8 +150,11 @@ func _on_keep_pressed() -> void:
 	# Hungry Bait: the next chain's low ranks bite instantly.
 	line.instant_through = FishingLine.hungry_reach(top)
 	var text := "Kept %d fish for $%s" % [count, _commas(floori(paid))]
-	if speed > 1.005:
-		text += "  (×%s fast!)" % str(snappedf(speed, 0.01))
+	if not bonuses.is_empty():
+		text += "  (" + ", ".join(bonuses.map(func(b): return "×%s %s" % [str(snappedf(b[1], 0.01)), b[0]])) + ")"
+	# Welcome Back is used up by this Keep.
+	if bonuses.any(func(b): return b[0] == "welcome back"):
+		PassiveSystems.welcome_back_pending = false
 	if line.instant_through >= 0:
 		text += "\nHungry fish: rank%s bite instantly next" % (
 			" 0" if line.instant_through == 0 else "s 0–%d" % line.instant_through)
@@ -232,7 +236,7 @@ func _refresh() -> void:
 	# What's on the line and what it's worth.
 	if line.is_empty():
 		chain_label.text = "Line: empty"
-		fish_stats.text = ""
+		fish_stats.text = _stats_text()
 	else:
 		var parts := line.chain.map(func(f): return "R%d %sg" % [f.rank, _commas(roundi(f.mass))])
 		chain_label.text = "On line: " + " → ".join(parts)
@@ -292,8 +296,17 @@ func _show_boss_hint() -> void:
 	boss_hint.text = "Boss: hook a fish of %s  (biggest in pond %s)" % [Prestige.mass_text(lvl.boss_mass), Prestige.mass_text(biggest)]
 
 
-## What Keep would pay now, and the Swift Ladder pace when it's owned.
+## What Keep would pay now, the Swift Ladder pace and the Hot Streak when
+## they're owned.
 func _stats_text() -> String:
+	var streak := ""
+	var pond := _pond_fish()
+	if Tuning.apply(Tuning.HOT_STREAK, 0.0) > 0.0 and line.streak_bonus(pond) > 0.0:
+		streak = "Streak %d  (+%d%%)" % [line.streak, roundi(line.streak_bonus(pond) * 100.0)]
+		if line.is_empty():
+			streak += "  %.0fs left" % maxf(line.streak_time_left(pond), 0.0)
+	if line.is_empty():
+		return streak
 	var text := "Keep now: $%s" % _commas(floori(line.payout()))
 	if line.chain.size() > 1:
 		text += "   (separately $%s)" % _commas(floori(line.value_if_separate()))
@@ -302,6 +315,8 @@ func _stats_text() -> String:
 	if Tuning.apply(Tuning.SWIFT_LADDER, 0.0) > 0.0:
 		text += "\nPace %.1fs / par %.1fs  → ×%s" % [line.elapsed(), line.par_seconds,
 			str(snappedf(line.speed_multiplier(), 0.01))]
+	if streak != "":
+		text += "\n" + streak
 	return text
 
 

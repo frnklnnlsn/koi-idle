@@ -37,6 +37,12 @@
 #   old_timers        income bonus per hour a toilet fish has worked (0.01 =
 #                     +1%/h, up to RankTable.old_timer_cap) (PassiveSystems)
 #   full_house        income bonus while the toilet is full (0.1 = +10%)
+#   empty_bowl        catch bonus while the toilet is empty (0.25 = +25%)
+#   hot_streak        catch bonus per streak step (0.05 = +5% a step, up to
+#                     RankTable.hot_streak_cap)
+#   patient_angler    bonus on a fish per minute its bite took (0.1 = +10%,
+#                     up to RankTable.patient_cap)
+#   welcome_back      bonus on the first Keep after an hour+ away (0.5 = +50%)
 # To add a knob: pick a name, add a constant below, and read the number
 # through Tuning.apply() where the game uses it.
 class_name Tuning
@@ -59,12 +65,16 @@ const SWIFT_LADDER := "swift_ladder"
 const INSTANT_BITES := "instant_bites"
 const OLD_TIMERS := "old_timers"
 const FULL_HOUSE := "full_house"
+const EMPTY_BOWL := "empty_bowl"
+const HOT_STREAK := "hot_streak"
+const PATIENT_ANGLER := "patient_angler"
+const WELCOME_BACK := "welcome_back"
 
 ## Every knob, for pickers in the Inspector (SkillDef.knob uses the same list).
 const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
 	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE,
 	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS, SWIFT_LADDER, INSTANT_BITES,
-	OLD_TIMERS, FULL_HOUSE]
+	OLD_TIMERS, FULL_HOUSE, EMPTY_BOWL, HOT_STREAK, PATIENT_ANGLER, WELCOME_BACK]
 ## How each knob is named to the player.
 const LABELS := {
 	PRICE: "Fish price",
@@ -84,6 +94,10 @@ const LABELS := {
 	INSTANT_BITES: "Instant bites",
 	OLD_TIMERS: "Seniority",
 	FULL_HOUSE: "Full toilet income",
+	EMPTY_BOWL: "Empty toilet catches",
+	HOT_STREAK: "Streak bonus",
+	PATIENT_ANGLER: "Patience bonus",
+	WELCOME_BACK: "Welcome back catch",
 }
 ## Knobs that are shares (0..1): an extra on these shows as percentage points.
 const SHARES := [RECYCLE_FEE, POND_SALE_RATE]
@@ -141,6 +155,14 @@ static func describe(knob: String, mod: Vector2) -> String:
 	if knob == OLD_TIMERS:
 		return "Toilet fish earn +%s%% more per hour worked (up to +%d%%)" % [
 			_num(mod.x * mod.y * 100.0), roundi(Ranks.table().old_timer_cap * 100.0)]
+	if knob == EMPTY_BOWL:
+		return "+%s%% on catches while the toilet is empty" % _num(mod.x * mod.y * 100.0)
+	if knob == HOT_STREAK:
+		return "+%s%% per streak step (up to +%d%%)" % [_num(mod.x * mod.y * 100.0), roundi(Ranks.table().hot_streak_cap * 100.0)]
+	if knob == PATIENT_ANGLER:
+		return "+%s%% per minute a bite took (up to +%d%%)" % [_num(mod.x * mod.y * 100.0), roundi(Ranks.table().patient_cap * 100.0)]
+	if knob == WELCOME_BACK:
+		return "+%s%% on your first Keep after an hour+ away" % _num(mod.x * mod.y * 100.0)
 	if knob == FULL_HOUSE:
 		return "+%s%% income while the toilet is full" % _num(mod.x * mod.y * 100.0)
 	if knob == SWIFT_LADDER:

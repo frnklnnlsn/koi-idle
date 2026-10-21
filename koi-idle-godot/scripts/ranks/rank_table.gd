@@ -40,6 +40,16 @@ extends Resource
 @export_range(0.0, 10.0, 0.5) var swift_allowance_seconds: float = 3.0
 ## Swift Ladder: most a fast chain can pay (× its value).
 @export_range(1.0, 5.0, 0.1) var swift_cap: float = 2.0
+## Hot Streak: a catch keeps the streak going if it comes within
+## (next rank's average bite × this) + streak_window_extra seconds of the last.
+@export_range(1.0, 5.0, 0.1) var streak_window_bites: float = 2.0
+@export_range(0.0, 30.0, 0.5) var streak_window_extra: float = 5.0
+## Hot Streak: most the streak can add (1 = +100%).
+@export_range(0.0, 5.0, 0.1) var hot_streak_cap: float = 1.0
+## Patient Angler: most one fish's wait can add (1 = +100%).
+@export_range(0.0, 5.0, 0.1) var patient_cap: float = 1.0
+## Welcome Back: hours away that count as "coming back".
+@export_range(0.0, 24.0, 0.25) var welcome_back_hours: float = 1.0
 
 @export_group("Toilet")
 ## Old Timers: the most a toilet fish's seniority can add to its income
