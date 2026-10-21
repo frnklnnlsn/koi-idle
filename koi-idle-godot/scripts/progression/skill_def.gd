@@ -20,7 +20,8 @@ extends Resource
 @export_group("Effect")
 ## The number this skill changes (see tuning.gd for where each is used).
 @export_enum("price", "income", "bite_time", "growth_speed", "growth_potential",
-	"toilet_capacity", "shop_pool", "recycle_fee", "pond_sale_rate") var knob: String = "income"
+	"toilet_capacity", "shop_pool", "recycle_fee", "pond_sale_rate",
+	"offline_income", "offline_growth", "start_mass", "chain_bonus") var knob: String = "income"
 ## Added per level (slots, seconds...; for shares like recycle_fee, 0.05 = 5%).
 @export var extra_per_level: float = 0.0
 ## Multiplies per level (1 = no change, 0.9 = 10% less each level).
@@ -36,6 +37,8 @@ extends Resource
 @export var requires: Array[SkillDef] = []
 
 @export_group("Layout")
+## Which branch it belongs to (the tree screen puts a heading over each).
+@export_enum("passive", "active", "other") var branch: String = "other"
 ## Place in the tree: x = column, y = row (row 0 at the top).
 @export var grid_pos: Vector2i = Vector2i.ZERO
 

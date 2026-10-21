@@ -24,6 +24,11 @@ extends RefCounted
 
 const CHAIN_BONUS: float = 1.5
 
+
+## The chain bonus now (CHAIN_BONUS through Tuning: Chain Master adds to it).
+static func chain_bonus() -> float:
+	return maxf(Tuning.apply(Tuning.CHAIN_BONUS, CHAIN_BONUS), 1.0)
+
 # Bite times per rank live in the rank table (FishRank.bite_seconds).
 
 ## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
@@ -109,7 +114,7 @@ static func avg_start_mass(rank_def: FishRank) -> float:
 func value() -> float:
 	var v := 0.0
 	for i in chain.size():
-		v = worth(chain[i]) if i == 0 else (v + worth(chain[i])) * CHAIN_BONUS
+		v = worth(chain[i]) if i == 0 else (v + worth(chain[i])) * chain_bonus()
 	return v
 
 

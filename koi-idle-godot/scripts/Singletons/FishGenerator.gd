@@ -68,7 +68,9 @@ func _build_fish(rank: int) -> fish_conf:
 	# (PassiveSystems.income_rate), so they reach fish you already own.
 	fish.income = stats["income"]
 	fish.income_z = stats["income_z"]
-	fish.mass = stats["mass"]
+	# Tuning start_mass (Fat Fry): heavier from the start, so it also pays more
+	# when caught and grows from a bigger base.
+	fish.mass = stats["mass"] * maxf(Tuning.apply(Tuning.START_MASS, 1.0), 0.01)
 	fish.mass_z = stats["mass_z"]
 	fish.value = fish.income   # what the shop's value charts sort and show
 

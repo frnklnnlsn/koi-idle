@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/skill_node.gd" id="1_node"]
 
 [node name="SkillNode" type="Button"]
-custom_minimum_size = Vector2(150, 68)
+custom_minimum_size = Vector2(128, 68)
 focus_mode = 0
 script = ExtResource("1_node")
 
@@ -25,7 +25,7 @@ alignment = 1
 [node name="Title" type="Label" parent="Lines"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "Skill"
 horizontal_alignment = 1
 clip_text = true

@@ -135,11 +135,9 @@ func _away(seconds: float) -> void:
 	SaveManager.save_timestamp()
 	PassiveSystems._flush_to_save()
 	var paid: float = PassiveSystems.last_offline["coins"]
-	var used: float = PassiveSystems.last_offline["seconds"]
-	var capped := "" if used >= seconds - 1.0 else "  (capped at %s)" % _duration(used)
-	_say("Away %s: earned $%s, pond grew %s pond-hours%s" % [
+	_say("Away %s: earned $%s, pond grew %s pond-hours" % [
 		_duration(seconds), _commas(paid),
-		_commas(grown * FishGrowthManager.TIME_SCALE / 3600.0), capped])
+		_commas(grown * FishGrowthManager.TIME_SCALE / 3600.0)])
 
 
 func _save_now() -> void:

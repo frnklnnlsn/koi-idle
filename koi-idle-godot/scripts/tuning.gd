@@ -25,6 +25,10 @@
 #   shop_pool         shop buy pool size (Ranks.pool_size)
 #   recycle_fee       share kept back on recycling (PassiveSystems)
 #   pond_sale_rate    share Sell Pond pays (FishingLine)
+#   offline_income    money earned while the game is closed (PassiveSystems)
+#   offline_growth    pond growth while the game is closed (FishGrowthManager)
+#   start_mass        a new fish's starting mass (FishGenerator)
+#   chain_bonus       fishing chain snowball, normally 1.5 (FishingLine)
 # To add a knob: pick a name, add a constant below, and read the number
 # through Tuning.apply() where the game uses it.
 class_name Tuning
@@ -39,10 +43,15 @@ const TOILET_CAPACITY := "toilet_capacity"
 const SHOP_POOL := "shop_pool"
 const RECYCLE_FEE := "recycle_fee"
 const POND_SALE_RATE := "pond_sale_rate"
+const OFFLINE_INCOME := "offline_income"
+const OFFLINE_GROWTH := "offline_growth"
+const START_MASS := "start_mass"
+const CHAIN_BONUS := "chain_bonus"
 
 ## Every knob, for pickers in the Inspector (SkillDef.knob uses the same list).
 const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
-	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE]
+	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE,
+	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS]
 ## How each knob is named to the player.
 const LABELS := {
 	PRICE: "Fish price",
@@ -54,6 +63,10 @@ const LABELS := {
 	SHOP_POOL: "Shop pool size",
 	RECYCLE_FEE: "Recycle fee",
 	POND_SALE_RATE: "Pond sale rate",
+	OFFLINE_INCOME: "Income while away",
+	OFFLINE_GROWTH: "Pond growth while away",
+	START_MASS: "New fish weight",
+	CHAIN_BONUS: "Chain bonus",
 }
 ## Knobs that are shares (0..1): an extra on these shows as percentage points.
 const SHARES := [RECYCLE_FEE, POND_SALE_RATE]

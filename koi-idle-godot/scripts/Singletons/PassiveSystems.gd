@@ -8,8 +8,6 @@ const SAVE_INTERVAL: float = 5.0
 var _save_timer: float = 0.0
 # What caught fish pay is set by the rank table (catch_return) and each
 # rank's price; see FishingLine.catch_value.
-## Longest absence that still earns offline income, in real seconds.
-const MAX_OFFLINE_SECONDS: float = 8.0 * 60.0 * 60.0
 ## What the last offline catch-up paid: {"seconds": away time used, "coins": earned}.
 ## Read it to show a "while you were away" message.
 var last_offline := {"seconds": 0.0, "coins": 0.0}
@@ -52,11 +50,12 @@ func _apply_offline_earnings() -> void:
 		return
 
 	var now := Time.get_unix_time_from_system()
-	var seconds_away := clampf(now - last_timestamp, 0.0, MAX_OFFLINE_SECONDS)
+	# No cap: every second away pays (Tuning offline_income on top).
+	var seconds_away := maxf(now - last_timestamp, 0.0)
 	if seconds_away <= 0.0:
 		return
 
-	var earnings := income_rate() * seconds_away
+	var earnings := income_rate() * seconds_away * maxf(Tuning.apply(Tuning.OFFLINE_INCOME, 1.0), 0.0)
 	net_worth += earnings
 	last_offline = {"seconds": seconds_away, "coins": earnings}
 

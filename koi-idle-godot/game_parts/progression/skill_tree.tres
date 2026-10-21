@@ -7,24 +7,13 @@
 script = ExtResource("1_def")
 id = "rich_water"
 title = "Rich Water"
-description = "Every fish earns a little more."
+description = "Every toilet fish earns more."
 knob = "income"
 mult_per_level = 1.05
 max_level = 5
 cost = 1
-grid_pos = Vector2i(0, 0)
-
-[sub_resource type="Resource" id="Skill_golden_scales"]
-script = ExtResource("1_def")
-id = "golden_scales"
-title = "Golden Scales"
-description = "Every fish earns a lot more."
-knob = "income"
-mult_per_level = 1.1
-max_level = 3
-cost = 2
-requires = [SubResource("Skill_rich_water")]
-grid_pos = Vector2i(0, 1)
+branch = "passive"
+grid_pos = Vector2i(2, 0)
 
 [sub_resource type="Resource" id="Skill_big_appetite"]
 script = ExtResource("1_def")
@@ -35,20 +24,69 @@ knob = "growth_potential"
 mult_per_level = 1.1
 max_level = 5
 cost = 1
-grid_pos = Vector2i(2, 0)
-
-[sub_resource type="Resource" id="Skill_giant_genes"]
-script = ExtResource("1_def")
-id = "giant_genes"
-title = "Giant Genes"
-description = "Pond fish grow much bigger."
-knob = "growth_potential"
-mult_per_level = 1.25
-max_level = 3
-cost = 2
-requires = [SubResource("Skill_big_appetite")]
+branch = "passive"
 grid_pos = Vector2i(2, 1)
+
+[sub_resource type="Resource" id="Skill_night_shift"]
+script = ExtResource("1_def")
+id = "night_shift"
+title = "Night Shift"
+description = "You earn more while the game is closed."
+knob = "offline_income"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 2)
+
+[sub_resource type="Resource" id="Skill_slow_food"]
+script = ExtResource("1_def")
+id = "slow_food"
+title = "Slow Food"
+description = "Pond fish grow faster while the game is closed."
+knob = "offline_growth"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 3)
+
+[sub_resource type="Resource" id="Skill_quick_hands"]
+script = ExtResource("1_def")
+id = "quick_hands"
+title = "Quick Hands"
+description = "Fish bite sooner."
+knob = "bite_time"
+mult_per_level = 0.9
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 0)
+
+[sub_resource type="Resource" id="Skill_fat_fry"]
+script = ExtResource("1_def")
+id = "fat_fry"
+title = "Fat Fry"
+description = "New fish start heavier, so they pay more when caught."
+knob = "start_mass"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 1)
+
+[sub_resource type="Resource" id="Skill_chain_master"]
+script = ExtResource("1_def")
+id = "chain_master"
+title = "Chain Master"
+description = "Each fish added to a chain snowballs its value harder."
+knob = "chain_bonus"
+extra_per_level = 0.1
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 2)
 
 [resource]
 script = ExtResource("2_tree")
-skills = [SubResource("Skill_rich_water"), SubResource("Skill_golden_scales"), SubResource("Skill_big_appetite"), SubResource("Skill_giant_genes")]
+skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master")]
