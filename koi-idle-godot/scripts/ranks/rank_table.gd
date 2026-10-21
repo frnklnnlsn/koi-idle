@@ -18,6 +18,24 @@ extends Resource
 ## 0.1 = you get 90% back.
 @export_range(0.0, 1.0, 0.01) var recycle_fee: float = 0.1
 
+@export_group("Fishing")
+## Bites depend on how many fish of the wanted rank are in the pond: a
+## crowded pond bites fast, a lone fish takes ages.
+##
+##   wait = rank's bite_seconds × (bite_full_pond ÷ fish of that rank) ^ exponent
+##
+## e.g. full pond 20, exponent 1: 20 fish = bite_seconds, 10 fish = 2×,
+## 1 fish = 20× as long. Then skills / levels (Tuning bite_time) apply.
+
+## Fish of a rank in the pond at which bites take exactly its bite_seconds.
+@export_range(1, 500) var bite_full_pond: int = 20
+## How much the count matters: 1 = in proportion, 0.5 = gentler (1 fish =
+## about 4.5× instead of 20×), 0 = the count doesn't matter.
+@export_range(0.0, 2.0, 0.05) var bite_population_exponent: float = 1.0
+## Fastest a crowded pond can make bites (× bite_seconds). 1 = more than
+## bite_full_pond fish doesn't help.
+@export_range(0.05, 1.0, 0.05) var bite_crowd_floor: float = 0.5
+
 @export_group("Pond growth")
 ## Each fish rolls one of two growth types when it's made.
 ##

@@ -82,11 +82,11 @@ func _set_idle_status() -> void:
 func _process(_delta: float) -> void:
 	if not _waiting:
 		return
-	var r := line.bite_range()
+	var r := line.bite_range(_pond_fish())
 	var elapsed := fishing_timer.wait_time - fishing_timer.time_left
 	bite_bar.max_value = r.y
 	bite_bar.value = elapsed
-	bite_label.text = "%.1fs   (bite in %s–%ss)" % [elapsed, _secs(r.x), _secs(r.y)]
+	bite_label.text = "%.1fs   (bite in %s–%s)" % [elapsed, _secs(r.x), _secs(r.y)]
 
 
 # --- Buttons ------------------------------------------------------------------
@@ -101,7 +101,7 @@ func _on_fishing_button_pressed() -> void:
 		_refresh()   # nothing can bite; the timer already shows ∞
 		return
 	_waiting = true
-	fishing_timer.wait_time = line.roll_bite_time()
+	fishing_timer.wait_time = line.roll_bite_time(_pond_fish())
 	fishing_timer.start()
 	_set_status("[wave amp=20 freq=5 connected=1]Waiting for a rank %d...[/wave]" % line.target_rank())
 	_refresh()
@@ -232,8 +232,9 @@ func _refresh() -> void:
 		elif not can_cast:
 			bite_label.text = "Next bite: ∞   (no rank %d fish in the pond)" % line.target_rank()
 		else:
-			var r := line.bite_range()
-			bite_label.text = "Next bite: %s–%ss   (rank %d)" % [_secs(r.x), _secs(r.y), line.target_rank()]
+			var r := line.bite_range(_pond_fish())
+			var n := line.candidates(_pond_fish()).size()
+			bite_label.text = "Next bite: %s–%s   (rank %d · %d in pond)" % [_secs(r.x), _secs(r.y), line.target_rank(), n]
 
 	var boss := not _waiting and Prestige.boss_ready(line.top())
 	if not boss:
@@ -295,8 +296,11 @@ func _pond_fish() -> Array:
 	return save_data.list_of_retired_fish if save_data else []
 
 
+## 1.5 -> "1.5s", 75 -> "1m 15s".
 static func _secs(s: float) -> String:
-	return str(int(s)) if is_equal_approx(s, roundf(s)) else "%.1f" % s
+	if s >= 60.0:
+		return "%dm %02ds" % [int(s) / 60, int(s) % 60]
+	return (str(int(s)) if is_equal_approx(s, roundf(s)) else "%.1f" % s) + "s"
 
 
 ## 1234567 -> "1,234,567"

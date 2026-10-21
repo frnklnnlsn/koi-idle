@@ -29,7 +29,8 @@ const CHAIN_BONUS: float = 1.5
 static func chain_bonus() -> float:
 	return maxf(Tuning.apply(Tuning.CHAIN_BONUS, CHAIN_BONUS), 1.0)
 
-# Bite times per rank live in the rank table (FishRank.bite_seconds).
+# Bite times per rank live in the rank table (FishRank.bite_seconds), scaled
+# by how many fish of that rank are in the pond (RankTable "Fishing" group).
 
 ## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
 ## worth, so a player stuck without a rank 0 can always turn the pond into cash.
@@ -69,14 +70,26 @@ func candidates(pond_fish: Array) -> Array:
 	return pond_fish.filter(func(f): return f is fish_conf and f.rank == rank and f.ID not in on_line)
 
 
-func bite_range() -> Vector2:
+## Shortest and longest wait for the next bite, given the pond's fish (their
+## count of the target rank sets the pace; see population_factor).
+func bite_range(pond_fish: Array = []) -> Vector2:
 	var r: Vector2 = Ranks.get_rank(target_rank()).bite_seconds
+	r *= population_factor(candidates(pond_fish).size())
 	return Vector2(Tuning.apply(Tuning.BITE_TIME, r.x), Tuning.apply(Tuning.BITE_TIME, r.y))
 
 
-func roll_bite_time() -> float:
-	var r := bite_range()
+func roll_bite_time(pond_fish: Array = []) -> float:
+	var r := bite_range(pond_fish)
 	return randf_range(r.x, r.y)
+
+
+## How much `count` fish of a rank stretch its bite time: 1 at the rank
+## table's bite_full_pond, more with fewer fish, down to bite_crowd_floor
+## with more.
+static func population_factor(count: int) -> float:
+	var t := Ranks.table()
+	var f := pow(float(t.bite_full_pond) / float(maxi(count, 1)), t.bite_population_exponent)
+	return maxf(f, t.bite_crowd_floor)
 
 
 func hook(fish: fish_conf) -> void:
