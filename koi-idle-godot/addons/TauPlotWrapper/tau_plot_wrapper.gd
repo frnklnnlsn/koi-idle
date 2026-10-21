@@ -167,7 +167,11 @@ static func _line_with_markers(plot: TauPlot, title: String, x: PackedFloat64Arr
 	o["colors"] = colors
 	if not o.has("legend"):
 		o["legend"] = series.size() > 1
-	_plot(plot, title, dataset, [line_cfg, TauScatterConfig.new()], types, false, o)
+	var dot_cfg := TauScatterConfig.new()
+	# "circles": every marker a round dot (otherwise each gets its own shape).
+	if opts.get("circles", false):
+		dot_cfg.style.marker_shapes = [TauScatterStyle.MarkerShape.CIRCLE]
+	_plot(plot, title, dataset, [line_cfg, dot_cfg], types, false, o)
 
 
 ## overlays: one config per overlay type used in the pane.

@@ -10,6 +10,9 @@ extends Control
 @onready var distribution_graph   = get_node_or_null("%BellcurveList")
 @onready var growth_curve         = %GrowthcurveList
 @onready var histogram_graph      = %HistogramList
+## Old Timers: toilet fish income over hours worked. Shown instead of the
+## growth chart for toilet fish once Old Timers is owned.
+@onready var seniority_chart: SeniorityChart = get_node_or_null("%SeniorityList")
 @onready var preview_viewport: SubViewport = get_node_or_null("%PreviewViewport")
 @onready var v_separator_3: VSeparator = get_node_or_null("%VSeparator3")
 
@@ -86,6 +89,19 @@ func refresh(showing_pond: bool) -> void:
 	var save_data  = SaveManager.load_saved_data()
 	var fish_array = save_data.list_of_retired_fish if showing_pond else save_data.list_of_work_fish
 	populate_list(fish_array)
+	_show_seniority(fish_array)
+
+
+## Toilet fish + Old Timers owned: the seniority chart replaces the growth one.
+func _show_seniority(fish_array: Array) -> void:
+	if seniority_chart == null:
+		return
+	var on := not _showing_pond and PassiveSystems.seniority_rate() > 0.0
+	seniority_chart.visible = on
+	growth_curve.visible = not on
+	if on:
+		seniority_chart.set_fish_collection(fish_array)
+		seniority_chart.set_selected(_selected_fish)
 
 func _on_growth_updated() -> void:
 	if not _showing_pond:
@@ -127,6 +143,8 @@ func clear_list() -> void:
 # ── Signal handlers ───────────────────────────────────────────────────────────
 func _on_row_hovered(fish: fish_conf) -> void:
 	_graph_manager.update_for_fish(fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(fish)
 	_label_display.show(fish)
 	_update_label_visibility()
 
@@ -135,6 +153,8 @@ func _on_row_unhovered(_fish: fish_conf) -> void:
 	if _selected_fish:
 		_graph_manager.update_for_fish(_selected_fish)
 		_label_display.show(_selected_fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(_selected_fish)
 
 
 func _select_from_chart(fish: fish_conf) -> void:
@@ -157,6 +177,8 @@ func _on_row_clicked(fish: fish_conf) -> void:
 	_selected_fish = fish
 	_selected_row  = _get_row_for_fish(fish)
 	_graph_manager.update_for_fish(fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(fish)
 	_label_display.show(fish)
 	_update_label_visibility()
 

@@ -41,6 +41,11 @@ extends Resource
 ## Swift Ladder: most a fast chain can pay (× its value).
 @export_range(1.0, 5.0, 0.1) var swift_cap: float = 2.0
 
+@export_group("Toilet")
+## Old Timers: the most a toilet fish's seniority can add to its income
+## (0.5 = +50%).
+@export_range(0.0, 5.0, 0.05) var old_timer_cap: float = 0.5
+
 @export_group("Pond growth")
 ## Each fish rolls one of two growth types when it's made.
 ##

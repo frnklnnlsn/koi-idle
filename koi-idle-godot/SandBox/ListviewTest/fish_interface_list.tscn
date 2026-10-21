@@ -4,6 +4,7 @@
 [ext_resource type="LabelSettings" uid="uid://da5e1803whf56" path="res://assets/fonts/list_lable_settings.tres" id="1_q7idn"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="3_60prq"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_5oxw5"]
+[ext_resource type="PackedScene" path="res://game_parts/charts/seniority_chart.tscn" id="5_senior"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
 bg_color = Color(0.054902, 0.066667, 0.176471, 1)
@@ -137,6 +138,13 @@ theme_override_constants/separation = 12
 
 [node name="GrowthcurveList" parent="Backdrop/Columns/Charts" instance=ExtResource("3_60prq")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SeniorityList" parent="Backdrop/Columns/Charts" instance=ExtResource("5_senior")]
+unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
 size_flags_vertical = 3

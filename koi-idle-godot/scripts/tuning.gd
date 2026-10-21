@@ -34,6 +34,9 @@
 #   instant_bites     after a Keep, ranks this close to the last chain's top
 #                     bite instantly: 1 = up to 3 below, 2 = 2 below, 3 = 1
 #                     below; 0 = off (FishingLine.hungry_reach, Hungry Bait)
+#   old_timers        income bonus per hour a toilet fish has worked (0.01 =
+#                     +1%/h, up to RankTable.old_timer_cap) (PassiveSystems)
+#   full_house        income bonus while the toilet is full (0.1 = +10%)
 # To add a knob: pick a name, add a constant below, and read the number
 # through Tuning.apply() where the game uses it.
 class_name Tuning
@@ -54,11 +57,14 @@ const START_MASS := "start_mass"
 const CHAIN_BONUS := "chain_bonus"
 const SWIFT_LADDER := "swift_ladder"
 const INSTANT_BITES := "instant_bites"
+const OLD_TIMERS := "old_timers"
+const FULL_HOUSE := "full_house"
 
 ## Every knob, for pickers in the Inspector (SkillDef.knob uses the same list).
 const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
 	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE,
-	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS, SWIFT_LADDER, INSTANT_BITES]
+	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS, SWIFT_LADDER, INSTANT_BITES,
+	OLD_TIMERS, FULL_HOUSE]
 ## How each knob is named to the player.
 const LABELS := {
 	PRICE: "Fish price",
@@ -76,6 +82,8 @@ const LABELS := {
 	CHAIN_BONUS: "Chain bonus",
 	SWIFT_LADDER: "Fast chain bonus",
 	INSTANT_BITES: "Instant bites",
+	OLD_TIMERS: "Seniority",
+	FULL_HOUSE: "Full toilet income",
 }
 ## Knobs that are shares (0..1): an extra on these shows as percentage points.
 const SHARES := [RECYCLE_FEE, POND_SALE_RATE]
@@ -130,6 +138,11 @@ static func describe(knob: String, mod: Vector2) -> String:
 		if n <= 0:
 			return "No instant bites"
 		return "After a Keep, ranks up to %d below your last top bite instantly" % maxi(4 - n, 1)
+	if knob == OLD_TIMERS:
+		return "Toilet fish earn +%s%% more per hour worked (up to +%d%%)" % [
+			_num(mod.x * mod.y * 100.0), roundi(Ranks.table().old_timer_cap * 100.0)]
+	if knob == FULL_HOUSE:
+		return "+%s%% income while the toilet is full" % _num(mod.x * mod.y * 100.0)
 	if knob == SWIFT_LADDER:
 		return "Chains faster than par pay more (strength %d%%, up to ×%s)" % [
 			roundi(mod.x * mod.y * 100.0), _num(Ranks.table().swift_cap)]

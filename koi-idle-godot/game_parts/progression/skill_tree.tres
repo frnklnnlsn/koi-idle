@@ -113,6 +113,32 @@ requires = [SubResource("Skill_chain_master")]
 branch = "active"
 grid_pos = Vector2i(4, 2)
 
+[sub_resource type="Resource" id="Skill_old_timers"]
+script = ExtResource("1_def")
+id = "old_timers"
+title = "Old Timers"
+description = "Toilet fish earn more the longer they've worked, even while the game is closed. Flushing them starts the new ones from scratch."
+knob = "old_timers"
+extra_per_level = 0.01
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_rich_water")]
+branch = "passive"
+grid_pos = Vector2i(1, 0)
+
+[sub_resource type="Resource" id="Skill_full_house"]
+script = ExtResource("1_def")
+id = "full_house"
+title = "Full House"
+description = "Your whole toilet earns more while every slot is filled."
+knob = "full_house"
+extra_per_level = 0.1
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_night_shift")]
+branch = "passive"
+grid_pos = Vector2i(1, 2)
+
 [resource]
 script = ExtResource("2_tree")
-skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait")]
+skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait"), SubResource("Skill_old_timers"), SubResource("Skill_full_house")]

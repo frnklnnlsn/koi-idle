@@ -15,6 +15,9 @@ class_name fish_conf
 @export var rank: int
 @export var cost: float
 @export var age: float
+## Seconds this fish has worked in the toilet (also while the game is closed).
+## Old Timers turns it into an income bonus.
+@export var work_time: float = 0.0
 
 ### growth_rate stuff
 @export var growth_rate :float
