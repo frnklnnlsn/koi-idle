@@ -29,6 +29,11 @@
 #   offline_growth    pond growth while the game is closed (FishGrowthManager)
 #   start_mass        a new fish's starting mass (FishGenerator)
 #   chain_bonus       fishing chain snowball, normally 1.5 (FishingLine)
+#   swift_ladder      strength of the pay bonus for chains faster than par,
+#                     0 = off (FishingLine.speed_multiplier, Swift Ladder)
+#   instant_bites     after a Keep, ranks this close to the last chain's top
+#                     bite instantly: 1 = up to 3 below, 2 = 2 below, 3 = 1
+#                     below; 0 = off (FishingLine.hungry_reach, Hungry Bait)
 # To add a knob: pick a name, add a constant below, and read the number
 # through Tuning.apply() where the game uses it.
 class_name Tuning
@@ -47,11 +52,13 @@ const OFFLINE_INCOME := "offline_income"
 const OFFLINE_GROWTH := "offline_growth"
 const START_MASS := "start_mass"
 const CHAIN_BONUS := "chain_bonus"
+const SWIFT_LADDER := "swift_ladder"
+const INSTANT_BITES := "instant_bites"
 
 ## Every knob, for pickers in the Inspector (SkillDef.knob uses the same list).
 const KNOBS := [PRICE, INCOME, BITE_TIME, GROWTH_SPEED, GROWTH_POTENTIAL,
 	TOILET_CAPACITY, SHOP_POOL, RECYCLE_FEE, POND_SALE_RATE,
-	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS]
+	OFFLINE_INCOME, OFFLINE_GROWTH, START_MASS, CHAIN_BONUS, SWIFT_LADDER, INSTANT_BITES]
 ## How each knob is named to the player.
 const LABELS := {
 	PRICE: "Fish price",
@@ -67,6 +74,8 @@ const LABELS := {
 	OFFLINE_GROWTH: "Pond growth while away",
 	START_MASS: "New fish weight",
 	CHAIN_BONUS: "Chain bonus",
+	SWIFT_LADDER: "Fast chain bonus",
+	INSTANT_BITES: "Instant bites",
 }
 ## Knobs that are shares (0..1): an extra on these shows as percentage points.
 const SHARES := [RECYCLE_FEE, POND_SALE_RATE]
@@ -115,6 +124,15 @@ static func apply_share(knob: String, base: float) -> float:
 
 ## A change in words, e.g. "Toilet capacity +5", "Recycle fee -50%".
 static func describe(knob: String, mod: Vector2) -> String:
+	# Knobs that count steps read better in words.
+	if knob == INSTANT_BITES:
+		var n := roundi(mod.x)
+		if n <= 0:
+			return "No instant bites"
+		return "After a Keep, ranks up to %d below your last top bite instantly" % maxi(4 - n, 1)
+	if knob == SWIFT_LADDER:
+		return "Chains faster than par pay more (strength %d%%, up to ×%s)" % [
+			roundi(mod.x * mod.y * 100.0), _num(Ranks.table().swift_cap)]
 	var parts: PackedStringArray = []
 	if not is_zero_approx(mod.x):
 		var x := mod.x * 100.0 if knob in SHARES else mod.x

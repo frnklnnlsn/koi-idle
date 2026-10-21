@@ -21,7 +21,8 @@ extends Resource
 ## The number this skill changes (see tuning.gd for where each is used).
 @export_enum("price", "income", "bite_time", "growth_speed", "growth_potential",
 	"toilet_capacity", "shop_pool", "recycle_fee", "pond_sale_rate",
-	"offline_income", "offline_growth", "start_mass", "chain_bonus") var knob: String = "income"
+	"offline_income", "offline_growth", "start_mass", "chain_bonus",
+	"swift_ladder", "instant_bites") var knob: String = "income"
 ## Added per level (slots, seconds...; for shares like recycle_fee, 0.05 = 5%).
 @export var extra_per_level: float = 0.0
 ## Multiplies per level (1 = no change, 0.9 = 10% less each level).

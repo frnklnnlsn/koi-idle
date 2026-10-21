@@ -35,6 +35,11 @@ extends Resource
 ## Fastest a crowded pond can make bites (× bite_seconds). 1 = more than
 ## bite_full_pond fish doesn't help.
 @export_range(0.05, 1.0, 0.05) var bite_crowd_floor: float = 0.5
+## Swift Ladder: seconds to react allowed per catch in a chain's par time
+## (par = each rank's average bite + this).
+@export_range(0.0, 10.0, 0.5) var swift_allowance_seconds: float = 3.0
+## Swift Ladder: most a fast chain can pay (× its value).
+@export_range(1.0, 5.0, 0.1) var swift_cap: float = 2.0
 
 @export_group("Pond growth")
 ## Each fish rolls one of two growth types when it's made.

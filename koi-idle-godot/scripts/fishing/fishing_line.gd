@@ -40,6 +40,15 @@ const POND_SALE_RATE: float = 0.5
 ## hooked; a fish out of the water stops growing.
 var chain: Array = []
 
+## Swift Ladder: seconds since the chain's first cast (-1 = not cast yet;
+## the fishing panel adds game time with tick()) and its par time so far
+## (each cast's average bite + the reaction allowance).
+var clock: float = -1.0
+var par_seconds: float = 0.0
+## Hungry Bait: ranks up to this one bite instantly in this chain (-1 = none).
+## Set after a Keep, gone with the next Keep / Release.
+var instant_through: int = -1
+
 
 static func max_rank() -> int:
 	return Ranks.max_rank()
@@ -98,6 +107,62 @@ func hook(fish: fish_conf) -> void:
 
 func clear() -> void:
 	chain.clear()
+	clock = -1.0
+	par_seconds = 0.0
+	instant_through = -1
+
+
+# ------------------------------------------------------------------ Swift Ladder
+
+## Call on every cast: starts the chain's clock and adds this cast to par.
+## `instant` casts only add the reaction allowance.
+func note_cast(pond_fish: Array, instant: bool) -> void:
+	if clock < 0.0:
+		clock = 0.0
+	var r := bite_range(pond_fish)
+	par_seconds += (0.0 if instant else (r.x + r.y) * 0.5) + Ranks.table().swift_allowance_seconds
+
+
+## Moves the chain's clock on (game time, so it matches the bite timer).
+func tick(delta: float) -> void:
+	if clock >= 0.0:
+		clock += delta
+
+
+## Seconds since the chain's first cast.
+func elapsed() -> float:
+	return maxf(clock, 0.0)
+
+
+## Pay multiplier for beating par: 1 + strength × (par ÷ time − 1), from 1
+## (never a penalty) to the rank table's swift_cap. 1 without Swift Ladder.
+func speed_multiplier() -> float:
+	var strength := Tuning.apply(Tuning.SWIFT_LADDER, 0.0)
+	if strength <= 0.0 or chain.is_empty() or clock < 0.0:
+		return 1.0
+	var speed := par_seconds / maxf(elapsed(), 0.1)
+	return clampf(1.0 + strength * (speed - 1.0), 1.0, Ranks.table().swift_cap)
+
+
+## What Keep pays now: the chain's value with the speed bonus.
+func payout() -> float:
+	return value() * speed_multiplier()
+
+
+# ------------------------------------------------------------------ Hungry Bait
+
+## True if the next bite comes instantly (Hungry Bait, right after a Keep).
+func is_instant() -> bool:
+	return instant_through >= 0 and target_rank() <= instant_through
+
+
+## After keeping a chain that reached `top_rank`: the highest rank that bites
+## instantly in the next chain (-1 = none). Rank 0 always, once owned.
+static func hungry_reach(top_rank: int) -> int:
+	var n := roundi(Tuning.apply(Tuning.INSTANT_BITES, 0.0))
+	if n <= 0:
+		return -1
+	return maxi(top_rank - maxi(4 - n, 1), 0)
 
 
 func worth(fish: fish_conf) -> float:

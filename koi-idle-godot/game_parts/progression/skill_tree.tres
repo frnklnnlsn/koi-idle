@@ -87,6 +87,32 @@ cost = 1
 branch = "active"
 grid_pos = Vector2i(3, 2)
 
+[sub_resource type="Resource" id="Skill_swift_ladder"]
+script = ExtResource("1_def")
+id = "swift_ladder"
+title = "Swift Ladder"
+description = "A chain kept faster than its par time pays more. Par is each rank's usual bite time plus 3 seconds to react."
+knob = "swift_ladder"
+extra_per_level = 0.3333
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_quick_hands")]
+branch = "active"
+grid_pos = Vector2i(4, 0)
+
+[sub_resource type="Resource" id="Skill_hungry_bait"]
+script = ExtResource("1_def")
+id = "hungry_bait"
+title = "Hungry Bait"
+description = "After you Keep a chain, the low ranks of your next chain bite instantly, so climbing back up is quick."
+knob = "instant_bites"
+extra_per_level = 1.0
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_chain_master")]
+branch = "active"
+grid_pos = Vector2i(4, 2)
+
 [resource]
 script = ExtResource("2_tree")
-skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master")]
+skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait")]

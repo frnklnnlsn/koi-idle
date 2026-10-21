@@ -46,6 +46,7 @@ var _waiting     := false   # cast is out, waiting for a bite
 var _just_caught := false   # a fresh catch: choose Keep / Release / Leave On
 var _sell_armed  := false   # Sell Pond clicked once; next click within SELL_CONFIRM_SECONDS sells
 var _sell_arm_id := 0       # so an old timeout can't disarm a newer confirmation
+var _instant     := false   # the current cast is a Hungry Bait instant bite
 var _boss_armed  := false   # Challenge the boss clicked once
 var _boss_arm_id := 0
 
@@ -79,7 +80,11 @@ func _set_idle_status() -> void:
 		_set_status("Cast for a rank 0 fish")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	line.tick(delta)
+	# The Swift Ladder pace changes every moment while a chain is out.
+	if not line.is_empty() and Tuning.apply(Tuning.SWIFT_LADDER, 0.0) > 0.0:
+		fish_stats.text = _stats_text()
 	if not _waiting:
 		return
 	var r := line.bite_range(_pond_fish())
@@ -101,7 +106,10 @@ func _on_fishing_button_pressed() -> void:
 		_refresh()   # nothing can bite; the timer already shows ∞
 		return
 	_waiting = true
-	fishing_timer.wait_time = line.roll_bite_time(_pond_fish())
+	# Hungry Bait: right after a Keep, low ranks snap at the bait at once.
+	_instant = line.is_instant()
+	line.note_cast(_pond_fish(), _instant)
+	fishing_timer.wait_time = 0.05 if _instant else line.roll_bite_time(_pond_fish())
 	fishing_timer.start()
 	_set_status("[wave amp=20 freq=5 connected=1]Waiting for a rank %d...[/wave]" % line.target_rank())
 	_refresh()
@@ -120,6 +128,8 @@ func _on_fishing_timer_timeout() -> void:
 	_just_caught = true
 	if Prestige.boss_ready(fish):
 		_set_status("[shake rate=20 level=8]A %s monster! Something bigger stirs below...[/shake]" % Prestige.mass_text(fish.mass))
+	elif _instant:
+		_set_status("[shake rate=30 level=6]Snap![/shake]  A hungry rank %d!  %sg" % [fish.rank, _commas(roundi(fish.mass))])
 	else:
 		_set_status("Caught a rank %d!  %sg" % [fish.rank, _commas(roundi(fish.mass))])
 	_refresh()
@@ -128,13 +138,23 @@ func _on_fishing_timer_timeout() -> void:
 func _on_keep_pressed() -> void:
 	if line.is_empty() or _waiting:
 		return
-	var paid := line.value()
+	var speed := line.speed_multiplier()
+	var paid := line.payout()
 	var count := line.chain.size()
+	var top: int = line.top().rank
 	PassiveSystems.pay_catch(paid)
 	DisplayManager.fish_caught.emit(line.chain.duplicate())   # removes them from the pond
 	line.clear()
 	_just_caught = false
-	_set_status("Kept %d fish for $%s" % [count, _commas(floori(paid))])
+	# Hungry Bait: the next chain's low ranks bite instantly.
+	line.instant_through = FishingLine.hungry_reach(top)
+	var text := "Kept %d fish for $%s" % [count, _commas(floori(paid))]
+	if speed > 1.005:
+		text += "  (×%s fast!)" % str(snappedf(speed, 0.01))
+	if line.instant_through >= 0:
+		text += "\nHungry fish: rank%s bite instantly next" % (
+			" 0" if line.instant_through == 0 else "s 0–%d" % line.instant_through)
+	_set_status(text)
 	_refresh()
 
 
@@ -216,18 +236,15 @@ func _refresh() -> void:
 	else:
 		var parts := line.chain.map(func(f): return "R%d %sg" % [f.rank, _commas(roundi(f.mass))])
 		chain_label.text = "On line: " + " → ".join(parts)
-		var text := "Keep now: $%s" % _commas(floori(line.value()))
-		if line.chain.size() > 1:
-			text += "   (separately $%s)" % _commas(floori(line.value_if_separate()))
-		else:
-			text += "   (shop price $%s)" % _commas(floori(Ranks.price(line.top().rank)))
-		fish_stats.text = text
+		fish_stats.text = _stats_text()
 
 	# Bite timer: a range for the rank you'd catch next, or ∞ if nothing can bite.
 	var can_cast := line.can_climb() and not line.candidates(_pond_fish()).is_empty()
 	if not _waiting:
 		bite_bar.value = 0.0
-		if not line.can_climb():
+		if line.is_instant() and can_cast:
+			bite_label.text = "Next bite: instant   (hungry rank %d)" % line.target_rank()
+		elif not line.can_climb():
 			bite_label.text = "Next bite: ∞   (top rank on the line)"
 		elif not can_cast:
 			bite_label.text = "Next bite: ∞   (no rank %d fish in the pond)" % line.target_rank()
@@ -273,6 +290,19 @@ func _show_boss_hint() -> void:
 		if f is fish_conf:
 			biggest = maxf(biggest, f.mass)
 	boss_hint.text = "Boss: hook a fish of %s  (biggest in pond %s)" % [Prestige.mass_text(lvl.boss_mass), Prestige.mass_text(biggest)]
+
+
+## What Keep would pay now, and the Swift Ladder pace when it's owned.
+func _stats_text() -> String:
+	var text := "Keep now: $%s" % _commas(floori(line.payout()))
+	if line.chain.size() > 1:
+		text += "   (separately $%s)" % _commas(floori(line.value_if_separate()))
+	else:
+		text += "   (shop price $%s)" % _commas(floori(Ranks.price(line.top().rank)))
+	if Tuning.apply(Tuning.SWIFT_LADDER, 0.0) > 0.0:
+		text += "\nPace %.1fs / par %.1fs  → ×%s" % [line.elapsed(), line.par_seconds,
+			str(snappedf(line.speed_multiplier(), 0.01))]
+	return text
 
 
 ## Every pond fish; the line's fish highlighted, with a "Now" dot on their
