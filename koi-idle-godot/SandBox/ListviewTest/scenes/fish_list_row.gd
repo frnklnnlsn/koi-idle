@@ -12,9 +12,13 @@ var fish_resource: fish_conf = null
 @export var normal_color:   StyleBox = null
 @export var hover_color:    StyleBox = null
 @export var selected_color: StyleBox = null
-## Length (pixels) of a fish picture at size 1. Pond fish are drawn bigger by
-## the pond's growth size (Pond.size_of: up to 4x); toilet fish all at 1.
-@export var icon_base_length: float = 26.0
+## Screen pixels per pond pixel in the fish pictures. 2 matches the pond
+## (which is drawn at half resolution and doubled); 1 is smaller. Bigger pond
+## fish get their chunkier pond pixels on top of this.
+@export_range(1, 4) var icon_pixel_size: int = 2
+## Longest a fish picture may get (pixels); bigger fish use smaller pixels
+## to fit.
+@export var max_icon_length: float = 120.0
 ## Space inside the row at the left and right (the list header uses the same,
 ## so the columns line up).
 @export var side_margin: float = 8.0
@@ -27,6 +31,8 @@ var fish_resource: fish_conf = null
 
 var _selected := false
 var _is_pond := false
+## Draws the fish picture (set by the list manager).
+var icon_renderer: FishIconRenderer
 
 # ── Godot callbacks ───────────────────────────────────────────────────────────
 func _ready() -> void:
@@ -56,10 +62,20 @@ func _apply_display_mode() -> void:
 		income_label.text = "%sg" % FishLabelDisplay.num(fish_resource.mass)
 	else:
 		income_label.text = "$%s/s" % FishLabelDisplay.num(PassiveSystems.fish_income(fish_resource))
-	# Picture size: the fish's size in the pond (growth), 1 for toilet fish.
-	var f := Pond.size_of(fish_resource) if _is_pond else 1.0
-	var w := icon_base_length * f * float(FishIconRenderer.PICTURE_SIZE.x) / (27.0 * FishIconRenderer.RENDER_SCALE)
-	icon.custom_minimum_size = Vector2(w, w * FishIconRenderer.PICTURE_SIZE.y / FishIconRenderer.PICTURE_SIZE.x)
+	# Picture: drawn like the fish in the pond (its pond size and pixel size;
+	# toilet fish are all size 1), then blown up with hard pixel edges.
+	if icon_renderer:
+		var density := Pond.icon_density(fish_resource) if _is_pond else 1.0
+		var scale := icon_pixel_size * (Pond.pixel_scale_of(fish_resource) if _is_pond else 1)
+		var fish := fish_resource
+		icon_renderer.request(fish, density, func(tex: Texture2D):
+			if not is_instance_valid(icon) or fish_resource != fish:
+				return
+			var s := scale
+			while s > 1 and tex.get_width() * s > max_icon_length:
+				s -= 1
+			icon.texture = tex
+			icon.custom_minimum_size = tex.get_size() * s)
 
 
 func _row_style(bg: Color) -> StyleBoxFlat:

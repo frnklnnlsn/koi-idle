@@ -237,6 +237,22 @@ static func size_of(fish: fish_conf) -> float:
 	return growth_size(fish, 0.333, 4.0)
 
 
+## How many times bigger than normal `fish`'s pixels are in the pond
+## (1 = normal; one more each pixel_step it grows, see pixel_group).
+static func pixel_scale_of(fish: fish_conf) -> int:
+	var s := size_of(fish)
+	if current and is_instance_valid(current):
+		return current.pixel_group(s) + 1
+	return clampi(floori(s - 1.0 + 0.01) + 1, 1, 4)
+
+
+## Picture pixels per pond pixel for `fish` (FishIconRenderer): its size
+## spread over its pixel scale, so a picture blown up by pixel_scale_of()
+## has the same chunky pixels as the fish in the pond.
+static func icon_density(fish: fish_conf) -> float:
+	return size_of(fish) / float(pixel_scale_of(fish))
+
+
 ## The biggest size a fish can reach in the pond.
 static func max_size() -> float:
 	return current.max_size_factor if current and is_instance_valid(current) else 4.0
