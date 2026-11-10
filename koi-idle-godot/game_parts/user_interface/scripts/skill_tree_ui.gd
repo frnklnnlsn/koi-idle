@@ -20,7 +20,7 @@ signal action_message(text: String)
 const SKILL_NODE := preload("res://game_parts/user_interface/scenes/skill_node.tscn")
 
 ## Space each grid step takes (a box sits in the middle of its cell).
-@export var cell_size := Vector2(140, 96)
+@export var cell_size := Vector2(96, 88)
 ## Width of the lines between skills.
 @export var link_width := 3.0
 ## Room for the branch headings above the boxes.

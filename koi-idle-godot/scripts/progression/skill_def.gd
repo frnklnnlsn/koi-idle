@@ -16,6 +16,10 @@ extends Resource
 @export var id: String = ""
 @export var title: String = ""
 @export_multiline var description: String = ""
+## Picture on the skill's box in the tree (white on transparent works best;
+## it's tinted to match the skill's state). Without one, the box shows the
+## title instead.
+@export var icon: Texture2D
 
 @export_group("Effect")
 ## The number this skill changes (see tuning.gd for where each is used).
