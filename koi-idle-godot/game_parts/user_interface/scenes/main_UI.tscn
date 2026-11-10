@@ -30,6 +30,7 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/skills.png" id="32_ic_skills"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/fish_peek.tscn" id="33_peek"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/pond_pixel_layers.gd" id="34_pixlayers"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/settings_menu.tscn" id="40_settings"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -254,7 +255,7 @@ theme_override_constants/separation = 4
 [node name="Button" type="Button" parent="Sidebar/Buttons" unique_id=1291562547]
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-tooltip_text = "Menu"
+tooltip_text = "Settings (Esc)"
 focus_mode = 0
 icon = ExtResource("13_ic_menu")
 icon_alignment = 1
@@ -383,6 +384,10 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 0
 
+[node name="SettingsMenu" parent="." instance=ExtResource("40_settings")]
+unique_name_in_owner = true
+
+[connection signal="pressed" from="Sidebar/Buttons/Button" to="." method="_on_menu_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Flush" to="." method="_on_flush_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Skills" to="." method="_on_skills_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/View" to="." method="_on_view_pressed"]

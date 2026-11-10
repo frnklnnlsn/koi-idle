@@ -204,7 +204,8 @@ func run_command(cmd: Dictionary) -> String:
 
 
 func command_status() -> String:
-	return "skills · %s · b buys" % Upgrades.points_text(Progression.points())
+	var hint := " · b buys" if Settings.get_value("gameplay/key_hints") else ""
+	return "skills · %s%s" % [Upgrades.points_text(Progression.points()), hint]
 
 
 func command_info() -> String:

@@ -349,10 +349,6 @@ static func _secs(s: float) -> String:
 
 
 ## 1234567 -> "1,234,567"
+## Money and grams, in the Settings "Big numbers" style.
 static func _commas(n: int) -> String:
-	var digits := str(absi(n))
-	var out := ""
-	while digits.length() > 3:
-		out = "," + digits.right(3) + out
-		digits = digits.left(-3)
-	return ("-" if n < 0 else "") + digits + out
+	return NumberFormat.whole(n)

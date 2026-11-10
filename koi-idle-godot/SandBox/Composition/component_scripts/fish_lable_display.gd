@@ -84,20 +84,16 @@ static func is_fast_grower(fish: fish_conf) -> bool:
 	return fish.mid_point < Ranks.table().normal_peak_hours.x
 
 
-## Readable number: decimals for small values, commas for big ones.
-## 0.123 -> "0.12", 12.5 -> "12.5", 1234567 -> "1,234,567"
+## Readable number: decimals for small values; big ones in the Settings
+## "Big numbers" style (NumberFormat).
+## 0.123 -> "0.12", 12.5 -> "12.5", 1234567 -> "1,234,567" / "1.23M" / "1.23e6"
 static func num(x: float) -> String:
 	var a := absf(x)
 	if a < 10.0:
 		return _trim("%.2f" % x)
 	if a < 1000.0:
 		return _trim("%.1f" % x)
-	var digits := str(absi(floori(a)))
-	var out := ""
-	while digits.length() > 3:
-		out = "," + digits.right(3) + out
-		digits = digits.left(-3)
-	return ("-" if x < 0 else "") + digits + out
+	return NumberFormat.big(x)
 
 
 static func duration(seconds: float) -> String:

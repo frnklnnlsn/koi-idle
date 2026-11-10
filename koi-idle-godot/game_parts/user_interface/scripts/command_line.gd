@@ -52,7 +52,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var target = _target()
 	_status.text = target.command_status() if target \
-		else "toilet %d/%d%s · S opens the shop" % [FishHandler.work_count(), FishHandler.capacity, _full_house_text()]
+		else "toilet %d/%d%s%s" % [FishHandler.work_count(), FishHandler.capacity, _full_house_text(),
+			" · S opens the shop" if Settings.get_value("gameplay/key_hints") else ""]
 	_set_info(target.command_info() if target and target.has_method("command_info") else "")
 
 
@@ -151,7 +152,7 @@ func _sell_all(confirmed: bool) -> void:
 		_say("No fish in the toilet to sell")
 		return
 	var value := FishHandler.toilet_sale_value()
-	if not confirmed:
+	if not confirmed and Settings.get_value("gameplay/confirm_big_sells"):
 		_say("Sell %d toilet fish for $%s?  y / n" % [count, FishLabelDisplay.num(value)])
 		_prompt.text = "y/n"
 		_confirm = func(yes: bool):

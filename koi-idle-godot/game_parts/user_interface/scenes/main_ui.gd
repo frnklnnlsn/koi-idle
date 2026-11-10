@@ -18,6 +18,11 @@ extends Control
 @onready var fishing_ui: Control = %FishingUI
 ## The skill tree screen (skill_tree_ui.tscn). T or the Skills button.
 @onready var skill_tree_ui: SkillTreeUI = %SkillTreeUI
+## The settings window (menu button, or Esc with nothing open).
+@onready var settings_menu: SettingsMenu = %SettingsMenu
+## "Ask before big sells": yes / no box for recycling many fish at once.
+var _confirm_dialog: ConfirmationDialog
+var _confirm_action: Callable
 
 ## The keyboard terminal along the bottom (command_line.tscn); style and size
 ## it in the editor. The rest of the UI is kept above it.
@@ -56,8 +61,11 @@ func _ready() -> void:
 	command_line.global_keys["v"] = _on_view_pressed
 	# T opens / closes the skill tree.
 	command_line.global_keys["t"] = _on_skills_pressed
-	# Esc closes the open panel (once nothing is half typed in the terminal).
-	command_line.global_keys["escape"] = close_open_panel
+	# Esc closes the open panel (once nothing is half typed in the terminal);
+	# with nothing open it opens the settings.
+	command_line.global_keys["escape"] = func():
+		if not close_open_panel():
+			settings_menu.open()
 	# The close-up window first, so Esc closes it before the panel under it.
 	fish_peek.add_to_group(ESC_CLOSES)
 	for panel in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
@@ -66,6 +74,13 @@ func _ready() -> void:
 	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
 	shop_ui.action_message.connect(command_line.say)
+	shop_ui.confirm_requested.connect(_ask)
+	_confirm_dialog = ConfirmationDialog.new()
+	_confirm_dialog.title = "Are you sure?"
+	_confirm_dialog.confirmed.connect(func():
+		if _confirm_action.is_valid():
+			_confirm_action.call())
+	add_child(_confirm_dialog)
 	skill_tree_ui.action_message.connect(command_line.say)
 	# Clicking the points counter opens the tree.
 	skill_points_label.gui_input.connect(func(e):
@@ -219,7 +234,7 @@ func _on_buy_max_pressed() -> void:
 
 func _process(_delta: float) -> void:
 	# Whole coins only, rounded down so it never shows money you don't have yet.
-	net_worth_label.text = "$ " + _with_commas(floori(PassiveSystems.net_worth))
+	net_worth_label.text = "$ " + NumberFormat.whole(floorf(PassiveSystems.net_worth))
 	if _shop_bar.visible:
 		_update_rank_meter()
 
@@ -261,6 +276,18 @@ func _toggle_panel(panel: Control) -> bool:
 			p.visible = false
 	panel.visible = open
 	return open
+
+
+func _on_menu_pressed() -> void:
+	settings_menu.toggle()
+
+
+## Yes / no box; `on_yes` runs if confirmed.
+func _ask(question: String, yes_text: String, on_yes: Callable) -> void:
+	_confirm_action = on_yes
+	_confirm_dialog.dialog_text = question
+	_confirm_dialog.ok_button_text = yes_text
+	_confirm_dialog.popup_centered()
 
 
 func _on_shop_pressed() -> void:
