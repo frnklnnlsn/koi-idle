@@ -39,6 +39,8 @@ var _confirm_action: Callable
 ## See-through layer over the toilet / pond while the shop or fishing is open. Change how
 ## dark it is with its Color (the alpha slider) in the Inspector.
 @onready var _shop_backdrop: ColorRect = %ShopBackdrop
+## The bobber view shown behind the fishing panel (in place of the pond).
+@onready var fishing_scene: FishingScene = %FishingScene
 
 ## Light colours (keep / trash / off) come from UIPalette.
 
@@ -92,6 +94,13 @@ func _ready() -> void:
 	_show_skill_points()
 	_show_level()
 	fishing_ui.boss_challenged.connect(_play_boss)
+	# The bobber view follows the fishing panel.
+	fishing_ui.cast_started.connect(fishing_scene.cast)
+	fishing_ui.cast_ended.connect(fishing_scene.set_waiting.bind(false))
+	fishing_ui.fish_hooked.connect(fishing_scene.hook)
+	fishing_ui.line_kept.connect(fishing_scene.keep)
+	fishing_ui.line_released.connect(fishing_scene.release)
+	_update_backdrop()
 	# The fish the close-up is following never sinks out of view.
 	if Pond.current:
 		Pond.current.keep_visible = func(n): return fish_peek.is_showing(n)
@@ -134,7 +143,8 @@ func _on_shop_visibility() -> void:
 
 
 func _update_backdrop() -> void:
-	_shop_backdrop.visible = shop_ui.visible or fishing_ui.visible
+	_shop_backdrop.visible = shop_ui.visible
+	fishing_scene.visible = fishing_ui.visible
 
 
 func _on_drag_zone(zone: String) -> void:
@@ -151,6 +161,8 @@ func _on_drag_zone(zone: String) -> void:
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
+	if fishing_ui.visible:
+		return   # the bobber view covers the water
 	var hovered := get_viewport().gui_get_hovered_control()
 	if hovered not in [null, self, _main_column, toilet, pond]:
 		return

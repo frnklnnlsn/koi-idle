@@ -31,6 +31,7 @@
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/fish_peek.tscn" id="33_peek"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/pond_pixel_layers.gd" id="34_pixlayers"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/settings_menu.tscn" id="40_settings"]
+[ext_resource type="PackedScene" path="res://game_parts/fishing_scene/fishing_scene.tscn" id="41_fishscene"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -160,6 +161,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0.054902, 0.066667, 0.176471, 0.6)
+
+[node name="FishingScene" parent="." instance=ExtResource("41_fishscene")]
+unique_name_in_owner = true
+visible = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=296132464]
 clip_contents = true

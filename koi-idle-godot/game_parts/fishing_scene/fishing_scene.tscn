@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game_parts/fishing_scene/fishing_scene.gd" id="1_scene"]
+[ext_resource type="Shader" path="res://game_parts/fishing_scene/fishing_water.gdshader" id="2_water"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+shader = ExtResource("2_water")
+
+[node name="FishingScene" type="SubViewportContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+stretch_shrink = 2
+script = ExtResource("1_scene")
+
+[node name="View" type="SubViewport" parent="."]
+disable_3d = true
+handle_input_locally = false
+size = Vector2i(640, 360)
+render_target_update_mode = 4
+
+[node name="Water" type="ColorRect" parent="View"]
+material = SubResource("ShaderMaterial_water")
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+
+[node name="Stage" type="Node2D" parent="View"]
+
+[node name="Fish" type="Sprite2D" parent="View/Stage"]
+visible = false
+texture_filter = 1

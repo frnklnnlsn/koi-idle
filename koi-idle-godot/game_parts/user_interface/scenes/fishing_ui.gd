@@ -17,6 +17,13 @@
 # kept fish leave the pond (and the charts), released ones look normal again.
 extends Control
 
+## For the fishing scene (the bobber view behind the panel).
+signal cast_started
+signal cast_ended            # the line came back with nothing
+signal fish_hooked(fish: fish_conf)
+signal line_kept
+signal line_released
+
 ## "Challenge the boss" confirmed: main_ui plays the cut scene.
 signal boss_challenged
 
@@ -112,6 +119,7 @@ func _on_fishing_button_pressed() -> void:
 	line.note_cast(_pond_fish(), _instant)
 	fishing_timer.wait_time = 0.05 if _instant else line.roll_bite_time(_pond_fish())
 	fishing_timer.start()
+	cast_started.emit()
 	_set_status("[wave amp=20 freq=5 connected=1]Waiting for a rank %d...[/wave]" % line.target_rank())
 	_refresh()
 
@@ -122,11 +130,13 @@ func _on_fishing_timer_timeout() -> void:
 	var pool := line.candidates(_pond_fish())
 	if pool.is_empty():
 		_set_status("Nothing bit. No rank %d fish left in the pond." % line.target_rank())
+		cast_ended.emit()
 		_refresh()
 		return
 	var fish: fish_conf = pool[randi() % pool.size()]
 	line.hook(fish, fishing_timer.wait_time, _instant)
 	_just_caught = true
+	fish_hooked.emit(fish)
 	if Prestige.boss_ready(fish):
 		_set_status("[shake rate=20 level=8]A %s monster! Something bigger stirs below...[/shake]" % Prestige.mass_text(fish.mass))
 	elif _instant:
@@ -147,6 +157,7 @@ func _on_keep_pressed() -> void:
 	DisplayManager.fish_caught.emit(line.chain.duplicate())   # removes them from the pond
 	line.clear()
 	_just_caught = false
+	line_kept.emit()
 	# Hungry Bait: the next chain's low ranks bite instantly.
 	line.instant_through = FishingLine.hungry_reach(top)
 	var text := "Kept %d fish for $%s" % [count, _commas(floori(paid))]
@@ -167,6 +178,7 @@ func _on_release_pressed() -> void:
 		return
 	line.clear()
 	_just_caught = false
+	line_released.emit()
 	_set_status("Released. They swim back into the pond.")
 	_refresh()
 
