@@ -25,7 +25,8 @@ static func table() -> RankTable:
 
 
 static func count() -> int:
-	return _table.ranks.size()
+	# The table can still be loading while the editor imports the project.
+	return _table.ranks.size() if _table else 0
 
 
 static func max_rank() -> int:
