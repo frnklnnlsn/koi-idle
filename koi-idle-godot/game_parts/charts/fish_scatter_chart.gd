@@ -32,16 +32,10 @@ var _earlier: Array = []  # fishing: caught earlier this session (faded)
 var _mode := 0
 var _series_fish := {}   # series name -> Array of fish, in point order (for clicks)
 
-# --- Zoom and pan ---------------------------------------------------------------
-# Scroll over the chart to zoom in / out around the mouse, drag with the right
-# mouse button to pan, double-click to see everything again. (A plain left
-# drag is box selection in the shop.)
-## Zoom per scroll step.
-@export_range(1.05, 2.0, 0.05) var zoom_step := 1.25
+# --- Zoom and pan (mouse handling in KoiChart) ------------------------------
 ## Deepest zoom: the view's width in spreads (full view = 2 × REACH).
 @export var min_view_width := 0.25
 var _view := Rect2(-REACH, -REACH, 2.0 * REACH, 2.0 * REACH)
-var _panning := false
 
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
@@ -78,6 +72,7 @@ static func sample_data() -> Dictionary:
 # --- Shop API ------------------------------------------------------------------
 
 func _ready() -> void:
+	zoomable = true
 	var names := PackedStringArray()
 	for m in MODES:
 		names.append(m[0])
@@ -143,27 +138,18 @@ func _redraw_now() -> void:
 	draw(plot, {"series": series, "colors": colors, "title": title, "view": _view}, _on_plot_clicked)
 
 
-func _input(event: InputEvent) -> void:
-	if not is_visible_in_tree() or plot == null:
-		return
-	var mb := event as InputEventMouseButton
-	if mb:
-		var inside := plot.get_global_rect().has_point(mb.global_position)
-		if mb.pressed and inside and mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-			var f := 1.0 / zoom_step if mb.button_index == MOUSE_BUTTON_WHEEL_UP else zoom_step
-			zoom_at(mb.global_position, f)
-			get_viewport().set_input_as_handled()
-		elif mb.button_index == MOUSE_BUTTON_RIGHT:
-			_panning = mb.pressed and inside
-			if inside:
-				get_viewport().set_input_as_handled()
-		elif mb.pressed and inside and mb.double_click and mb.button_index == MOUSE_BUTTON_LEFT:
-			reset_view()
-	elif event is InputEventMouseMotion and _panning:
-		var scale := _data_per_pixel()
-		if scale != Vector2.ZERO:
-			_set_view(Rect2(_view.position - event.relative * scale, _view.size))
-		get_viewport().set_input_as_handled()
+func _pan_pixels(relative: Vector2) -> void:
+	var scale := _data_per_pixel()
+	if scale != Vector2.ZERO:
+		_set_view(Rect2(_view.position - relative * scale, _view.size))
+
+
+func _zoom_at(screen_pos: Vector2, factor: float) -> void:
+	zoom_at(screen_pos, factor)
+
+
+func _reset_zoom() -> void:
+	reset_view()
 
 
 ## Zoom by `factor` (< 1 = in) keeping the point under `screen_pos` still.
