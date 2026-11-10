@@ -92,6 +92,9 @@ func _ready() -> void:
 	_show_skill_points()
 	_show_level()
 	fishing_ui.boss_challenged.connect(_play_boss)
+	# The fish the close-up is following never sinks out of view.
+	if Pond.current:
+		Pond.current.keep_visible = func(n): return fish_peek.is_showing(n)
 	add_to_group("main_ui")
 	if Prestige.just_advanced:
 		Prestige.just_advanced = false

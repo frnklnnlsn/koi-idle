@@ -176,6 +176,9 @@ func _on_row_clicked(fish: fish_conf) -> void:
 
 	_selected_fish = fish
 	_selected_row  = _get_row_for_fish(fish)
+	# Pond list: bring the fish up from the deep so you can see it.
+	if _showing_pond:
+		Pond.surface(fish)
 	_graph_manager.update_for_fish(fish)
 	if seniority_chart and seniority_chart.visible:
 		seniority_chart.set_selected(fish)
