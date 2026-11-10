@@ -61,17 +61,23 @@ func _build_fish(rank: int) -> fish_conf:
 
 	fish.ID = _generate_id(15)
 	fish.rank = rank
-	fish.cost = rank_def.cost
+	fish.cost = Ranks.price(rank)
 
 	var stats := roll_stats(rank_def, _rng)
+	# The fish's own income; skills / levels apply on top when paid
+	# (PassiveSystems.income_rate), so they reach fish you already own.
 	fish.income = stats["income"]
 	fish.income_z = stats["income_z"]
-	fish.mass = stats["mass"]
+	# Tuning start_mass (Fat Fry): heavier from the start, so it also pays more
+	# when caught and grows from a bigger base.
+	fish.mass = stats["mass"] * maxf(Tuning.apply(Tuning.START_MASS, 1.0), 0.01)
 	fish.mass_z = stats["mass_z"]
 	fish.value = fish.income   # what the shop's value charts sort and show
 
 	var growth := roll_growth(fish.mass, rank_def, _rng)
 	fish.growth_rate = growth["growth_rate"]
+	# The fish's own max mass; size skills / levels apply on top as it grows
+	# (FishGrowthManager.max_mass), so they reach fish already in the pond.
 	fish.carrying_capacity = growth["carrying_capacity"]
 	fish.mid_point = growth["mid_point"]
 	fish.size_z = growth["size_z"]

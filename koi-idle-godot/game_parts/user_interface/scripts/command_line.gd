@@ -52,8 +52,14 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var target = _target()
 	_status.text = target.command_status() if target \
-		else "toilet %d/%d · S opens the shop" % [FishHandler.work_count(), FishHandler.capacity]
+		else "toilet %d/%d%s · S opens the shop" % [FishHandler.work_count(), FishHandler.capacity, _full_house_text()]
 	_set_info(target.command_info() if target and target.has_method("command_info") else "")
+
+
+## " · full +20%" while Full House is paying (toilet full and owned).
+func _full_house_text() -> String:
+	var b := PassiveSystems.full_house_bonus()
+	return "" if b <= 1.0 else " · full +%d%%" % roundi((b - 1.0) * 100.0)
 
 
 ## One label per line of info, flowing across the Info grid's columns.

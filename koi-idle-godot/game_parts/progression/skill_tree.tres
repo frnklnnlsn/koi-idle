@@ -1,0 +1,196 @@
+[gd_resource type="Resource" script_class="SkillTree" format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/skill_def.gd" id="1_def"]
+[ext_resource type="Script" path="res://scripts/progression/skill_tree.gd" id="2_tree"]
+
+[sub_resource type="Resource" id="Skill_rich_water"]
+script = ExtResource("1_def")
+id = "rich_water"
+title = "Rich Water"
+description = "Every toilet fish earns more."
+knob = "income"
+mult_per_level = 1.05
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 0)
+
+[sub_resource type="Resource" id="Skill_big_appetite"]
+script = ExtResource("1_def")
+id = "big_appetite"
+title = "Big Appetite"
+description = "Pond fish grow bigger before they stop."
+knob = "growth_potential"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 1)
+
+[sub_resource type="Resource" id="Skill_night_shift"]
+script = ExtResource("1_def")
+id = "night_shift"
+title = "Night Shift"
+description = "You earn more while the game is closed."
+knob = "offline_income"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 2)
+
+[sub_resource type="Resource" id="Skill_slow_food"]
+script = ExtResource("1_def")
+id = "slow_food"
+title = "Slow Food"
+description = "Pond fish grow faster while the game is closed."
+knob = "offline_growth"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "passive"
+grid_pos = Vector2i(2, 3)
+
+[sub_resource type="Resource" id="Skill_quick_hands"]
+script = ExtResource("1_def")
+id = "quick_hands"
+title = "Quick Hands"
+description = "Fish bite sooner."
+knob = "bite_time"
+mult_per_level = 0.9
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 0)
+
+[sub_resource type="Resource" id="Skill_fat_fry"]
+script = ExtResource("1_def")
+id = "fat_fry"
+title = "Fat Fry"
+description = "New fish start heavier, so they pay more when caught."
+knob = "start_mass"
+mult_per_level = 1.1
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 1)
+
+[sub_resource type="Resource" id="Skill_chain_master"]
+script = ExtResource("1_def")
+id = "chain_master"
+title = "Chain Master"
+description = "Each fish added to a chain snowballs its value harder."
+knob = "chain_bonus"
+extra_per_level = 0.1
+max_level = 5
+cost = 1
+branch = "active"
+grid_pos = Vector2i(3, 2)
+
+[sub_resource type="Resource" id="Skill_swift_ladder"]
+script = ExtResource("1_def")
+id = "swift_ladder"
+title = "Swift Ladder"
+description = "A chain kept faster than its par time pays more. Par is each rank's usual bite time plus 3 seconds to react."
+knob = "swift_ladder"
+extra_per_level = 0.3333
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_quick_hands")]
+branch = "active"
+grid_pos = Vector2i(4, 0)
+
+[sub_resource type="Resource" id="Skill_hungry_bait"]
+script = ExtResource("1_def")
+id = "hungry_bait"
+title = "Hungry Bait"
+description = "After you Keep a chain, the low ranks of your next chain bite instantly, so climbing back up is quick."
+knob = "instant_bites"
+extra_per_level = 1.0
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_chain_master")]
+branch = "active"
+grid_pos = Vector2i(4, 2)
+
+[sub_resource type="Resource" id="Skill_old_timers"]
+script = ExtResource("1_def")
+id = "old_timers"
+title = "Old Timers"
+description = "Toilet fish earn more the longer they've worked, even while the game is closed. Flushing them starts the new ones from scratch."
+knob = "old_timers"
+extra_per_level = 0.01
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_rich_water")]
+branch = "passive"
+grid_pos = Vector2i(1, 0)
+
+[sub_resource type="Resource" id="Skill_full_house"]
+script = ExtResource("1_def")
+id = "full_house"
+title = "Full House"
+description = "Your whole toilet earns more while every slot is filled."
+knob = "full_house"
+extra_per_level = 0.1
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_night_shift")]
+branch = "passive"
+grid_pos = Vector2i(1, 2)
+
+[sub_resource type="Resource" id="Skill_patient_angler"]
+script = ExtResource("1_def")
+id = "patient_angler"
+title = "Patient Angler"
+description = "A fish whose bite took a long time pays more when kept. Lone big fish are worth the wait."
+knob = "patient_angler"
+extra_per_level = 0.1
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_big_appetite")]
+branch = "passive"
+grid_pos = Vector2i(1, 1)
+
+[sub_resource type="Resource" id="Skill_welcome_back"]
+script = ExtResource("1_def")
+id = "welcome_back"
+title = "Welcome Back"
+description = "Your first Keep after coming back from an hour or more away pays extra."
+knob = "welcome_back"
+extra_per_level = 0.5
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_slow_food")]
+branch = "passive"
+grid_pos = Vector2i(1, 3)
+
+[sub_resource type="Resource" id="Skill_hot_streak"]
+script = ExtResource("1_def")
+id = "hot_streak"
+title = "Hot Streak"
+description = "Hook fish one after another to build a streak. Each catch in time adds to the bonus; the window grows with the rank's bite time."
+knob = "hot_streak"
+extra_per_level = 0.05
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_quick_hands")]
+branch = "active"
+grid_pos = Vector2i(4, 1)
+
+[sub_resource type="Resource" id="Skill_empty_bowl"]
+script = ExtResource("1_def")
+id = "empty_bowl"
+title = "Empty Bowl"
+description = "Catches pay more while the toilet is empty: give up idle income for fishing income."
+knob = "empty_bowl"
+extra_per_level = 0.25
+max_level = 3
+cost = 2
+requires = [SubResource("Skill_fat_fry")]
+branch = "active"
+grid_pos = Vector2i(4, 3)
+
+[resource]
+script = ExtResource("2_tree")
+skills = [SubResource("Skill_rich_water"), SubResource("Skill_big_appetite"), SubResource("Skill_night_shift"), SubResource("Skill_slow_food"), SubResource("Skill_quick_hands"), SubResource("Skill_fat_fry"), SubResource("Skill_chain_master"), SubResource("Skill_swift_ladder"), SubResource("Skill_hungry_bait"), SubResource("Skill_old_timers"), SubResource("Skill_full_house"), SubResource("Skill_patient_angler"), SubResource("Skill_welcome_back"), SubResource("Skill_hot_streak"), SubResource("Skill_empty_bowl")]

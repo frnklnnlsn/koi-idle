@@ -11,3 +11,21 @@ const CURRENT_VERSION := 1
 @export var list_of_shop_fish: Array
 @export var income: float
 @export var net_worth: float
+
+### progression (skill points; kept across prestige)
+## Prestige level (0 = the first). Prestige comes later; per-level milestones
+## are remembered per level.
+@export var level: int = 0
+## Skill points not spent yet.
+@export var skill_points: int = 0
+## Every skill point ever earned.
+@export var points_earned: int = 0
+## Milestones already earned (keys from Progression).
+@export var claimed_milestones: PackedStringArray = PackedStringArray()
+## Skill levels bought: skill id -> level (Upgrades).
+@export var skills: Dictionary = {}
+## Points spent on those, given back on a respec.
+@export var skill_points_spent: int = 0
+## False on saves from before skill points: Progression then credits the
+## ranks already owned, once.
+@export var progression_started: bool = false

@@ -24,7 +24,13 @@ extends RefCounted
 
 const CHAIN_BONUS: float = 1.5
 
-# Bite times per rank live in the rank table (FishRank.bite_seconds).
+
+## The chain bonus now (CHAIN_BONUS through Tuning: Chain Master adds to it).
+static func chain_bonus() -> float:
+	return maxf(Tuning.apply(Tuning.CHAIN_BONUS, CHAIN_BONUS), 1.0)
+
+# Bite times per rank live in the rank table (FishRank.bite_seconds), scaled
+# by how many fish of that rank are in the pond (RankTable "Fishing" group).
 
 ## Fail-safe "Sell Pond": every pond fish sold at this fraction of its normal
 ## worth, so a player stuck without a rank 0 can always turn the pond into cash.
@@ -33,6 +39,25 @@ const POND_SALE_RATE: float = 0.5
 ## Fish on the line, bait first, newest last. Masses are as they were when
 ## hooked; a fish out of the water stops growing.
 var chain: Array = []
+
+## Swift Ladder: seconds since the chain's first cast (-1 = not cast yet;
+## the fishing panel adds game time with tick()) and its par time so far
+## (each cast's average bite + the reaction allowance).
+var clock: float = -1.0
+var par_seconds: float = 0.0
+## Hungry Bait: ranks up to this one bite instantly in this chain (-1 = none).
+## Set after a Keep, gone with the next Keep / Release.
+var instant_through: int = -1
+## Patient Angler: a pay multiplier per fish on the line (from its wait).
+var fish_bonus: Array[float] = []
+
+## Hot Streak (kept across chains): game seconds this session, when the last
+## fish was hooked, the streak length, and how long the next catch may take
+## to keep it (set on each cast from the target rank's bite time).
+var session_time: float = 0.0
+var last_hook_at: float = -1.0e9
+var streak: int = 0
+var streak_window: float = 0.0
 
 
 static func max_rank() -> int:
@@ -64,25 +89,165 @@ func candidates(pond_fish: Array) -> Array:
 	return pond_fish.filter(func(f): return f is fish_conf and f.rank == rank and f.ID not in on_line)
 
 
-func bite_range() -> Vector2:
-	return Ranks.get_rank(target_rank()).bite_seconds
+## Shortest and longest wait for the next bite, given the pond's fish (their
+## count of the target rank sets the pace; see population_factor).
+func bite_range(pond_fish: Array = []) -> Vector2:
+	var r: Vector2 = Ranks.get_rank(target_rank()).bite_seconds
+	r *= population_factor(candidates(pond_fish).size())
+	return Vector2(Tuning.apply(Tuning.BITE_TIME, r.x), Tuning.apply(Tuning.BITE_TIME, r.y))
 
 
-func roll_bite_time() -> float:
-	var r := bite_range()
+func roll_bite_time(pond_fish: Array = []) -> float:
+	var r := bite_range(pond_fish)
 	return randf_range(r.x, r.y)
 
 
-func hook(fish: fish_conf) -> void:
+## How much `count` fish of a rank stretch its bite time: 1 at the rank
+## table's bite_full_pond, more with fewer fish, down to bite_crowd_floor
+## with more.
+static func population_factor(count: int) -> float:
+	var t := Ranks.table()
+	var f := pow(float(t.bite_full_pond) / float(maxi(count, 1)), t.bite_population_exponent)
+	return maxf(f, t.bite_crowd_floor)
+
+
+## Puts `fish` on the line. `waited` = how long its bite took (Patient
+## Angler); `instant` = a Hungry Bait bite (keeps a streak alive, doesn't add).
+func hook(fish: fish_conf, waited: float = 0.0, instant: bool = false) -> void:
 	chain.append(fish)
+	var patience := maxf(Tuning.apply(Tuning.PATIENT_ANGLER, 0.0), 0.0)
+	fish_bonus.append(1.0 + minf(patience * waited / 60.0, Ranks.table().patient_cap))
+	var in_time := session_time - last_hook_at <= streak_window
+	if not in_time:
+		streak = 0
+	elif not instant:
+		streak += 1
+	last_hook_at = session_time
 
 
 func clear() -> void:
 	chain.clear()
+	fish_bonus.clear()
+	clock = -1.0
+	par_seconds = 0.0
+	instant_through = -1
+
+
+# ------------------------------------------------------------------ Swift Ladder
+
+## Call on every cast: starts the chain's clock and adds this cast to par.
+## `instant` casts only add the reaction allowance.
+func note_cast(pond_fish: Array, instant: bool) -> void:
+	if clock < 0.0:
+		clock = 0.0
+	var r := bite_range(pond_fish)
+	var avg := (r.x + r.y) * 0.5
+	par_seconds += (0.0 if instant else avg) + Ranks.table().swift_allowance_seconds
+	# Hot Streak: the next catch must come within this to keep the streak.
+	streak_window = window_for(pond_fish)
+
+
+## Moves the chain's clock on (game time, so it matches the bite timer).
+func tick(delta: float) -> void:
+	session_time += delta
+	if clock >= 0.0:
+		clock += delta
+
+
+## Seconds since the chain's first cast.
+func elapsed() -> float:
+	return maxf(clock, 0.0)
+
+
+## Pay multiplier for beating par: 1 + strength × (par ÷ time − 1), from 1
+## (never a penalty) to the rank table's swift_cap. 1 without Swift Ladder.
+func speed_multiplier() -> float:
+	var strength := Tuning.apply(Tuning.SWIFT_LADDER, 0.0)
+	if strength <= 0.0 or chain.is_empty() or clock < 0.0:
+		return 1.0
+	var speed := par_seconds / maxf(elapsed(), 0.1)
+	return clampf(1.0 + strength * (speed - 1.0), 1.0, Ranks.table().swift_cap)
+
+
+## What Keep pays now: the chain's value with every catch bonus.
+func payout() -> float:
+	var m := 1.0
+	for b in bonuses():
+		m *= b[1]
+	return value() * m
+
+
+## The catch bonuses that apply to Keep right now: [[name, multiplier], ...].
+## Patient Angler is per fish, inside value().
+func bonuses() -> Array:
+	var out := []
+	var speed := speed_multiplier()
+	if speed > 1.005:
+		out.append(["fast", speed])
+	var empty := Tuning.apply(Tuning.EMPTY_BOWL, 0.0)
+	if empty > 0.0 and FishHandler.work_count() == 0:
+		out.append(["empty bowl", 1.0 + empty])
+	var s := streak_bonus()
+	if s > 0.0:
+		out.append(["streak", 1.0 + s])
+	var welcome := Tuning.apply(Tuning.WELCOME_BACK, 0.0)
+	if welcome > 0.0 and PassiveSystems.welcome_back_pending:
+		out.append(["welcome back", 1.0 + welcome])
+	return out
+
+
+## Hot Streak bonus now (0 = none or the streak has run out). Without a
+## chain on the line it depends on the time left for the next catch, so pass
+## the pond.
+func streak_bonus(pond_fish: Array = []) -> float:
+	var step := Tuning.apply(Tuning.HOT_STREAK, 0.0)
+	if step <= 0.0 or streak <= 0:
+		return 0.0
+	# A chain on the line keeps the streak it earned (Keep can take a moment).
+	if chain.is_empty() and streak_time_left(pond_fish) < 0.0:
+		return 0.0
+	return minf(step * streak, Ranks.table().hot_streak_cap)
+
+
+## How long the next catch may take to keep a streak: the target rank's
+## average bite (with the pond and skills) × streak_window_bites + extra.
+func window_for(pond_fish: Array) -> float:
+	var r := bite_range(pond_fish)
+	var t := Ranks.table()
+	return (r.x + r.y) * 0.5 * t.streak_window_bites + t.streak_window_extra
+
+
+## Seconds left for the next hook to keep the streak going.
+func streak_time_left(pond_fish: Array) -> float:
+	return last_hook_at + window_for(pond_fish) - session_time
+
+
+# ------------------------------------------------------------------ Hungry Bait
+
+## True if the next bite comes instantly (Hungry Bait, right after a Keep).
+func is_instant() -> bool:
+	return instant_through >= 0 and target_rank() <= instant_through
+
+
+## After keeping a chain that reached `top_rank`: the highest rank that bites
+## instantly in the next chain (-1 = none). Rank 0 always, once owned.
+static func hungry_reach(top_rank: int) -> int:
+	var n := roundi(Tuning.apply(Tuning.INSTANT_BITES, 0.0))
+	if n <= 0:
+		return -1
+	return maxi(top_rank - maxi(4 - n, 1), 0)
 
 
 func worth(fish: fish_conf) -> float:
-	return catch_value(Ranks.get_rank(fish.rank), fish.mass, Ranks.table().catch_return)
+	return catch_value_of(fish)
+
+
+## What `fish` pays if caught now: like catch_value, but from the price this
+## fish was bought at (so a harder level's prices carry through).
+static func catch_value_of(fish: fish_conf) -> float:
+	var rank_def := Ranks.get_rank(fish.rank)
+	var price: float = fish.cost if fish.cost > 0.0 else Ranks.price(fish.rank)
+	return price * Ranks.table().catch_return * fish.mass / avg_start_mass(rank_def)
 
 
 ## What a caught fish of `rank_def` weighing `mass` pays when kept on its own.
@@ -100,7 +265,8 @@ static func avg_start_mass(rank_def: FishRank) -> float:
 func value() -> float:
 	var v := 0.0
 	for i in chain.size():
-		v = worth(chain[i]) if i == 0 else (v + worth(chain[i])) * CHAIN_BONUS
+		var w := worth(chain[i]) * (fish_bonus[i] if i < fish_bonus.size() else 1.0)
+		v = w if i == 0 else (v + w) * chain_bonus()
 	return v
 
 
@@ -118,4 +284,4 @@ func pond_sale_value(pond_fish: Array) -> float:
 	for f in pond_fish:
 		if f is fish_conf:
 			v += worth(f)
-	return v * POND_SALE_RATE
+	return v * Tuning.apply_share(Tuning.POND_SALE_RATE, POND_SALE_RATE)

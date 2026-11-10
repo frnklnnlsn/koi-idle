@@ -37,6 +37,17 @@ static func get_rank(rank: int) -> FishRank:
 	return _table.ranks[clampi(rank, 0, max_rank())]
 
 
+## Price of a fish of `rank` right now (rank table cost, through Tuning:
+## the prestige level and skills can change it).
+static func price(rank: int) -> float:
+	return Tuning.apply(Tuning.PRICE, float(get_rank(rank).cost))
+
+
+## How many fish the shop's buy pool holds right now (through Tuning).
+static func pool_size() -> int:
+	return Tuning.apply_int(Tuning.SHOP_POOL, table().shop_pool_size, 1)
+
+
 static func all() -> Array[FishRank]:
 	_check()
 	return _table.ranks

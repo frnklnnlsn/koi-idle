@@ -3,8 +3,11 @@ extends Node
 #var list_of_work_fish:Array 
 #var lsit_of_retired_fish:Array
 var list_of_shop_fish:Array
+## Toilet capacity before Tuning (levels / skills change it).
+var base_capacity: int = 20
 ## Toilet capacity: most fish you can keep earning at once.
-var capacity = 20
+var capacity: int:
+	get: return Tuning.apply_int(Tuning.TOILET_CAPACITY, base_capacity, 1)
 var total_fish:int
 
 signal keep_fish(list)
@@ -38,7 +41,7 @@ func toilet_space() -> int:
 
 ## Free slots in the shop's buy pool (rank table: shop_pool_size).
 func pool_space() -> int:
-	return maxi(Ranks.table().shop_pool_size - SaveManager.load_saved_data().list_of_shop_fish.size(), 0)
+	return maxi(Ranks.pool_size() - SaveManager.load_saved_data().list_of_shop_fish.size(), 0)
 
 
 ### takes an array of fish_res, (can search through for same res)

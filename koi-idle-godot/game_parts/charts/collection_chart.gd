@@ -157,8 +157,8 @@ func get_hovered_fish() -> fish_conf:
 static func stat_value(f: fish_conf, stat: int) -> float:
 	match stat:
 		1: return f.y_start if f.y_start > 0.0 else f.mass   # starting mass
-		2: return f.carrying_capacity                         # max mass
-		_: return f.income
+		2: return FishGrowthManager.max_mass(f)               # max mass
+		_: return PassiveSystems.fish_income(f)
 
 
 func _on_stat(i: int) -> void:

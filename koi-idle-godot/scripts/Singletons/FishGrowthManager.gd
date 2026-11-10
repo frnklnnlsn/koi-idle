@@ -16,7 +16,6 @@ extends Node
 signal growth_updated
 
 const UPDATE_INTERVAL: float = 5.0
-const MAX_OFFLINE_HOURS: float = 8.0
 ## Pond hours per real second. 1.0 = real time, 3600.0 = 1 second is 1 hour (debug).
 const TIME_SCALE: float = 1.0
 
@@ -66,36 +65,51 @@ static func mass_at(base: float, k: float, growth_rate: float, mid_point: float,
 
 
 static func mass_for(fish: fish_conf, hours: float) -> float:
-	return GrowthModel.mass_at(fish.y_start, float(fish.carrying_capacity), fish.growth_rate, fish.mid_point, hours)
+	return GrowthModel.mass_at(fish.y_start, max_mass(fish), fish.growth_rate, fish.mid_point, hours)
+
+
+## How big `fish` can grow, with Tuning growth_potential (size skills, the
+## level) stretching how far above its starting mass it goes. Applies to
+## every fish, already in the pond or not.
+static func max_mass(fish: fish_conf) -> float:
+	var base := fish.y_start if fish.y_start > 0.0 else fish.mass
+	var k := float(fish.carrying_capacity)
+	return base + maxf(k - base, 0.0) * maxf(Tuning.apply(Tuning.GROWTH_POTENTIAL, 1.0), 0.0)
 
 
 # --- Ticking ---------------------------------------------------------------
 
-func _apply_growth_to_retired_fish(extra_seconds: float) -> void:
+func _apply_growth_to_retired_fish(extra_seconds: float, offline: bool = false) -> void:
 	var save_data: SaveData = SaveManager.load_saved_data()
 	if not save_data or save_data.list_of_retired_fish.is_empty():
 		return
 
+	# Tuning growth_speed: pond time passes faster or slower (from now on;
+	# ages already reached stay as they are).
+	var aged := extra_seconds * Tuning.apply(Tuning.GROWTH_SPEED, 1.0)
+	# Time away: Tuning offline_growth on top (Slow Food).
+	if offline:
+		aged *= maxf(Tuning.apply(Tuning.OFFLINE_GROWTH, 1.0), 0.0)
 	for fish in save_data.list_of_retired_fish:
 		if fish is fish_conf:
-			fish.age += extra_seconds
+			fish.age += aged
 			fish.mass = mass_for(fish, pond_hours(fish))
 
 	SaveManager.save_current_data(save_data)
 	growth_updated.emit()
 
 
-## Growth while the game was closed, capped at MAX_OFFLINE_HOURS of real time.
+## Growth while the game was closed (no cap).
 ## Returns the real seconds of growth applied.
 func apply_offline_growth() -> float:
 	var last_timestamp := SaveManager.load_timestamp()
 	if last_timestamp < 1577836800.0:
 		return 0.0
 	var now := Time.get_unix_time_from_system()
-	var seconds_away := clampf(now - last_timestamp, 0.0, MAX_OFFLINE_HOURS * 3600.0)
+	var seconds_away := maxf(now - last_timestamp, 0.0)
 	if seconds_away <= 0.0:
 		return 0.0
-	_apply_growth_to_retired_fish(seconds_away)
+	_apply_growth_to_retired_fish(seconds_away, true)
 	return seconds_away
 
 

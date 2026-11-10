@@ -10,6 +10,9 @@ extends Control
 @onready var distribution_graph   = get_node_or_null("%BellcurveList")
 @onready var growth_curve         = %GrowthcurveList
 @onready var histogram_graph      = %HistogramList
+## Old Timers: toilet fish income over hours worked. Shown instead of the
+## growth chart for toilet fish once Old Timers is owned.
+@onready var seniority_chart: SeniorityChart = get_node_or_null("%SeniorityList")
 @onready var preview_viewport: SubViewport = get_node_or_null("%PreviewViewport")
 @onready var v_separator_3: VSeparator = get_node_or_null("%VSeparator3")
 
@@ -20,10 +23,17 @@ extends Control
 @onready var mass_heading:   Label = get_node_or_null("%MassLabelHeading")
 @onready var rank_heading:   Label = get_node_or_null("%RankLabelHeading")
 @onready var id_heading:     Label = get_node_or_null("%IDLabelHeading")
+# Layout (fish_interface_list.tscn): an opaque backdrop over the game, the
+# list on the left, charts on the right.
+@onready var _backdrop: PanelContainer = get_node_or_null("%Backdrop")
+@onready var _scroll: ScrollContainer = get_node_or_null("%ListScroll")
+## Header spacer as wide as the list's scrollbar, so header and rows line up.
+@onready var _scroll_pad: Control = get_node_or_null("%ScrollPad")
 
 # ── Internal ──────────────────────────────────────────────────────────────────
 var _list_manager:  FishListManager
 var _renderer:      FishViewportRenderer
+var _icons:         FishIconRenderer
 var _label_display: FishLabelDisplay
 var _graph_manager: ShopGraphManager
 var _selected_row:  Control   = null
@@ -39,6 +49,13 @@ func _ready() -> void:
 
 	_renderer = FishViewportRenderer.new()
 	add_child(_renderer)
+	_icons = FishIconRenderer.new()
+	add_child(_icons)
+	_apply_palette()
+	if _scroll and _scroll_pad:
+		var bar := _scroll.get_v_scroll_bar()
+		bar.visibility_changed.connect(_fit_header_to_scrollbar)
+		_fit_header_to_scrollbar()
 
 	_list_manager = FishListManager.new(fish_list_vbox)
 	add_child(_list_manager)
@@ -72,6 +89,19 @@ func refresh(showing_pond: bool) -> void:
 	var save_data  = SaveManager.load_saved_data()
 	var fish_array = save_data.list_of_retired_fish if showing_pond else save_data.list_of_work_fish
 	populate_list(fish_array)
+	_show_seniority(fish_array)
+
+
+## Toilet fish + Old Timers owned: the seniority chart replaces the growth one.
+func _show_seniority(fish_array: Array) -> void:
+	if seniority_chart == null:
+		return
+	var on := not _showing_pond and PassiveSystems.seniority_rate() > 0.0
+	seniority_chart.visible = on
+	growth_curve.visible = not on
+	if on:
+		seniority_chart.set_fish_collection(fish_array)
+		seniority_chart.set_selected(_selected_fish)
 
 func _on_growth_updated() -> void:
 	if not _showing_pond:
@@ -93,7 +123,7 @@ func _on_growth_updated() -> void:
 	_refresh_row_display_mode()
 
 func populate_list(fish_array: Array) -> void:
-	_list_manager.populate(fish_array, _renderer)
+	_list_manager.populate(fish_array, _icons)
 	_graph_manager.refresh_histogram(fish_array)
 	_clear_detail_panel()
 	_refresh_row_display_mode()
@@ -113,6 +143,8 @@ func clear_list() -> void:
 # ── Signal handlers ───────────────────────────────────────────────────────────
 func _on_row_hovered(fish: fish_conf) -> void:
 	_graph_manager.update_for_fish(fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(fish)
 	_label_display.show(fish)
 	_update_label_visibility()
 
@@ -121,6 +153,8 @@ func _on_row_unhovered(_fish: fish_conf) -> void:
 	if _selected_fish:
 		_graph_manager.update_for_fish(_selected_fish)
 		_label_display.show(_selected_fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(_selected_fish)
 
 
 func _select_from_chart(fish: fish_conf) -> void:
@@ -143,6 +177,8 @@ func _on_row_clicked(fish: fish_conf) -> void:
 	_selected_fish = fish
 	_selected_row  = _get_row_for_fish(fish)
 	_graph_manager.update_for_fish(fish)
+	if seniority_chart and seniority_chart.visible:
+		seniority_chart.set_selected(fish)
 	_label_display.show(fish)
 	_update_label_visibility()
 
@@ -150,7 +186,7 @@ func _on_fish_list_updated(fish_array: Array) -> void:
 	if _showing_pond:
 		return
 
-	_list_manager.merge(fish_array, _renderer)
+	_list_manager.merge(fish_array, _icons)
 
 	var all_fish: Array = []
 	for child in fish_list_vbox.get_children():
@@ -164,6 +200,28 @@ func _on_fish_list_updated(fish_array: Array) -> void:
 	_refresh_row_display_mode()
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
+## The backdrop takes the palette's background colour (covers the game).
+func _apply_palette() -> void:
+	if _backdrop:
+		var style := _backdrop.get_theme_stylebox("panel")
+		if style is StyleBoxFlat:
+			style = style.duplicate()
+			style.bg_color = UIPalette.get_palette().background
+			_backdrop.add_theme_stylebox_override("panel", style)
+		# Also cover the gap above the list (the main column's spacing under
+		# the top bar), so no game shows through.
+		var column := get_parent() as BoxContainer
+		if column:
+			_backdrop.offset_top = -column.get_theme_constant("separation")
+
+
+func _fit_header_to_scrollbar() -> void:
+	var bar := _scroll.get_v_scroll_bar()
+	# The pad itself adds one column gap, so it's that much narrower.
+	var gap: int = _scroll_pad.get_parent().get_theme_constant("separation")
+	_scroll_pad.visible = bar.visible
+	_scroll_pad.custom_minimum_size.x = maxf(bar.size.x - gap, 0.0)
+
 func _update_label_visibility() -> void:
 	if income_heading:
 		income_heading.visible = not _showing_pond

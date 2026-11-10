@@ -55,6 +55,36 @@ func _add_money(amount: float) -> void:
 	_say("Added $%s" % _commas(amount))
 
 
+func _add_points(n: int) -> void:
+	Progression.refund(n)
+	_say("Added %d skill point%s (%d to spend)" % [n, "" if n == 1 else "s", Progression.points()])
+
+
+func _respec() -> void:
+	var back := Upgrades.respec()
+	_say("Skills reset, %d point%s back" % [back, "" if back == 1 else "s"])
+
+
+func _boss_scene() -> void:
+	var ui = get_tree().get_first_node_in_group("main_ui")
+	if ui and Prestige.current().has_boss():
+		_panel.visible = false
+		ui._play_boss()
+	else:
+		_say("No boss on this level")
+
+
+func _next_level() -> void:
+	if Prestige.has_next():
+		Prestige.jump_to(Prestige.level() + 1)
+	else:
+		_say("Already on the last level")
+
+
+func _level_one() -> void:
+	Prestige.jump_to(0)
+
+
 func _zero_money() -> void:
 	PassiveSystems.net_worth = 0.0
 	PassiveSystems._flush_to_save()
@@ -105,11 +135,9 @@ func _away(seconds: float) -> void:
 	SaveManager.save_timestamp()
 	PassiveSystems._flush_to_save()
 	var paid: float = PassiveSystems.last_offline["coins"]
-	var used: float = PassiveSystems.last_offline["seconds"]
-	var capped := "" if used >= seconds - 1.0 else "  (capped at %s)" % _duration(used)
-	_say("Away %s: earned $%s, pond grew %s pond-hours%s" % [
+	_say("Away %s: earned $%s, pond grew %s pond-hours" % [
 		_duration(seconds), _commas(paid),
-		_commas(grown * FishGrowthManager.TIME_SCALE / 3600.0), capped])
+		_commas(grown * FishGrowthManager.TIME_SCALE / 3600.0)])
 
 
 func _save_now() -> void:
@@ -153,7 +181,7 @@ func _update_info() -> void:
 	for r in range(Ranks.count()):
 		pond_ranks.append("R%d:%d" % [r, ranks.get(r, 0)])
 	_info.text = "\n".join([
-		"Money  $%s   Income  $%s/s" % [FishLabelDisplay.num(PassiveSystems.net_worth), FishLabelDisplay.num(PassiveSystems.income)],
+		"Money  $%s   Income  $%s/s" % [FishLabelDisplay.num(PassiveSystems.net_worth), FishLabelDisplay.num(PassiveSystems.income_rate())],
 		"Shop %d   Toilet %d   Pond %d  (%s)" % [data.list_of_shop_fish.size(), data.list_of_work_fish.size(), data.list_of_retired_fish.size(), " ".join(pond_ranks)],
 		"Pond time: 1 real second = %s pond hour%s" % [_commas(FishGrowthManager.TIME_SCALE / 3600.0), "" if FishGrowthManager.TIME_SCALE == 3600.0 else "s"],
 		"Reset on launch: %s" % ("ON" if DevSettings.RESET_SAVE_ON_LAUNCH else "off"),
@@ -245,6 +273,12 @@ func _build_ui() -> void:
 	_count.value = 3
 	pick.add_child(_count)
 	_row(box, [["→ Shop (free)", _spawn_shop], ["→ Toilet", _spawn_toilet], ["→ Pond", _spawn_pond]])
+
+	_section(box, "Skill points")
+	_row(box, [["+1 point", _add_points.bind(1)], ["+5 points", _add_points.bind(5)], ["Respec (refund all)", _respec]])
+
+	_section(box, "Prestige")
+	_row(box, [["Boss scene", _boss_scene], ["Next level", _next_level], ["Level 1", _level_one]])
 
 	_section(box, "Time away (real offline catch-up)")
 	_row(box, [["10 min", _away.bind(600.0)], ["1 hour", _away.bind(3600.0)], ["8 hours", _away.bind(8.0 * 3600.0)]])

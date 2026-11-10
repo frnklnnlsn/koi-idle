@@ -47,6 +47,26 @@ class_name Pond extends SubViewport
 ## How far toward depth_tint each level goes: 0.28 = level 3 is 84% of the way.
 @export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.28
 
+# ── Pixel size ──────────────────────────────────────────────────────────────
+# Bigger fish get bigger pixels so they keep the pixel-art look (see
+# pond_pixel_layers.gd). Every time a fish gets pixel_step bigger than it was
+# when it entered the pond, its pixels go up by one, up to max_pixel_scale:
+#
+#   pixel_step 1.0:  size 1 → 1×,  size 2 → 2×,  size 3 → 3×,  size 4 → 4×
+#   pixel_step 0.5:  size 1 → 1×,  1.5 → 2×,  2 → 3×,  2.5 → 4× (chunky sooner)
+#
+# "Size" is how big the fish is drawn: 1 on entering the pond, up to
+# max_size_factor when fully grown (smaller for deeper fish).
+@export_group("Pixel size")
+## How much bigger a fish must get for each next pixel size.
+@export_range(0.1, 4.0, 0.05) var pixel_step: float = 1.0
+## Biggest pixels a fish can get (× normal). Also how many pixel layers the
+## pond draws, so keep it small.
+@export_range(1, 8) var max_pixel_scale: int = 4
+## Blend the body pattern on big-pixel fish into average colours (calmer but
+## muddier). Off = crisp palette colours, busy patterns may look speckled.
+@export var smooth_big_patterns: bool = false
+
 # ── Internal ────────────────────────────────────────────────────────────────
 var _display:              FishDisplay
 var _pending_display_list: Array = []
@@ -62,6 +82,7 @@ var _swim_area: SwimArea
 
 
 func _ready() -> void:
+	current = self
 	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
 	if swim_shape:
 		_swim_area = swim_shape.make_swim_area()
@@ -192,10 +213,33 @@ func _spawn_filtered(list: Array) -> void:
 
 ## How big a fish should look: 1 on entering the pond, more as it grows.
 func size_for(fish: fish_conf) -> float:
+	return growth_size(fish, size_exponent, max_size_factor)
+
+
+## The pond's size rule as a plain function: 1 on entering the pond (or not
+## in it yet), growth ^ exponent after, capped. Other screens (the fish list)
+## use it with the running pond's settings through Pond.size_of().
+static func growth_size(fish: fish_conf, exponent: float, cap: float) -> float:
 	if fish == null or fish.y_start <= 0.0:
 		return 1.0
 	var growth := maxf(fish.mass / fish.y_start, 1.0)
-	return clampf(pow(growth, size_exponent), 1.0, max_size_factor)
+	return clampf(pow(growth, exponent), 1.0, cap)
+
+
+## The running pond (for size_of / max_size), or null.
+static var current: Pond = null
+
+
+## How big `fish` is drawn in the pond (growth only, not depth).
+static func size_of(fish: fish_conf) -> float:
+	if current and is_instance_valid(current):
+		return current.size_for(fish)
+	return growth_size(fish, 0.333, 4.0)
+
+
+## The biggest size a fish can reach in the pond.
+static func max_size() -> float:
+	return current.max_size_factor if current and is_instance_valid(current) else 4.0
 
 
 func _update_sizes(seconds: float) -> void:
@@ -207,9 +251,24 @@ func _size_fish(node: Node, seconds: float) -> void:
 	if not (node.has_method("set_size_factor") and "fish_res" in node) or node.fish_res == null:
 		return
 	var level := depth_of(node.fish_res)
-	node.set_size_factor(size_for(node.fish_res) * maxf(1.0 - depth_size_loss * level, 0.05), seconds)
+	var drawn := size_for(node.fish_res) * maxf(1.0 - depth_size_loss * level, 0.05)
+	node.set_size_factor(drawn, seconds)
+	PondPixelLayers.set_layers(node, PondPixelLayers.fish_bit(pixel_group(drawn)))
+	# Bigger pixels sample the body pattern more sparsely: with mipmaps they
+	# take the pattern's average colour per pixel instead of a speckle.
+	var body: CanvasItem = node.get_node_or_null("%FishBody")
+	if body and smooth_big_patterns:
+		body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	node.z_index = -level   # deeper fish drawn behind
 	node.modulate = Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
+
+
+## Pixel size group for a fish drawn `drawn` × normal size: 0 = normal
+## pixels, 1 = 2×, ... (one more for every pixel_step it has grown).
+func pixel_group(drawn: float) -> int:
+	# A little slack: growth ^ 0.333 lands just under whole sizes (8^0.333 = 1.9986).
+	var g := floori((drawn - 1.0 + 0.01) / maxf(pixel_step, 0.01))
+	return clampi(g, 0, max_pixel_scale - 1)
 
 
 ## The fish's depth level, picking one at random the first time.
