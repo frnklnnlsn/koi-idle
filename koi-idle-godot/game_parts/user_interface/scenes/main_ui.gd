@@ -293,19 +293,31 @@ func _ask(question: String, yes_text: String, on_yes: Callable) -> void:
 	_confirm_dialog.popup_centered()
 
 
+## Shows the pond (true) or the toilet (false).
+func _show_view(show_pond: bool) -> void:
+	if pond.visible == show_pond:
+		return
+	fish_peek.close()
+	pond.visible   = show_pond
+	toilet.visible = not show_pond
+	if list_ui.visible:
+		list_ui.refresh(pond.visible)
+
+
 func _on_shop_pressed() -> void:
-	_toggle_panel(shop_ui)
+	# The shop sends fish to the toilet, so it opens over the toilet.
+	if _toggle_panel(shop_ui):
+		_show_view(false)
 func _on_skills_pressed() -> void:
 	_toggle_panel(skill_tree_ui)
 func _on_list_pressed() -> void:
 	if _toggle_panel(list_ui):
 		list_ui.refresh(pond.visible)
 func _on_view_pressed() -> void:
-	fish_peek.close()
-	pond.visible   = not pond.visible
-	toilet.visible = not toilet.visible
-	if list_ui.visible:
-		list_ui.refresh(pond.visible)
+	# Switching view closes whatever panel is open, so you see the water.
+	for p in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
+		p.visible = false
+	_show_view(not pond.visible)
 func _on_flush_pressed() -> void:
 	var save_data = SaveManager.load_saved_data()
 
@@ -323,4 +335,6 @@ func _on_flush_pressed() -> void:
 
 
 func _on_go_fishing_pressed() -> void:
-	_toggle_panel(fishing_ui)
+	# Fishing happens in the pond, so it opens over the pond.
+	if _toggle_panel(fishing_ui):
+		_show_view(true)
