@@ -18,6 +18,17 @@ uniform float grout : hint_range(0.0, 8.0, 0.5) = 2.0;
 uniform float edge_width : hint_range(0.0, 12.0, 0.5) = 3.0;
 // How much each tile's colour varies (0 = all the same).
 uniform float variation : hint_range(0.0, 0.2, 0.005) = 0.03;
+group_uniforms colour;
+// Recolour the tiles: the hue to use (0..1 round the colour wheel: 0 red,
+// 0.17 yellow, 0.33 green, 0.5 cyan, 0.67 blue, 0.83 pink), how colourful,
+// and how much of it to apply (0 = the colours above as they are).
+uniform float hue : hint_range(0.0, 1.0, 0.005) = 0.58;
+uniform float saturation : hint_range(0.0, 1.0, 0.01) = 0.35;
+uniform float tint_amount : hint_range(0.0, 1.0, 0.01) = 0.0;
+// Recolour the grout too.
+uniform bool tint_grout = false;
+group_uniforms;
+
 // Snap to a chunky grid, in pixels (1 = none).
 uniform float pixel_size : hint_range(1.0, 8.0, 1.0) = 1.0;
 
@@ -25,6 +36,26 @@ varying vec2 world_pos;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
+}
+
+vec3 rgb2hsv(vec3 c) {
+	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+	vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+	float d = q.x - min(q.w, q.y);
+	float e = 1.0e-10;
+	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+	vec3 p = abs(fract(c.xxx + vec3(1.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0);
+	return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);
+}
+
+// The colour with the chosen hue and saturation, same brightness.
+vec3 tint(vec3 c) {
+	vec3 hsv = rgb2hsv(c);
+	return mix(c, hsv2rgb(vec3(hue, saturation, hsv.z)), tint_amount);
 }
 
 float hash(vec2 p) {
@@ -58,8 +89,9 @@ void fragment() {
 
 	vec3 col = edge < grout + edge_width ? edge_color.rgb : tile_color.rgb;
 	col *= 1.0 + (hash(centre) - 0.5) * 2.0 * variation;
+	col = tint(col);
 	if (found < 0.5 || edge < grout) {
-		col = grout_color.rgb;
+		col = tint_grout ? tint(grout_color.rgb) : grout_color.rgb;
 	}
 	COLOR = vec4(col, 1.0);
 }
