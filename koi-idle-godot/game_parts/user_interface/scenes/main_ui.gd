@@ -42,6 +42,13 @@ var _confirm_action: Callable
 ## The bobber view shown behind the fishing panel (in place of the pond).
 @onready var fishing_scene: FishingScene = %FishingScene
 var _fishing_open := false
+## Flush cut scene's circle wipe.
+@onready var iris: IrisTransition = %IrisTransition
+## Flush cut scene: how close it shows the pipe (pond camera zoom), how far
+## below the pipe it centres (pond pixels), and how long before pulling back.
+@export var flush_pipe_zoom := 2.5
+@export var flush_pipe_focus_offset := 50.0
+@export var flush_pipe_hold := 2.5
 
 ## Light colours (keep / trash / off) come from UIPalette.
 
@@ -348,10 +355,63 @@ func _on_flush_pressed() -> void:
 			FishGrowthManager.enter_pond(fish)   # base mass frozen, growth clock starts
 			save_data.list_of_retired_fish.append(fish)
 
+	# Cut scene: follow the fish down the drain into the pond (Settings).
+	var cutscene: bool = Settings.get_value("gameplay/flush_cutscene") and toilet.visible \
+		and not save_data.list_of_work_fish.is_empty() and not DisplayManager.is_flushing
 	save_data.list_of_work_fish.clear()
 	SaveManager.save_current_data(save_data)
 	DisplayManager.flush_fish.emit()
 	DisplayManager.display_fish_pond.emit(save_data.list_of_retired_fish)
+	if cutscene:
+		_play_flush_cutscene()
+
+
+## The screen closes in on the drain as the fish swirl down it, then opens
+## on the pond's pipe as they swim out.
+func _play_flush_cutscene() -> void:
+	var tv := toilet.get_node("ToiletViewport")
+	# Wait for the fish to reach the drain (give up after a few seconds).
+	var state := {"drained": false}
+	var mark := func(): state["drained"] = true
+	tv.flush_draining.connect(mark, CONNECT_ONE_SHOT)
+	var waited := 0.0
+	while not state["drained"] and waited < 6.0:
+		await get_tree().process_frame
+		waited += get_process_delta_time()
+	if not state["drained"]:
+		if tv.flush_draining.is_connected(mark):
+			tv.flush_draining.disconnect(mark)
+		return
+	await iris.close_on(tv.drain_screen_position(), 0.6)
+	if DisplayManager.is_flushing:
+		await DisplayManager.flush_completed
+	# Clear the view and switch to the pond while the screen is dark.
+	for p in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
+		p.visible = false
+	_show_view(true)
+	# Open once the first fish is on its way out of the pipe (at most 2s).
+	var before := Pond.current.fish_container_pond.get_child_count() if Pond.current else 0
+	var t := 0.0
+	while t < 2.0 and Pond.current and Pond.current.fish_container_pond.get_child_count() <= before:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	await get_tree().create_timer(0.35).timeout
+	if Pond.current == null:
+		await iris.open_on(size * 0.5, 0.8)
+		return
+	# Open on a close-up of the pipe as the fish swim out, then pull back.
+	var cam := Pond.current.get_node_or_null("Camera2D") as Camera2D
+	var home := {"position": cam.position, "zoom": cam.zoom} if cam else {}
+	if cam:
+		cam.position = Pond.current.pipe_origin + Vector2(0, flush_pipe_focus_offset)
+		cam.zoom = Vector2.ONE * flush_pipe_zoom
+		await get_tree().process_frame
+	await iris.open_on(Pond.current.pipe_screen_position(), 0.8)
+	if cam:
+		await get_tree().create_timer(flush_pipe_hold).timeout
+		var back := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+		back.tween_property(cam, "position", home["position"], 1.2)
+		back.tween_property(cam, "zoom", home["zoom"], 1.2)
 
 
 func _on_go_fishing_pressed() -> void:

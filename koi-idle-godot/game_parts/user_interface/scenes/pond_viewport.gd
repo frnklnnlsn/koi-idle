@@ -221,9 +221,12 @@ func _spawn_one(fish_data) -> void:
 	var angle_wobble = randf_range(-0.25, 0.25)   # ± ~14° in radians
 	var exit_dir     = channel_exit_dir.rotated(angle_wobble).normalized()
 
-	# Tell the fish to swim straight out for a while before wandering
+	# Tell the fish to swim straight out for a while before wandering,
+	# shot out fast by the water (it eases back to its normal pace).
 	if node.has_method("begin_entry"):
 		node.begin_entry(exit_dir, entry_swim_duration)
+	if node.has_method("force_state"):
+		node.force_state(node.FishState.FAST_SWIM)
 
 
 # ── Signal handlers ─────────────────────────────────────────────────────────
@@ -382,6 +385,18 @@ func _on_fish_caught(fish_list: Array) -> void:
 
 
 # ── Visible fish ────────────────────────────────────────────────────────────
+
+## Where the pipe is on screen, kept a little inside the pond view (the
+## pipe sits just off its top edge). For the flush cut scene.
+func pipe_screen_position() -> Vector2:
+	var c := get_parent() as SubViewportContainer
+	var shrink := float(c.stretch_shrink) if c else 1.0
+	var local := (canvas_transform * pipe_origin) * shrink
+	if c == null:
+		return local
+	local = local.clamp(Vector2(40, 40), c.size - Vector2(40, 40))
+	return c.get_global_transform() * local
+
 
 ## Brings `fish` to the surface (from the deep if it's hidden) and keeps it
 ## near the top for arrival_settle_seconds. For the fish list.

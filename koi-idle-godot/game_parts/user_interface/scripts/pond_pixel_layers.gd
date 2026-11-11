@@ -32,6 +32,9 @@ const ABOVE_FISH_BIT := 1 << 5
 @export var source: SubViewportContainer
 
 var _views: Array[SubViewport] = []
+var _cams: Array[Camera2D] = []
+var _pixels: Array[int] = []
+var _pond: SubViewport
 
 
 ## Layer bit for fish of size group `group` (0 = normal size).
@@ -62,6 +65,7 @@ func _ready() -> void:
 		push_warning("PondPixelLayers: no source set")
 		return
 	var pond: SubViewport = source.get_child(0)
+	_pond = pond
 	var groups: int = pond.max_pixel_scale if "max_pixel_scale" in pond else 1
 	# The pond's own view keeps everything except the fish and what's above.
 	pond.canvas_cull_mask = 1
@@ -105,6 +109,21 @@ func _add_view(pond: SubViewport, mask: int, pixel: int) -> void:
 	cam.zoom = Vector2.ONE / pixel
 	vp.add_child(cam)
 	_views.append(vp)
+	_cams.append(cam)
+	_pixels.append(pixel)
+
+
+# The layers' cameras follow the pond's camera, so moving or zooming it (the
+# fishing zoom, the flush cut scene) moves the fish with the water.
+func _process(_delta: float) -> void:
+	if not visible or _pond == null:
+		return
+	var pond_cam := _pond.get_camera_2d()
+	if pond_cam == null:
+		return
+	for i in _cams.size():
+		_cams[i].position = pond_cam.global_position
+		_cams[i].zoom = pond_cam.zoom / _pixels[i]
 
 
 func _follow_source() -> void:

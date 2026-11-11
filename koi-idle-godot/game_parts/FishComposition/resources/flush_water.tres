@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/flush_water.gdshader" id="1_flush"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_flush"]
+frequency = 0.03
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_flush"]
+width = 128
+height = 128
+seamless = true
+noise = SubResource("FastNoiseLite_flush")
+
+[resource]
+shader = ExtResource("1_flush")
+shader_parameter/noise = SubResource("NoiseTexture2D_flush")
