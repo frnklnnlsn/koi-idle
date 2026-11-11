@@ -1,7 +1,8 @@
 // fan_tiles.gdshader
 // A floor of fan (fish scale) tiles: round tops, pointed bottoms where the
-// next row overlaps them, thin grout lines, a soft glaze on each tile and a
-// slight colour difference from tile to tile. Drawn on a ColorRect (Floor in
+// next row overlaps them, thin grout lines, an even flat band just inside the
+// grout all the way round each tile, and a slight colour difference from tile
+// to tile. Drawn on a ColorRect (Floor in
 // the toilet view); positions are world pixels, so the tiles stay put however
 // big the rect is.
 shader_type canvas_item;
@@ -9,16 +10,14 @@ shader_type canvas_item;
 // Tile radius (half a tile's width), in pixels.
 uniform float radius : hint_range(4.0, 120.0, 1.0) = 26.0;
 uniform vec4 tile_color : source_color = vec4(0.79, 0.82, 0.86, 1.0);
-// The glaze's light spot near the top of each tile and its darker bottom.
-uniform vec4 highlight_color : source_color = vec4(0.85, 0.87, 0.90, 1.0);
-uniform vec4 shade_color : source_color = vec4(0.73, 0.76, 0.81, 1.0);
+// The flat band just inside the grout, all round each tile.
+uniform vec4 edge_color : source_color = vec4(0.73, 0.76, 0.81, 1.0);
 uniform vec4 grout_color : source_color = vec4(0.56, 0.60, 0.66, 1.0);
-// Grout line width, in pixels.
+// Grout line width, and the band inside it, in pixels.
 uniform float grout : hint_range(0.0, 8.0, 0.5) = 2.0;
+uniform float edge_width : hint_range(0.0, 12.0, 0.5) = 3.0;
 // How much each tile's colour varies (0 = all the same).
 uniform float variation : hint_range(0.0, 0.2, 0.005) = 0.03;
-// Steps of glaze shading (pixel-art bands). 0 = smooth.
-uniform float bands : hint_range(0.0, 8.0, 1.0) = 2.0;
 // Snap to a chunky grid, in pixels (1 = none).
 uniform float pixel_size : hint_range(1.0, 8.0, 1.0) = 1.0;
 
@@ -51,19 +50,14 @@ void fragment() {
 			found = 1.0;
 		}
 	}
-	vec2 d = (p - centre) / r;          // -1..1 inside the tile
-	float edge = r - length(p - centre); // pixels to the tile's rim
+	// Pixels to the tile's visible edge: its own rim, or the rims of the two
+	// tiles below that overlap its bottom.
+	float edge = r - length(p - centre);
+	edge = min(edge, length(p - (centre + vec2(-r, r))) - r);
+	edge = min(edge, length(p - (centre + vec2(r, r))) - r);
 
-	// Glaze: light near the top, darker toward the bottom point.
-	float g = clamp(0.5 - d.y * 0.5 - length(d - vec2(-0.25, -0.45)) * 0.35 + 0.15, 0.0, 1.0);
-	if (bands > 0.0) {
-		g = floor(g * bands + 0.5) / bands;
-	}
-	vec3 col = g > 0.5
-		? mix(tile_color.rgb, highlight_color.rgb, (g - 0.5) * 2.0)
-		: mix(shade_color.rgb, tile_color.rgb, g * 2.0);
+	vec3 col = edge < grout + edge_width ? edge_color.rgb : tile_color.rgb;
 	col *= 1.0 + (hash(centre) - 0.5) * 2.0 * variation;
-
 	if (found < 0.5 || edge < grout) {
 		col = grout_color.rgb;
 	}
