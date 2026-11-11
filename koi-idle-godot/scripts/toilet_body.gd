@@ -24,6 +24,12 @@ extends Node2D
 	set(v): metal_shine = v; queue_redraw()
 @export_range(0.0, 6.0, 1.0) var outline_width := 2.0:
 	set(v): outline_width = v; queue_redraw()
+## Shadow the toilet casts on the floor (alpha = how dark), and how far
+## it's offset. Offset (0, 0) = no shadow.
+@export var shadow_color := Color(0.1, 0.12, 0.18, 0.35):
+	set(v): shadow_color = v; queue_redraw()
+@export var shadow_offset := Vector2(8, 10):
+	set(v): shadow_offset = v; queue_redraw()
 
 @export_group("Bowl")
 ## Half the width / height of the outside of the bowl (a little bigger than
@@ -95,6 +101,13 @@ func _draw() -> void:
 	var neck := Rect2(Vector2(-neck_width * 0.5, tank.end.y - tank_corner),
 		Vector2(neck_width, neck_bottom - tank.end.y + tank_corner))
 	var o := outline_width
+
+	# Shadow on the floor.
+	if shadow_offset != Vector2.ZERO:
+		var so := shadow_offset
+		_ellipse(bowl_offset + so, bowl_size + Vector2.ONE * o, shadow_color)
+		_box(Rect2(neck.position + so, neck.size), 0, shadow_color)
+		_box(Rect2(tank.position + so, tank.size).grow(o), tank_corner + int(o), shadow_color)
 
 	# Outline: everything a little bigger, in the outline colour.
 	if o > 0.0:

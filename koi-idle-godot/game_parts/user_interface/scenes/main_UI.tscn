@@ -33,6 +33,7 @@
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/settings_menu.tscn" id="40_settings"]
 [ext_resource type="PackedScene" path="res://game_parts/fishing_scene/fishing_scene.tscn" id="41_fishscene"]
 [ext_resource type="Material" path="res://game_parts/FishComposition/resources/flush_water.tres" id="42_flushwater"]
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/fan_tiles.tres" id="43_fantiles"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/iris_transition.tscn" id="43_iris"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
@@ -63,6 +64,15 @@ render_target_update_mode = 4
 script = ExtResource("2_11njf")
 
 [node name="Camera2D" type="Camera2D" parent="ToiletViewportContainer/ToiletViewport" unique_id=102619028]
+
+[node name="Floor" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
+z_index = -50
+material = ExtResource("43_fantiles")
+offset_left = -420.0
+offset_top = -260.0
+offset_right = 420.0
+offset_bottom = 260.0
+mouse_filter = 2
 
 [node name="FishDisplay" type="Node" parent="ToiletViewportContainer/ToiletViewport" unique_id=426772673]
 script = ExtResource("7_k1q3n")
