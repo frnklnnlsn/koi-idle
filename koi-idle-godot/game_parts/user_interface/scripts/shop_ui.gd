@@ -1,9 +1,8 @@
 # shop_ui.gd
 # The shop: a pool of fish cards to screen, and the three charts. Buying,
 # keeping and recycling are done with keys through the terminal (see
-# CommandLine / VimKeys, not shown at the moment). The hovered fish's details
-# show in a small panel above its card (or the selection's summary after a
-# box select), and rank / pool / toilet in the top right corner.
+# CommandLine / VimKeys, not shown at the moment). The toilet count is in the
+# top bar (main_ui).
 #
 # Mouse:
 #   drag a card up / down         keep / recycle it (the whole selection if the
@@ -77,7 +76,6 @@ const CARD_MARGIN := 10.0
 func _ready() -> void:
 	resized.connect(_place_cards)
 	visibility_changed.connect(_place_cards)
-	_build_info()
 	# The charts rise up from the bottom when the shop opens.
 	visibility_changed.connect(func():
 		if visible:
@@ -92,7 +90,6 @@ func _process(_delta: float) -> void:
 	if PassiveSystems.net_worth != _last_known_net_worth:
 		_last_known_net_worth = PassiveSystems.net_worth
 		_refresh_affordability()
-	_update_info()
 
 func _init_managers() -> void:
 	renderer      = FishViewportRenderer.new()
@@ -143,7 +140,6 @@ func _populate(fish_array: Array) -> void:
 
 func _on_card_hovered(fish: fish_conf) -> void:
 	_show_summary = false
-	_hovering = true
 	# Mouse, keys and chart clicks all move the keyboard cursor to this fish.
 	var i := _cards().map(func(c): return c.fish_resource).find(fish)
 	if i >= 0 and i != _cursor:
@@ -153,7 +149,6 @@ func _on_card_hovered(fish: fish_conf) -> void:
 	graph_manager.update_for_fish(fish)
 
 func _on_card_unhovered(_fish: fish_conf) -> void:
-	_hovering = false
 	_shown_fish = selected_fish   # back to the selected fish (or nothing)
 	_show_summary = not _selection.is_empty()
 	if selected_fish:
@@ -595,70 +590,6 @@ func command_info() -> String:
 	if _show_summary and not _selection.is_empty():
 		return _selection_info()
 	return FishLabelDisplay.describe(_shown_fish)
-
-
-# --- Info panel and status --------------------------------------------------------
-
-## Hovered fish's details (or the box selection's summary) in a small panel
-## above the cards; rank / pool / toilet in the corner. Built in code; their
-## look follows the UI theme.
-var _hovering := false
-var _info_panel: PanelContainer
-var _info_label: Label
-var _status_label: Label
-
-
-func _build_info() -> void:
-	_info_panel = PanelContainer.new()
-	_info_panel.top_level = true
-	_info_panel.z_index = 30
-	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var margin := MarginContainer.new()
-	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 10)
-	for side in ["top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 6)
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_info_label = Label.new()
-	_info_label.add_theme_font_size_override("font_size", 13)
-	margin.add_child(_info_label)
-	_info_panel.add_child(margin)
-	add_child(_info_panel)
-	_info_panel.visible = false
-	_status_label = Label.new()
-	_status_label.theme_type_variation = &"DimLabel"
-	_status_label.add_theme_font_size_override("font_size", 13)
-	_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_status_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	_status_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	_status_label.position += Vector2(-10, 6)
-	add_child(_status_label)
-
-
-func _update_info() -> void:
-	if not is_visible_in_tree() or _info_panel == null:
-		return
-	_status_label.text = command_status()
-	var text := ""
-	var over: Rect2
-	var cards := _cards()
-	if _hovering and _shown_fish:
-		text = FishLabelDisplay.describe(_shown_fish)
-		var i := cards.map(func(c): return c.fish_resource).find(_shown_fish)
-		if i >= 0:
-			over = cards[i].get_global_rect()
-	elif _show_summary and not _selection.is_empty():
-		text = _selection_info()
-		over = fish_card_hbox.get_parent().get_global_rect()
-	_info_panel.visible = text != "" and over.size != Vector2.ZERO
-	if not _info_panel.visible:
-		return
-	_info_label.text = text
-	_info_panel.reset_size()
-	var ps := _info_panel.get_combined_minimum_size()
-	var screen := get_viewport_rect().size
-	var pos := Vector2(over.get_center().x - ps.x * 0.5, over.position.y - ps.y - 8.0)
-	_info_panel.position = pos.clamp(Vector2(4, 4), screen - ps - Vector2(4, 4))
 
 
 func command_status() -> String:

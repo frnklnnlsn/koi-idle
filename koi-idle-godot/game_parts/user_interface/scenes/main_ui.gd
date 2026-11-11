@@ -4,6 +4,8 @@ extends Control
 @onready var skill_points_label: Label = %SkillPoints
 ## Prestige level, left of the money (tooltip: the level's boss goal).
 @onready var level_label: Label = %LevelLabel
+## Toilet fill in the top bar: a bar filling up with "Toilet 3/20" over it.
+@onready var toilet_meter: ProgressBar = %ToiletMeter
 ## Close-up window of one fish: click a fish in the toilet or pond.
 @onready var fish_peek: FishPeek = %FishPeek
 ## How close (in water pixels, beyond the fish's own width) a click must be
@@ -65,7 +67,8 @@ func _ready() -> void:
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
 	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
-	shop_ui.action_message.connect(toast.say)
+	# (Buying / keeping / recycling show no message; the toilet count in the
+	# top bar shows the result.)
 	shop_ui.confirm_requested.connect(_ask)
 	_confirm_dialog = ConfirmationDialog.new()
 	_confirm_dialog.title = "Are you sure?"
@@ -83,6 +86,7 @@ func _ready() -> void:
 	Progression.credited_existing.connect(_on_credited_existing)
 	_show_skill_points()
 	_show_level()
+	_style_toilet_meter()
 	fishing_ui.boss_challenged.connect(_play_boss)
 	# The bobber view follows the fishing panel.
 	fishing_ui.cast_started.connect(fishing_scene.cast)
@@ -230,6 +234,31 @@ func _play_boss() -> void:
 
 
 # ── Skill points ──────────────────────────────────────────────────────────────
+## "Toilet 3/20" over a bar that fills as the toilet fills (top bar).
+func _update_toilet_meter() -> void:
+	var n := FishHandler.work_count()
+	var cap := FishHandler.capacity
+	toilet_meter.max_value = maxi(cap, 1)
+	toilet_meter.value = n
+	(toilet_meter.get_node("Text") as Label).text = "Toilet %d/%d" % [n, cap]
+
+
+## The toilet meter's look, from the UI palette: like the other top bar
+## boxes, with the fill in the accent colour (keep green when full).
+func _style_toilet_meter() -> void:
+	var pal := UIPalette.get_palette()
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = pal.inset
+	bg.border_color = pal.accent
+	bg.set_border_width_all(1)
+	bg.set_corner_radius_all(4)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(pal.accent, 0.35)
+	fill.set_corner_radius_all(4)
+	toilet_meter.add_theme_stylebox_override("background", bg)
+	toilet_meter.add_theme_stylebox_override("fill", fill)
+
+
 func _show_skill_points() -> void:
 	var p := Progression.points()
 	skill_points_label.visible = Progression.points_earned() > 0
@@ -252,16 +281,17 @@ func _on_credited_existing(count: int, points: int) -> void:
 
 
 func _on_buy_pressed() -> void:
-	toast.say(shop_ui.buy_one())
+	shop_ui.buy_one()
 
 
 func _on_buy_max_pressed() -> void:
-	toast.say(shop_ui.fill_pool())
+	shop_ui.fill_pool()
 
 
 func _process(_delta: float) -> void:
 	# Whole coins only, rounded down so it never shows money you don't have yet.
 	net_worth_label.text = "$ " + NumberFormat.whole(floorf(PassiveSystems.net_worth))
+	_update_toilet_meter()
 	if _shop_bar.visible:
 		_update_rank_meter()
 
