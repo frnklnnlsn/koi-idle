@@ -7,6 +7,8 @@ signal flush_draining
 
 ## Where the water drains (the dark oval at the top of the bowl), in toilet
 ## pixels. The fish spiral in to it and the flush water swirls around it.
+## If the toilet has a ToiletArea/Underwater/Drain node, its position is used
+## instead, so moving or scaling the toilet keeps the drain in the right place.
 @export var flush_drain_point:      Vector2 = Vector2(0, -60)
 @export var flush_final_radius:     float   = 10.0
 @export var flush_duration:         float   = 2.0
@@ -58,6 +60,9 @@ var _base_avoidance: float = -1.0   # fish's normal avoidance distance, read on 
 
 
 func _ready() -> void:
+	var drain := get_node_or_null("ToiletArea/Underwater/Drain") as Node2D
+	if drain:
+		flush_drain_point = drain.global_position
 	var swim_shape := get_node_or_null("ToiletArea/SwimShape") as SwimShape
 	_base_area = swim_shape.make_swim_area() if swim_shape else _FALLBACK_AREA
 	_swim_area = _base_area.duplicate()

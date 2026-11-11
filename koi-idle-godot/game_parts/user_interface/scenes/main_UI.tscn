@@ -74,6 +74,8 @@ script = ExtResource("8_7vram")
 unique_name_in_owner = true
 
 [node name="ToiletArea" parent="ToiletViewportContainer/ToiletViewport" unique_id=1143554548 instance=ExtResource("5_88aja")]
+position = Vector2(0, 45)
+scale = Vector2(0.8, 0.8)
 
 [node name="WaterSurface" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
 z_index = 10

@@ -4,6 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
 [ext_resource type="Script" uid="uid://cfmoa6hcvdirb" path="res://scripts/swim_shape.gd" id="3_swim"]
 [ext_resource type="Script" path="res://scripts/ellipse_ring.gd" id="5_ring"]
+[ext_resource type="Script" path="res://scripts/ellipse_shape.gd" id="6_ellipse"]
+[ext_resource type="Script" path="res://scripts/toilet_body.gd" id="7_body"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -19,7 +21,31 @@ metadata/_edit_vertical_guides_ = [128.0]
 [node name="Underwater" type="Node2D" parent="." unique_id=1639702239]
 z_index = -20
 
+[node name="Body" type="Node2D" parent="Underwater"]
+script = ExtResource("7_body")
+
+[node name="Water" type="Node2D" parent="Underwater"]
+position = Vector2(-2, 3)
+script = ExtResource("6_ellipse")
+size = Vector2(107, 129)
+color = Color(0.608, 0.678, 0.718, 1)
+shade_color = Color(0.56, 0.635, 0.68, 1)
+shade_center = Vector2(0, -0.55)
+shade_reach = 0.55
+bands = 3
+
+[node name="Drain" type="Node2D" parent="Underwater"]
+position = Vector2(-1, -67)
+script = ExtResource("6_ellipse")
+size = Vector2(24, 31)
+color = Color(0.52, 0.5, 0.55, 1)
+shade_color = Color(0.22, 0.21, 0.25, 1)
+shade_center = Vector2(0, -0.45)
+shade_reach = 0.85
+bands = 4
+
 [node name="ToiletSprite" type="Sprite2D" parent="Underwater" unique_id=1309309159]
+visible = false
 use_parent_material = true
 position = Vector2(-18, -1)
 scale = Vector2(0.6, 0.6)
