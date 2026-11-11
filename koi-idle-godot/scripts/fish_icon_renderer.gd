@@ -80,7 +80,8 @@ func _run() -> void:
 		for job in _queue:
 			var k := _key(job[0], job[1])
 			if _cache.has(k):
-				if job[2].is_valid():
+				# Skip callbacks whose object was freed while waiting.
+				if job[2].is_valid() and (job[2].get_object() == null or is_instance_valid(job[2].get_object())):
 					job[2].call(_cache[k])
 			else:
 				waiting.append(job)

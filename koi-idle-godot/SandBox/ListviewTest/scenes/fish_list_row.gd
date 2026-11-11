@@ -55,6 +55,17 @@ func update_display(is_pond: bool) -> void:
 	_is_pond = is_pond
 	_apply_display_mode()
 
+## The fish picture arrived (FishIconRenderer.request).
+func _on_icon_ready(tex: Texture2D, fish: fish_conf, px_scale: int) -> void:
+	if fish_resource != fish or not is_instance_valid(icon):
+		return   # the row shows another fish now
+	var s := px_scale
+	while s > 1 and tex.get_width() * s > max_icon_length:
+		s -= 1
+	icon.texture = tex
+	icon.custom_minimum_size = tex.get_size() * s
+
+
 func _apply_display_mode() -> void:
 	if fish_resource == null or income_label == null:
 		return
@@ -66,16 +77,11 @@ func _apply_display_mode() -> void:
 	# toilet fish are all size 1), then blown up with hard pixel edges.
 	if icon_renderer:
 		var density := Pond.icon_density(fish_resource) if _is_pond else 1.0
-		var scale := icon_pixel_size * (Pond.pixel_scale_of(fish_resource) if _is_pond else 1)
-		var fish := fish_resource
-		icon_renderer.request(fish, density, func(tex: Texture2D):
-			if not is_instance_valid(icon) or fish_resource != fish:
-				return
-			var s := scale
-			while s > 1 and tex.get_width() * s > max_icon_length:
-				s -= 1
-			icon.texture = tex
-			icon.custom_minimum_size = tex.get_size() * s)
+		var px_scale := icon_pixel_size * (Pond.pixel_scale_of(fish_resource) if _is_pond else 1)
+		# A method on this row, not an inline function: if the row is freed
+		# before the picture arrives (the list rebuilt), Godot knows and the
+		# renderer skips it.
+		icon_renderer.request(fish_resource, density, _on_icon_ready.bind(fish_resource, px_scale))
 
 
 func _row_style(bg: Color) -> StyleBoxFlat:
