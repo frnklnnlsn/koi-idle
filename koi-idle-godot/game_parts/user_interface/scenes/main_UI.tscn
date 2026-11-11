@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://r5jvkc4i6dis" path="res://game_parts/pond_scenes/scenes/pond_area.tscn" id="8_xc818"]
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
-[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/command_line.tscn" id="12_cmdl"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/toast.tscn" id="12_toast"]
 [ext_resource type="Texture2D" uid="uid://v5p8opmgscx5" path="res://art/ui_icons/menu.png" id="13_ic_menu"]
 [ext_resource type="Texture2D" uid="uid://20ftdpnkhqtm" path="res://art/ui_icons/flush.png" id="14_ic_flush"]
 [ext_resource type="Texture2D" uid="uid://dkgc0laeiyoc4" path="res://art/ui_icons/view.png" id="15_ic_view"]
@@ -392,9 +392,8 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="CommandLine" parent="." unique_id=1830276273 instance=ExtResource("12_cmdl")]
+[node name="Toast" parent="." instance=ExtResource("12_toast")]
 unique_name_in_owner = true
-layout_mode = 1
 
 [node name="FishPeek" parent="." instance=ExtResource("33_peek")]
 unique_name_in_owner = true

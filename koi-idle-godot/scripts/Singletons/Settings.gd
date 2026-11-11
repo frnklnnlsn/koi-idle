@@ -41,7 +41,6 @@ const SPEC := [
 	{"key": "gameplay/autosave", "label": "Autosave every", "type": "choice", "options": ["5 seconds", "15 seconds", "30 seconds", "60 seconds"], "default": 0},
 	{"key": "gameplay/number_format", "label": "Big numbers", "type": "choice", "options": ["1,234,567", "1.23M", "1.23e6"], "default": 0},
 	{"key": "gameplay/confirm_big_sells", "label": "Ask before big sells (:sellall, recycling %d+ fish)" % BIG_SELL, "type": "toggle", "default": true},
-	{"key": "gameplay/key_hints", "label": "Show key hints in the terminal", "type": "toggle", "default": true},
 	{"key": "gameplay/flush_cutscene", "label": "Flush cut scene (follow the fish down the drain to the pond)", "type": "toggle", "default": true},
 ]
 

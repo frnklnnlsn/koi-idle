@@ -24,9 +24,8 @@ extends Control
 var _confirm_dialog: ConfirmationDialog
 var _confirm_action: Callable
 
-## The keyboard terminal along the bottom (command_line.tscn); style and size
-## it in the editor. The rest of the UI is kept above it.
-@onready var command_line: CommandLine = %CommandLine
+## Short messages fading in at the bottom ("Kept 3 fish"): toast.tscn.
+@onready var toast: Toast = %Toast
 @onready var _main_column: VBoxContainer = $VBoxContainer
 ## Icon buttons down the left edge (menu, flush, view, list, shop, fishing).
 @onready var _sidebar: Control = %Sidebar
@@ -58,24 +57,7 @@ const ESC_CLOSES := "esc_closes"
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	# Keys drive the shop while it's open.
-	# Keys drive the skill tree while it's open.
-	command_line.target_provider = func():
-		if shop_ui.visible:
-			return shop_ui
-		return skill_tree_ui if skill_tree_ui.visible else null
-	command_line.resized.connect(_fit_above_terminal)
-	# S opens / closes the shop from anywhere.
-	command_line.global_keys["s"] = _on_shop_pressed
-	# V switches between the toilet and the pond, like the View button.
-	command_line.global_keys["v"] = _on_view_pressed
-	# T opens / closes the skill tree.
-	command_line.global_keys["t"] = _on_skills_pressed
-	# Esc closes the open panel (once nothing is half typed in the terminal);
-	# with nothing open it opens the settings.
-	command_line.global_keys["escape"] = func():
-		if not close_open_panel():
-			settings_menu.open()
+	# Shortcut keys: see _unhandled_key_input.
 	# The close-up window first, so Esc closes it before the panel under it.
 	fish_peek.add_to_group(ESC_CLOSES)
 	for panel in [shop_ui, list_ui, fishing_ui, skill_tree_ui]:
@@ -83,7 +65,7 @@ func _ready() -> void:
 	shop_ui.visibility_changed.connect(_on_shop_visibility)
 	fishing_ui.visibility_changed.connect(_update_backdrop)
 	shop_ui.drag_zone_changed.connect(_on_drag_zone)
-	shop_ui.action_message.connect(command_line.say)
+	shop_ui.action_message.connect(toast.say)
 	shop_ui.confirm_requested.connect(_ask)
 	_confirm_dialog = ConfirmationDialog.new()
 	_confirm_dialog.title = "Are you sure?"
@@ -91,7 +73,7 @@ func _ready() -> void:
 		if _confirm_action.is_valid():
 			_confirm_action.call())
 	add_child(_confirm_dialog)
-	skill_tree_ui.action_message.connect(command_line.say)
+	skill_tree_ui.action_message.connect(toast.say)
 	# Clicking the points counter opens the tree.
 	skill_points_label.gui_input.connect(func(e):
 		if e is InputEventMouseButton and e.pressed and e.button_index == MOUSE_BUTTON_LEFT:
@@ -115,21 +97,36 @@ func _ready() -> void:
 	add_to_group("main_ui")
 	if Prestige.just_advanced:
 		Prestige.just_advanced = false
-		command_line.say.call_deferred("Welcome to %s. Money and fish start over; your %d skill points are back to spend (t)" % [Prestige.level_name(), Progression.points()])
+		toast.say.call_deferred("Welcome to %s. Money and fish start over; your %d skill points are back to spend (t)" % [Prestige.level_name(), Progression.points()])
 	_rank_meter.rank_clicked.connect(_on_rank_clicked)
 	_rank_meter.rank_scrolled.connect(_on_rank_scrolled)
 	_on_shop_visibility()
 	_on_drag_zone("")
-	_fit_above_terminal()
+	_fit_layout()
 
 
-## Stop the main column and the sidebar at the top of the terminal, however
-## tall it is, and start the main column right of the sidebar.
-func _fit_above_terminal() -> void:
-	var h := command_line.size.y if command_line.visible else 0.0
-	_main_column.offset_bottom = -h
-	_sidebar.offset_bottom = -h
-	_shop_bar.offset_bottom = -h
+## Shortcut keys, anywhere: S shop, V toilet / pond, T skill tree, Esc closes
+## the open panel (or opens the settings with nothing open).
+func _unhandled_key_input(event: InputEvent) -> void:
+	var k := event as InputEventKey
+	if k == null or not k.pressed or k.echo or k.is_command_or_control_pressed() or k.alt_pressed:
+		return
+	match k.keycode:
+		KEY_S: _on_shop_pressed()
+		KEY_V: _on_view_pressed()
+		KEY_T: _on_skills_pressed()
+		KEY_ESCAPE:
+			if not close_open_panel():
+				settings_menu.open()
+		_: return
+	get_viewport().set_input_as_handled()
+
+
+## The main column fills the space between the sidebars.
+func _fit_layout() -> void:
+	_main_column.offset_bottom = 0.0
+	_sidebar.offset_bottom = 0.0
+	_shop_bar.offset_bottom = 0.0
 	_main_column.offset_left = _sidebar.size.x
 	_main_column.offset_right = -_shop_bar.size.x if _shop_bar.visible else 0.0
 
@@ -147,7 +144,7 @@ func close_open_panel() -> bool:
 func _on_shop_visibility() -> void:
 	_shop_bar.visible = shop_ui.visible
 	_update_backdrop()
-	_fit_above_terminal()
+	_fit_layout()
 
 
 func _update_backdrop() -> void:
@@ -244,22 +241,22 @@ func _on_milestone_earned(title: String, points: int, first_ever: bool) -> void:
 	# Deferred: the purchase's own "Bought ..." message comes right after this
 	# and would hide it.
 	if first_ever:
-		command_line.say.call_deferred("Skill point earned: %s! The first fish of each rank earns one. Spend them in the skill tree (t)" % title.to_lower())
+		toast.say.call_deferred("Skill point earned: %s! The first fish of each rank earns one. Spend them in the skill tree (t)" % title.to_lower())
 	else:
-		command_line.say.call_deferred("+%d skill point%s: %s  (%d to spend)" % [points, "" if points == 1 else "s", title.to_lower(), Progression.points()])
+		toast.say.call_deferred("+%d skill point%s: %s  (%d to spend)" % [points, "" if points == 1 else "s", title.to_lower(), Progression.points()])
 
 
 func _on_credited_existing(count: int, points: int) -> void:
 	_show_skill_points()
-	command_line.say("Skill points: +%d for the %d rank%s you already own. Each new rank's first fish earns another" % [points, count, "" if count == 1 else "s"])
+	toast.say("Skill points: +%d for the %d rank%s you already own. Each new rank's first fish earns another" % [points, count, "" if count == 1 else "s"])
 
 
 func _on_buy_pressed() -> void:
-	command_line.say(shop_ui.buy_one())
+	toast.say(shop_ui.buy_one())
 
 
 func _on_buy_max_pressed() -> void:
-	command_line.say(shop_ui.fill_pool())
+	toast.say(shop_ui.fill_pool())
 
 
 func _process(_delta: float) -> void:
@@ -280,12 +277,12 @@ func _update_rank_meter() -> void:
 
 ## Clicking or scrolling the meter runs the same rank command as :rank N / [ ].
 func _on_rank_clicked(r: int) -> void:
-	command_line.say(shop_ui.run_command({"cmd": "rank", "to": r}))
+	toast.say(shop_ui.run_command({"cmd": "rank", "to": r}))
 	_update_rank_meter()
 
 
 func _on_rank_scrolled(step: int) -> void:
-	command_line.say(shop_ui.run_command({"cmd": "rank", "by": step}))
+	toast.say(shop_ui.run_command({"cmd": "rank", "by": step}))
 	_update_rank_meter()
 ## 1234567 -> "1,234,567"
 static func _with_commas(n: int) -> String:
