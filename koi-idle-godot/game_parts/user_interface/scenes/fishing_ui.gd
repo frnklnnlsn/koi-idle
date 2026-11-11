@@ -12,9 +12,12 @@
 # (Prestige), Cast turns into "Challenge the boss" (click twice to confirm).
 # That emits boss_challenged; main_ui plays the boss cut scene.
 #
-# Below the panel, the shop's three charts show every pond fish. Fish on the
-# line are drawn in the accent colour. Keep or Release clears the highlight:
-# kept fish leave the pond (and the charts), released ones look normal again.
+# Layout: no panel box. The controls sit at the bottom middle and only show
+# what applies: Cast; after a catch Keep / Release / Leave On; the bite bar
+# with a wavy "Waiting" while the line is out; Sell Pond only when nothing in
+# the pond can bite. The growth and bar charts start hidden below the screen;
+# the Charts tab slides them up on either side of the controls. Fish on the
+# line are drawn in the accent colour in them.
 extends Control
 
 ## For the fishing scene (the bobber view behind the panel).
@@ -30,7 +33,6 @@ signal boss_challenged
 @onready var fishing_status: RichTextLabel = %FishingStatus
 @onready var fish_stats:     Label         = %FishStats
 @onready var chain_label:    Label         = %ChainLabel
-@onready var bite_label:     Label         = %BiteTimer
 @onready var bite_bar:       ProgressBar   = %BiteBar
 @onready var fishing_button: Button        = %FishingButton
 @onready var keep_button:    Button        = %KeepButton
@@ -38,10 +40,14 @@ signal boss_challenged
 @onready var leave_on_button: Button       = %LeaveOnButton
 @onready var fishing_timer:  Timer         = $FishingTimer
 @onready var sell_pond_button: Button      = %SellPondButton
-## The level's boss goal, under the title.
-@onready var boss_hint: Label              = %BossHint
-# Charts along the bottom half (Charts node in fishing_ui.tscn).
-@onready var _scatter: FishScatterChart    = %Scatter
+# Charts on either side of the controls (Charts node in fishing_ui.tscn),
+# hidden below the screen until the Charts tab is pressed.
+@onready var _charts: Control             = %Charts
+@onready var _charts_tab: Button          = %ChartsTab
+## Seconds the charts take to slide up / down.
+@export var charts_slide_seconds := 0.35
+var _charts_shown := false
+var _charts_tween: Tween
 @onready var _growth:  GrowthChart         = %Growth
 @onready var _bars:    CollectionChart     = %Bars
 
@@ -66,6 +72,8 @@ func _ready() -> void:
 	# The pond changes under us (flushes, growth, catches): keep the hints current.
 	FishGrowthManager.growth_updated.connect(_refresh)
 	visibility_changed.connect(_on_visibility_changed)
+	_charts_tab.pressed.connect(func(): _show_charts(not _charts_shown, true))
+	resized.connect(func(): _show_charts(_charts_shown, false))
 	_set_idle_status()
 	_refresh()
 
@@ -73,10 +81,30 @@ func _ready() -> void:
 func _on_visibility_changed() -> void:
 	if visible and line.is_empty() and not _waiting:
 		_set_idle_status()
+	if visible:
+		_show_charts(false, false)   # charts start tucked away below
 	_refresh()
 
 
-## The status shown with an empty line, depending on what the pond holds.
+## Slides the charts up into view (or down, leaving just the tab showing).
+func _show_charts(shown: bool, animate: bool) -> void:
+	_charts_shown = shown
+	_charts_tab.text = "Hide charts" if shown else "Charts"
+	# Hidden: moved down by the charts' height, so only the tab peeks out.
+	var target := 0.0 if shown else size.y * (1.0 - 0.52)
+	if _charts_tween and _charts_tween.is_valid():
+		_charts_tween.kill()
+	if animate:
+		_charts_tween = create_tween()
+		_charts_tween.tween_property(_charts, "position:y", target, charts_slide_seconds) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	else:
+		_charts.position.y = target
+	if shown:
+		_refresh()
+
+
+## The status shown with an empty line: only when something's wrong.
 func _set_idle_status() -> void:
 	var pond := _pond_fish()
 	if pond.is_empty():
@@ -84,7 +112,7 @@ func _set_idle_status() -> void:
 	elif line.candidates(pond).is_empty():
 		_set_status("No rank 0 fish in the pond. Sell Pond to cash out.")
 	else:
-		_set_status("Cast for a rank 0 fish")
+		_set_status("")
 
 
 func _process(delta: float) -> void:
@@ -99,7 +127,6 @@ func _process(delta: float) -> void:
 	var elapsed := fishing_timer.wait_time - fishing_timer.time_left
 	bite_bar.max_value = r.y
 	bite_bar.value = elapsed
-	bite_label.text = "%.1fs   (bite in %s–%s)" % [elapsed, _secs(r.x), _secs(r.y)]
 
 
 # --- Buttons ------------------------------------------------------------------
@@ -120,7 +147,7 @@ func _on_fishing_button_pressed() -> void:
 	fishing_timer.wait_time = 0.05 if _instant else line.roll_bite_time(_pond_fish())
 	fishing_timer.start()
 	cast_started.emit()
-	_set_status("[wave amp=20 freq=5 connected=1]Waiting for a rank %d...[/wave]" % line.target_rank())
+	_set_status("[wave amp=20 freq=5 connected=1]Waiting[/wave]")
 	_refresh()
 
 
@@ -244,68 +271,47 @@ func _on_boss_pressed() -> void:
 func _refresh() -> void:
 	if not is_node_ready():
 		return
-
-	# What's on the line and what it's worth.
-	if line.is_empty():
-		chain_label.text = "Line: empty"
-		fish_stats.text = _stats_text()
-	else:
-		var parts := line.chain.map(func(f): return "R%d %sg" % [f.rank, _commas(roundi(f.mass))])
-		chain_label.text = "On line: " + " → ".join(parts)
-		fish_stats.text = _stats_text()
-
-	# Bite timer: a range for the rank you'd catch next, or ∞ if nothing can bite.
-	var can_cast := line.can_climb() and not line.candidates(_pond_fish()).is_empty()
-	if not _waiting:
-		bite_bar.value = 0.0
-		if line.is_instant() and can_cast:
-			bite_label.text = "Next bite: instant   (hungry rank %d)" % line.target_rank()
-		elif not line.can_climb():
-			bite_label.text = "Next bite: ∞   (top rank on the line)"
-		elif not can_cast:
-			bite_label.text = "Next bite: ∞   (no rank %d fish in the pond)" % line.target_rank()
-		else:
-			var r := line.bite_range(_pond_fish())
-			var n := line.candidates(_pond_fish()).size()
-			bite_label.text = "Next bite: %s–%s   (rank %d · %d in pond)" % [_secs(r.x), _secs(r.y), line.target_rank(), n]
-
+	var pond := _pond_fish()
+	var can_cast := line.can_climb() and not line.candidates(pond).is_empty()
 	var boss := not _waiting and Prestige.boss_ready(line.top())
 	if not boss:
 		_boss_armed = false
-	fishing_button.disabled = (_waiting or _just_caught or not can_cast) and not boss
+
+	# What's on the line and what it's worth (only with something on it).
+	chain_label.visible = not line.is_empty()
+	if not line.is_empty():
+		var parts := line.chain.map(func(f): return "R%d %sg" % [f.rank, _commas(roundi(f.mass))])
+		chain_label.text = "On line: " + " → ".join(parts)
+	fish_stats.text = _stats_text()
+	fish_stats.visible = fish_stats.text != ""
+
+	# The bite bar only while the line is out.
+	bite_bar.visible = _waiting
+	if not _waiting:
+		bite_bar.value = 0.0
+
+	# Buttons: Cast with nothing to decide; Keep / Release / Leave On right
+	# after a catch; Cast + Keep + Release with fish left on as bait.
+	fishing_button.visible = not _waiting and not _just_caught and (can_cast or boss)
 	if boss:
 		fishing_button.text = "Confirm: end %s? Money and fish are wiped" % Prestige.level_name() if _boss_armed \
 			else "Challenge the boss"
 	else:
 		fishing_button.text = "Cast"
-	_show_boss_hint()
-	keep_button.disabled = _waiting or line.is_empty()
-	release_button.disabled = _waiting or line.is_empty()
-	leave_on_button.disabled = not _just_caught
+	keep_button.visible = not _waiting and not line.is_empty()
+	release_button.visible = not _waiting and not line.is_empty()
+	leave_on_button.visible = _just_caught
 
-	var pond := _pond_fish()
-	_update_charts(pond)
-	sell_pond_button.disabled = _waiting or pond.is_empty()
-	if pond.is_empty():
+	# Sell Pond: the fail-safe, only when nothing in the pond can bite.
+	sell_pond_button.visible = not _waiting and line.is_empty() and not pond.is_empty() \
+		and line.candidates(pond).is_empty()
+	if not sell_pond_button.visible:
 		_sell_armed = false
-		sell_pond_button.text = "Sell Pond"
 	elif _sell_armed:
 		sell_pond_button.text = "Confirm: sell %d fish for $%s?" % [pond.size(), _commas(floori(line.pond_sale_value(pond)))]
 	else:
 		sell_pond_button.text = "Sell Pond ($%s)" % _commas(floori(line.pond_sale_value(pond)))
-
-
-## The level's boss goal and the biggest pond fish so far.
-func _show_boss_hint() -> void:
-	var lvl := Prestige.current()
-	if not lvl.has_boss() or not Prestige.has_next():
-		boss_hint.text = "%s: no boss here yet" % Prestige.level_name()
-		return
-	var biggest := 0.0
-	for f in _pond_fish():
-		if f is fish_conf:
-			biggest = maxf(biggest, f.mass)
-	boss_hint.text = "Boss: hook a fish of %s  (biggest in pond %s)" % [Prestige.mass_text(lvl.boss_mass), Prestige.mass_text(biggest)]
+	_update_charts(pond)
 
 
 ## What Keep would pay now, the Swift Ladder pace and the Hot Streak when
@@ -337,7 +343,7 @@ func _stats_text() -> String:
 func _update_charts(pond: Array) -> void:
 	if not is_visible_in_tree():
 		return
-	for chart in [_scatter, _growth, _bars]:
+	for chart in [_growth, _bars]:
 		chart.set_fish_collection(pond)
 		chart.set_caught(line.chain, [])
 	# A dot on each line fish's growth curve at its current growth.
@@ -346,6 +352,7 @@ func _update_charts(pond: Array) -> void:
 
 func _set_status(bbcode: String) -> void:
 	fishing_status.text = "[center]" + bbcode
+	fishing_status.visible = bbcode != ""
 
 
 func _pond_fish() -> Array:

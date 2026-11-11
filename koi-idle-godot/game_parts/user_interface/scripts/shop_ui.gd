@@ -75,6 +75,10 @@ const CARD_MARGIN := 10.0
 func _ready() -> void:
 	resized.connect(_place_cards)
 	visibility_changed.connect(_place_cards)
+	# The charts rise up from the bottom when the shop opens.
+	visibility_changed.connect(func():
+		if visible:
+			UiSlide.up_from_bottom(%bellcurve.get_parent().get_parent()))
 	get_viewport().size_changed.connect(_place_cards)
 	_init_managers()
 	_connect_signals()

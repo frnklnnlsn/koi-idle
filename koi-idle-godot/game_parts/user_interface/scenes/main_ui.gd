@@ -97,7 +97,7 @@ func _ready() -> void:
 	fishing_ui.boss_challenged.connect(_play_boss)
 	# The bobber view follows the fishing panel.
 	fishing_ui.cast_started.connect(fishing_scene.cast)
-	fishing_ui.cast_ended.connect(fishing_scene.set_waiting.bind(false))
+	fishing_ui.cast_ended.connect(fishing_scene.reel_in)
 	fishing_ui.fish_hooked.connect(fishing_scene.hook)
 	fishing_ui.line_kept.connect(fishing_scene.keep)
 	fishing_ui.line_released.connect(fishing_scene.release)

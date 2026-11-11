@@ -7,12 +7,16 @@
 #
 #   open(pond_camera)   zoom the pond camera in on the spot, then fade in
 #   close(pond_camera)  fade out while the pond camera zooms back out
-#   cast()              the bobber is pulled out and cast again (splash)
+#   cast()              the bobber drops in from above (splash); with a fish
+#                       left on as bait, both go back under
 #   set_waiting()       while the line is out it twitches now and then
+#   reel_in()           nothing bit: the bobber is pulled up out of view
 #   hook(fish)          the bobber dunks, the fish rises from below and is
 #                       pulled out of the water, dripping, and hangs by its
 #                       mouth on the line
-#   keep() / release()  the fish is pulled up and away / dropped back
+#   keep() / release()  the fish is pulled up and away / dropped back, and
+#                       the line leaves the view
+# With no cast out, there's no line or bobber in view, just the water.
 #
 # Positions and sizes are pond world units (a size-1 fish is ~27 long); the
 # camera zoom makes them bigger on screen.
@@ -26,7 +30,7 @@ extends SubViewportContainer
 ## the pixels even).
 @export_range(1.0, 8.0, 1.0) var zoom := 2.0
 ## Where on screen the bobber sits (share of the view, 0,0 = top left).
-@export var bobber_anchor := Vector2(0.2, 0.32)
+@export var bobber_anchor := Vector2(0.5, 0.3)
 ## Seconds the zoom-in / zoom-out takes when fishing opens / closes.
 @export_range(0.0, 3.0, 0.05) var transition_seconds := 0.7
 
@@ -40,11 +44,11 @@ extends SubViewportContainer
 @export var lift_height := 34.0
 ## Where the line comes from (the rod, off the top of the view), relative to
 ## the bobber.
-@export var rod_offset := Vector2(-30, -400)
+@export var rod_offset := Vector2(0, -400)
 
-enum State { FLOAT, CASTING, BITE, LIFT, HANG, KEEP, RELEASE }
+enum State { OFF, FLOAT, CASTING, BITE, LIFT, HANG, KEEP, RELEASE, REEL }
 
-var _state := State.FLOAT
+var _state := State.OFF
 var _time := 0.0
 var _waiting := false
 var _twitch_in := 1.0
@@ -141,8 +145,9 @@ func close(pond_camera: Camera2D = null) -> void:
 func cast() -> void:
 	_kill(_tween)
 	_waiting = true
-	_cast_from = _bob
-	_cast_tip = _rest() + Vector2(rod_offset.x * 0.6, -lift_height * 1.6)
+	# From above the view if nothing's out; else pulled up first.
+	_cast_from = _off_view() if _state == State.OFF else _bob
+	_cast_tip = _rest() + Vector2(rod_offset.x * 0.1, -lift_height * 1.6)
 	_fish.visible = false   # a fish left on as bait goes under with the hook
 	_state = State.CASTING
 	_tween = create_tween()
@@ -172,6 +177,26 @@ func _cast_landed() -> void:
 
 func set_waiting(on: bool) -> void:
 	_waiting = on
+
+
+## Nothing bit: the bobber is pulled up out of view.
+func reel_in() -> void:
+	_kill(_tween)
+	_waiting = false
+	if _state == State.OFF:
+		return
+	_state = State.REEL
+	_splash(_rest(), 2, 4.0)
+	_cast_from = _bob
+	_cast_tip = _off_view()
+	_tween = create_tween()
+	_tween.tween_method(_cast_pull, 0.0, 1.0, 0.45).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	_tween.tween_callback(func(): _state = State.OFF)
+
+
+## Above the top of the view, straight up from the bobber's spot.
+func _off_view() -> Vector2:
+	return _rest() + Vector2(0, -Vector2(_view.size).y / zoom)
 
 
 func hook(fish: fish_conf) -> void:
@@ -219,13 +244,13 @@ func keep() -> void:
 	_lift = 1.0
 	_rise = 1.0
 	_tween = create_tween()
-	_tween.tween_property(self, "_lift", 4.0, 0.5).set_ease(Tween.EASE_IN)
+	# Up and out of view with the line.
+	var out := Vector2(_view.size).y / zoom / lift_height + 1.5
+	_tween.tween_property(self, "_lift", out, 0.6).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
 	_tween.tween_callback(func():
 		_fish.visible = false
 		_hooked = null
-		_bob = _rest() + Vector2(rod_offset.x * 0.6, -lift_height * 1.6)
-		cast()
-		_waiting = false)
+		_state = State.OFF)
 
 
 func release() -> void:
@@ -242,10 +267,13 @@ func release() -> void:
 		_fish.visible = false
 		_hooked = null
 		_splash(_cast_tip, 4, 8.0))
-	_tween.tween_interval(0.3)
+	# Then the empty line is pulled up out of view.
 	_tween.tween_callback(func():
-		cast()
-		_waiting = false)
+		_state = State.REEL
+		_cast_from = _bob
+		_cast_tip = _off_view())
+	_tween.tween_method(_cast_pull, 0.0, 1.0, 0.45).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	_tween.tween_callback(func(): _state = State.OFF)
 
 
 ## Release: the fish falls back towards the water.
@@ -376,7 +404,17 @@ func _draw_under() -> void:
 
 
 func _draw_stage() -> void:
-	# Ripples: flat rings (seen at an angle) that grow and fade.
+	if _state == State.OFF:
+		_draw_ripples()
+		_draw_drops()
+		return
+	_draw_ripples()
+	_draw_line_and_bobber()
+	_draw_drops()
+
+
+## Ripples: flat rings (seen at an angle) that grow and fade.
+func _draw_ripples() -> void:
 	for r in _ripples:
 		var age: float = r[1]
 		if age < 0.0:
@@ -386,10 +424,13 @@ func _draw_stage() -> void:
 		_stage.draw_set_transform(r[0], 0.0, Vector2(1.0, 0.4))
 		_stage.draw_arc(Vector2.ZERO, radius, 0.0, TAU, 32, Color(ripple_color, 0.55 * (1.0 - t)), -1.0)
 	_stage.draw_set_transform(Vector2.ZERO)
+
+
+func _draw_line_and_bobber() -> void:
 	# Line: from the rod (off the top) to the bobber, slack while floating.
 	var top := _bob + Vector2(0, -bobber_radius - 1.5)
 	var tip := _rest() + rod_offset
-	var taut := _state in [State.BITE, State.LIFT, State.HANG, State.KEEP, State.RELEASE]
+	var taut := _state in [State.BITE, State.LIFT, State.HANG, State.KEEP, State.RELEASE, State.REEL]
 	var sag := 2.0 if taut else 9.0
 	var pts := PackedVector2Array()
 	for i in 17:
@@ -405,7 +446,9 @@ func _draw_stage() -> void:
 		var into := Vector2.DOWN.rotated(_fish.rotation + PI / 2.0) * 2.0
 		_stage.draw_line(_bob, mouth + into, line_color, -1.0)
 	_bobber_shape(_stage, _bob.round(), false)
-	# Drops of water.
+
+
+func _draw_drops() -> void:
 	for d in _drops:
 		_stage.draw_rect(Rect2(d[0], Vector2.ONE * (1.0 / zoom)), Color(ripple_color, 0.85))
 
