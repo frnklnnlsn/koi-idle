@@ -41,6 +41,7 @@ var _confirm_action: Callable
 @onready var _shop_backdrop: ColorRect = %ShopBackdrop
 ## The bobber view shown behind the fishing panel (in place of the pond).
 @onready var fishing_scene: FishingScene = %FishingScene
+var _fishing_open := false
 
 ## Light colours (keep / trash / off) come from UIPalette.
 
@@ -144,7 +145,14 @@ func _on_shop_visibility() -> void:
 
 func _update_backdrop() -> void:
 	_shop_backdrop.visible = shop_ui.visible
-	fishing_scene.visible = fishing_ui.visible
+	# Fishing: zoom into the pond, then the bobber scene fades in (and back).
+	var cam := pond.get_node_or_null("PondViewport/Camera2D") as Camera2D
+	if fishing_ui.visible and not _fishing_open:
+		_fishing_open = true
+		fishing_scene.open.call_deferred(cam)   # after the view has switched to the pond
+	elif not fishing_ui.visible and _fishing_open:
+		_fishing_open = false
+		fishing_scene.close(cam)
 
 
 func _on_drag_zone(zone: String) -> void:

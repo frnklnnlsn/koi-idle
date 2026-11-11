@@ -1,10 +1,8 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://game_parts/fishing_scene/fishing_scene.gd" id="1_scene"]
-[ext_resource type="Shader" path="res://game_parts/fishing_scene/fishing_water.gdshader" id="2_water"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
-shader = ExtResource("2_water")
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/pond_water_floor.tres" id="2_floor"]
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/pond_water_surface.tres" id="3_surface"]
 
 [node name="FishingScene" type="SubViewportContainer"]
 anchors_preset = 15
@@ -23,14 +21,31 @@ handle_input_locally = false
 size = Vector2i(640, 360)
 render_target_update_mode = 4
 
-[node name="Water" type="ColorRect" parent="View"]
-material = SubResource("ShaderMaterial_water")
-offset_right = 640.0
-offset_bottom = 360.0
+[node name="Camera2D" type="Camera2D" parent="View"]
+
+[node name="WaterFloor" type="ColorRect" parent="View"]
+z_index = -10
+material = ExtResource("2_floor")
+offset_left = -450.0
+offset_top = -300.0
+offset_right = 450.0
+offset_bottom = 300.0
+mouse_filter = 2
+
+[node name="Under" type="Node2D" parent="View"]
+
+[node name="WaterSurface" type="ColorRect" parent="View"]
+z_index = 10
+material = ExtResource("3_surface")
+offset_left = -450.0
+offset_top = -300.0
+offset_right = 450.0
+offset_bottom = 300.0
 mouse_filter = 2
 
 [node name="Stage" type="Node2D" parent="View"]
+z_index = 11
 
-[node name="Fish" type="Sprite2D" parent="View/Stage"]
+[node name="Fish" type="Sprite2D" parent="View"]
 visible = false
 texture_filter = 1
