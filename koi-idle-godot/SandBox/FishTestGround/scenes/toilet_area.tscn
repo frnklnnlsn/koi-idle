@@ -3,7 +3,6 @@
 [ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
 [ext_resource type="Script" uid="uid://cfmoa6hcvdirb" path="res://scripts/swim_shape.gd" id="3_swim"]
-[ext_resource type="Material" uid="uid://bctf4keiggvit" path="res://game_parts/FishComposition/resources/underwater_material.tres" id="4_under"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -18,7 +17,6 @@ metadata/_edit_vertical_guides_ = [128.0]
 
 [node name="Underwater" type="Node2D" parent="." unique_id=1639702239]
 z_index = -20
-material = ExtResource("4_under")
 
 [node name="ToiletSprite" type="Sprite2D" parent="Underwater" unique_id=1309309159]
 use_parent_material = true
