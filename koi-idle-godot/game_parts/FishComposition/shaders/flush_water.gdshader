@@ -15,12 +15,17 @@ uniform float strength : hint_range(0.0, 1.0, 0.01) = 0.0;
 uniform vec2 drain = vec2(0.0, -60.0);
 // 1 or -1: which way the water turns (matches the fish's spiral).
 uniform float spin = 1.0;
+// How far the water has turned so far. toilet_viewport.gd adds to it each
+// frame (slow at first, faster as the flush builds), so the spin speeds up
+// smoothly instead of jumping when the strength changes.
+uniform float swirl_phase = 0.0;
 uniform float pixel_size : hint_range(1.0, 8.0, 1.0) = 2.0;
 // Draw only inside the bowl (set by the toilet script).
 uniform bool clip_to_area = false;
 
 group_uniforms swirl;
-// Number of spiral arms, how tightly they wind, and how fast they turn.
+// Number of spiral arms, how tightly they wind, and how fast they turn at
+// full flush (toilet_viewport.gd reads spin_speed).
 uniform float arms : hint_range(1.0, 8.0, 1.0) = 3.0;
 uniform float twist : hint_range(0.0, 12.0, 0.1) = 4.0;
 uniform float spin_speed : hint_range(0.0, 20.0, 0.1) = 6.0;
@@ -58,7 +63,7 @@ void fragment() {
 	vec2 d = p - drain;
 	float r = length(d) + 0.001;
 	float a = atan(d.y, d.x);
-	float t = TIME * spin_speed * (0.4 + strength);
+	float t = swirl_phase;
 	// Spiral arms: constant along a * arms + twist * log(r); turning in time.
 	float phase = a * arms * spin + twist * log(r) - t * spin;
 	// Turn the noise with the water so the streaks break up as they swirl.

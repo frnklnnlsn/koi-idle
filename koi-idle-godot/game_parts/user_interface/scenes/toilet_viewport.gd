@@ -29,6 +29,10 @@ signal flush_draining
 @export var drain_fade_radius: float = 26.0
 ## Swirling water over the bowl while flushing (the FlushWater node).
 @export var flush_water_fade_in: float = 0.4
+## How fast the swirl water turns when the flush starts, as a share of its
+## full speed (spin_speed on flush_water.tres); it builds to full speed over
+## the flush and stays there while the water calms.
+@export_range(0.0, 1.0, 0.01) var swirl_start_speed: float = 0.1
 @export_group("")
 ## Keep the water effects (sparkles, underwater bend and light) inside the
 ## swim area, so the porcelain around the water stays clean.
@@ -39,6 +43,8 @@ var _is_flushing: bool  = false
 var _fish_cache:  Array = []
 var _draining_sent := false
 var _flush_t := -1.0   # flush progress 0..1 while the spiral runs, else -1
+var _swirl_phase := 0.0
+var _swirl_speed_k := 0.0   # 0..1 share of the swirl's full speed
 
 ## The toilet's own boundary, shared by every toilet fish, built from the
 ## ToiletArea/SwimShape node (drag / resize it in toilet_area.tscn). The flush
@@ -137,6 +143,7 @@ func _play_flush_animation() -> void:
 	# ③ One tween drives 0→1 progress; each step shrinks the shared boundary
 	#    toward the drain and steers every fish along the spiral around it.
 	_draining_sent = false
+	_swirl_speed_k = swirl_start_speed
 	var water := create_tween()
 	water.tween_method(_set_flush_water, 0.0, 1.0, flush_water_fade_in)
 	var tween := create_tween()
@@ -146,12 +153,14 @@ func _play_flush_animation() -> void:
 		0.0, 1.0, flush_duration)
 	await tween.finished
 
-	# ④ Hold at final state, the water calming as the last fish go down.
-	_flush_t = -1.0
+	# ④ Hold at final state, the water calming as the last fish go down
+	#    (the current keeps its full speed until the flush is over).
+	_flush_t = 1.0
 	if is_inside_tree():
 		var calm := create_tween()
 		calm.tween_method(_set_flush_water, 1.0, 0.0, flush_hold_duration + 0.6)
 		await get_tree().create_timer(flush_hold_duration).timeout
+	_flush_t = -1.0
 
 
 func _apply_flush_progress(t: float, start_size: Vector2, start_center: Vector2, start_avoidance: float) -> void:
@@ -186,6 +195,7 @@ func _apply_flush_progress(t: float, start_size: Vector2, start_center: Vector2,
 ## The flush current: every fish is carried round the drain, faster as the
 ## flush builds (their own steering follows the same spiral).
 func _process(delta: float) -> void:
+	_turn_flush_water(delta)
 	if _flush_t < 0.0:
 		return
 	var turn := TAU * swirl_turns_per_second * smoothstep(0.0, 0.6, _flush_t) * delta * flush_spin
@@ -197,6 +207,19 @@ func _process(delta: float) -> void:
 		var head: Vector2 = fish.to_global(fish.fish_body.get_point_position(0)) if "fish_body" in fish else fish.global_position
 		var d := head - flush_drain_point
 		fish.position += d.rotated(turn) - d
+
+
+## Turns the swirl water: slow when the flush starts, building to full speed.
+func _turn_flush_water(delta: float) -> void:
+	var fw := get_node_or_null("FlushWater") as CanvasItem
+	if fw == null or not fw.visible or not (fw.material is ShaderMaterial):
+		return
+	var mat: ShaderMaterial = fw.material
+	if _flush_t >= 0.0:
+		_swirl_speed_k = lerpf(swirl_start_speed, 1.0, smoothstep(0.0, 1.0, _flush_t))
+	var full = mat.get_shader_parameter("spin_speed")
+	_swirl_phase += delta * (full if full != null else 6.0) * _swirl_speed_k
+	mat.set_shader_parameter("swirl_phase", _swirl_phase)
 
 
 ## How much the flush water shows (0..1).
