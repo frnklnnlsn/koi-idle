@@ -51,20 +51,26 @@ extends Node2D
 ## How far the seat's front reaches toward the bowl.
 @export var seat_front := 26.0:
 	set(v): seat_front = v; queue_redraw()
+## The seat is a rounded oval (not pointed like the lid): its half width,
+## and how boxy its ends are (2 = plain ellipse, higher = squarer ends).
+@export var seat_width := 118.0:
+	set(v): seat_width = v; queue_redraw()
+@export_range(2.0, 6.0, 0.1) var seat_squareness := 2.6:
+	set(v): seat_squareness = v; queue_redraw()
 ## Thickness of the shaded lip along the lid's and seat's front edges.
 @export var lip := 4.0:
 	set(v): lip = v; queue_redraw()
 
 @export_group("Hole")
-## The sliver of hole in the seat: half width, where its ends sit (from the
-## hinge line), and how far its back and front edges bulge.
-@export var hole_width := 86.0:
+## The sliver of hole in the seat: half width, and where its back and front
+## edges are (from the hinge line). Hole Ends Y is unused (kept for scenes).
+@export var hole_width := 84.0:
 	set(v): hole_width = v; queue_redraw()
 @export var hole_ends_y := 4.0:
 	set(v): hole_ends_y = v; queue_redraw()
-@export var hole_back := 3.0:
+@export var hole_back := 6.0:
 	set(v): hole_back = v; queue_redraw()
-@export var hole_front := 12.0:
+@export var hole_front := 14.0:
 	set(v): hole_front = v; queue_redraw()
 
 @export_group("Hinges")
@@ -82,8 +88,10 @@ const STEPS := 40
 func _draw() -> void:
 	var y0 := hinge_line_y
 	# Outline and the shadow underneath everything.
-	_lens(width + 2.0, y0, lid_back - 2.0, seat_front + 2.0, outline)
-	_lens(width, y0, lid_back, seat_front, gap_color)
+	# (only down to the seat's middle, so it doesn't poke out round its ends)
+	var mid := (seat_back + seat_front) * 0.5
+	_lens(width + 2.0, y0, lid_back - 2.0, mid, outline)
+	_lens(width, y0, lid_back, mid, gap_color)
 
 	# Hinges peek out under the seat's front edge.
 	for side in [-1.0, 1.0]:
@@ -95,13 +103,31 @@ func _draw() -> void:
 	_lens(width, y0, lid_back, lid_front, shade_color)
 	_lens(width, y0, lid_back, lid_front - lip, seat_color)
 
-	# Seat: shaded front lip, top, then the sliver of hole.
-	_lens(width, y0, seat_back, seat_front, shade_color)
-	_lens(width, y0, seat_back, seat_front - lip, seat_color)
+	# Seat: a rounded oval from Seat Back to Seat Front, with a shaded lip
+	# along the front, then the sliver of hole.
+	var c := Vector2(0, y0 + (seat_back + seat_front) * 0.5)
+	var half := Vector2(seat_width, (seat_front - seat_back) * 0.5)
+	_oval(c, half + Vector2(1.5, 1.5), outline)
+	_oval(c, half, shade_color)
+	_oval(c + Vector2(0, -lip * 0.5), half - Vector2(lip * 0.5, lip * 0.5), seat_color)
 	if hole_front > hole_back:
-		var hy := y0 + hole_ends_y
-		_lens(hole_width + 1.0, hy, hole_back - 1.0, hole_front + 1.0, shade_color)
-		_lens(hole_width, hy, hole_back, hole_front, hole_color)
+		var hc := Vector2(0, y0 + (hole_back + hole_front) * 0.5)
+		var hh := Vector2(hole_width, (hole_front - hole_back) * 0.5)
+		_oval(hc, hh + Vector2(1, 1), shade_color)
+		_oval(hc, hh, hole_color)
+
+
+## A rounded oval (superellipse): squareness 2 = ellipse.
+func _oval(centre: Vector2, half: Vector2, col: Color) -> void:
+	var e := 2.0 / seat_squareness
+	var pts := PackedVector2Array()
+	for i in 72:
+		var a := TAU * i / 72.0
+		var cx := cos(a)
+		var sy := sin(a)
+		pts.append(centre + Vector2(signf(cx) * pow(absf(cx), e) * half.x,
+			signf(sy) * pow(absf(sy), e) * half.y))
+	draw_colored_polygon(pts, col)
 
 
 ## The shape between two elliptical arcs from (-half, y) to (half, y): one
