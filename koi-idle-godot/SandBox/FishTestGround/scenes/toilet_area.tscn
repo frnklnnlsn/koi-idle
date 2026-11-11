@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://ckg6cshvshkae" path="res://art/Sprites/ToiletRim.png" id="1_b7m5k"]
 [ext_resource type="Texture2D" uid="uid://c2pxqr0ja1fju" path="res://art/Sprites/ToiletRim3.png" id="2_t615y"]
 [ext_resource type="Script" uid="uid://cfmoa6hcvdirb" path="res://scripts/swim_shape.gd" id="3_swim"]
+[ext_resource type="Script" path="res://scripts/ellipse_ring.gd" id="5_ring"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -33,7 +34,12 @@ shape = SubResource("CapsuleShape2D_lsxmt")
 z_index = 20
 
 [node name="Rim" type="Sprite2D" parent="AboveWater" unique_id=1500697648]
+visible = false
 texture = ExtResource("2_t615y")
+
+[node name="RimShape" type="Node2D" parent="AboveWater"]
+position = Vector2(0, 1.5)
+script = ExtResource("5_ring")
 
 [node name="SwimShape" type="CollisionShape2D" parent="." unique_id=1964696330]
 visible = false
