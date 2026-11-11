@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/ellipse_ring.gd" id="5_ring"]
 [ext_resource type="Script" path="res://scripts/ellipse_shape.gd" id="6_ellipse"]
 [ext_resource type="Script" path="res://scripts/toilet_body.gd" id="7_body"]
+[ext_resource type="Script" path="res://scripts/toilet_seat_up.gd" id="8_seat"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -66,6 +67,17 @@ texture = ExtResource("2_t615y")
 [node name="RimShape" type="Node2D" parent="AboveWater"]
 position = Vector2(0, 1.5)
 script = ExtResource("5_ring")
+
+[node name="BowlSlope" type="Node2D" parent="AboveWater"]
+position = Vector2(0, 1.5)
+script = ExtResource("5_ring")
+outer_size = Vector2(97, 117)
+inner_size = Vector2(91, 109)
+inner_offset = Vector2(0, 1)
+color = Color(0.84, 0.87, 0.9, 1)
+
+[node name="SeatUp" type="Node2D" parent="AboveWater"]
+script = ExtResource("8_seat")
 
 [node name="SwimShape" type="CollisionShape2D" parent="." unique_id=1964696330]
 visible = false
