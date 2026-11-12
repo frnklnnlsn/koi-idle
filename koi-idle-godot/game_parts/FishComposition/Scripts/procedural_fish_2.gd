@@ -517,6 +517,13 @@ func _draw_swim_area(area: SwimArea) -> void:
 				area.size - Vector2.ONE * _steering.boundary_avoidance_distance, Color.ORANGE)
 		SwimArea.Shape.RECTANGLE:
 			draw_rect(Rect2(local_center - area.size, area.size * 2.0), Color.ALICE_BLUE, false, 1.5)
+		SwimArea.Shape.POLYGON:
+			var pts := PackedVector2Array()
+			for p in area.points:
+				pts.append(to_local(p))
+			if pts.size() > 1:
+				pts.append(pts[0])
+				draw_polyline(pts, Color.ALICE_BLUE, 1.5)
 
 
 func _draw_ellipse(center: Vector2, size: Vector2, color: Color, segments: int = 48) -> void:

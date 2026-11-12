@@ -111,8 +111,8 @@ var _pending_display_list: Array = []
 var _spawn_queue:  Array = []   # Array of fish data dicts waiting to be placed
 var _spawn_timer:  float = 0.0
 var _channel_idx:  int   = 0    # round-robins through channels
-## The pond's boundary, built from the PondArea/SwimShape node (drag / resize
-## it in pond_area.tscn), shared by every pond fish.
+## The pond's boundary, built from PondArea/PondShape (drag its outline points
+## in pond_area.tscn), shared by every pond fish.
 var _swim_area: SwimArea
 
 @onready var fish_container_pond: Node2D = %FishContainerPond
@@ -120,9 +120,12 @@ var _swim_area: SwimArea
 
 func _ready() -> void:
 	current = self
+	# The pond's outline: the organic PondShape if there is one (it draws the
+	# banks too), else the plain SwimShape.
+	var pond_shape := get_node_or_null("PondArea/PondShape") as PondShape
 	var swim_shape := get_node_or_null("PondArea/SwimShape") as SwimShape
-	if swim_shape:
-		_swim_area = swim_shape.make_swim_area()
+	if pond_shape or swim_shape:
+		_swim_area = pond_shape.make_swim_area() if pond_shape else swim_shape.make_swim_area()
 		# Water layers get the pond's shape (for foam / clipping, see
 		# pond_water.gdshader). Not clipped: the pond's water fills the view.
 		_swim_area.setup_water_layers([get_node_or_null("WaterFloor"), get_node_or_null("WaterSurface"), get_node_or_null("Underwater")], clip_water_to_swim_area)

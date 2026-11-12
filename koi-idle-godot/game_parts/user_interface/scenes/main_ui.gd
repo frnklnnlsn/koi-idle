@@ -48,9 +48,9 @@ var _fishing_open := false
 ## Flush cut scene's circle wipe.
 @onready var iris: IrisTransition = %IrisTransition
 @export_group("Pond camera")
-## Scroll zoom limits for the pond view (1 = the normal view) and how much
-## one scroll step zooms.
-@export var pond_zoom_min := 1.0
+## Scroll zoom limits for the pond view (1 = the normal view, below 1 shows
+## more of the pond and its banks) and how much one scroll step zooms.
+@export var pond_zoom_min := 0.7
 @export var pond_zoom_max := 4.0
 @export var pond_zoom_step := 1.15
 @export_group("")

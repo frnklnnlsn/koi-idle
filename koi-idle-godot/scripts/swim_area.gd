@@ -8,7 +8,7 @@
 class_name SwimArea
 extends Resource
 
-enum Shape { CIRCLE, ELLIPSE, RECTANGLE, CAPSULE }
+enum Shape { CIRCLE, ELLIPSE, RECTANGLE, CAPSULE, POLYGON }
 
 @export var shape:  Shape   = Shape.ELLIPSE
 @export var center: Vector2 = Vector2.ZERO
@@ -19,6 +19,61 @@ enum Shape { CIRCLE, ELLIPSE, RECTANGLE, CAPSULE }
 @export var size:   Vector2 = Vector2(800.0, 500.0)
 ## Turns the shape (radians), e.g. PI / 2 for a sideways capsule.
 @export var rotation: float = 0.0
+## POLYGON — the outline, in world coordinates (any shape, e.g. the pond's
+## organic outline from PondShape). center / size / rotation are unused.
+@export var points: PackedVector2Array = PackedVector2Array()
+
+## Most points sent to the water shaders for a POLYGON (water_area.gdshaderinc).
+const SHADER_POINTS := 64
+
+
+# --- Polygon helpers ---------------------------------------------------------
+
+## The closest point on the outline to `pos`.
+func _nearest_edge_point(pos: Vector2) -> Vector2:
+	var best := pos
+	var best_d := INF
+	var n := points.size()
+	for i in n:
+		var q := Geometry2D.get_closest_point_to_segment(pos, points[i], points[(i + 1) % n])
+		var d := pos.distance_squared_to(q)
+		if d < best_d:
+			best_d = d
+			best = q
+	return best
+
+
+func _polygon_bounds() -> Rect2:
+	if points.is_empty():
+		return Rect2()
+	var r := Rect2(points[0], Vector2.ZERO)
+	for p in points:
+		r = r.expand(p)
+	return r
+
+
+## The outline with at most `count` points, evenly spaced along it.
+func resampled(count: int) -> PackedVector2Array:
+	var n := points.size()
+	if n <= count:
+		return points
+	var total := 0.0
+	for i in n:
+		total += points[i].distance_to(points[(i + 1) % n])
+	var out := PackedVector2Array()
+	var step := total / count
+	var seg := 0
+	var seg_start := 0.0
+	for k in count:
+		var at := k * step
+		while seg < n and seg_start + points[seg].distance_to(points[(seg + 1) % n]) < at:
+			seg_start += points[seg].distance_to(points[(seg + 1) % n])
+			seg += 1
+		var a := points[seg % n]
+		var b := points[(seg + 1) % n]
+		var seg_len := a.distance_to(b)
+		out.append(a.lerp(b, (at - seg_start) / seg_len if seg_len > 0.0 else 0.0))
+	return out
 
 
 # Positions are turned into the shape's own unrotated frame first.
@@ -37,6 +92,8 @@ func _spine(local: Vector2) -> Vector2:
 
 
 func is_inside(pos: Vector2) -> bool:
+	if shape == Shape.POLYGON:
+		return points.size() < 3 or Geometry2D.is_point_in_polygon(pos, points)
 	var local = _local(pos)
 	match shape:
 		Shape.CIRCLE:
@@ -53,6 +110,11 @@ func is_inside(pos: Vector2) -> bool:
 ## Returns approximate distance from the boundary edge.
 ## Positive = inside, negative = outside.
 func distance_from_edge(pos: Vector2) -> float:
+	if shape == Shape.POLYGON:
+		if points.size() < 3:
+			return 9999.0
+		var d := pos.distance_to(_nearest_edge_point(pos))
+		return d if Geometry2D.is_point_in_polygon(pos, points) else -d
 	var local = _local(pos)
 	match shape:
 		Shape.CIRCLE:
@@ -72,6 +134,10 @@ func distance_from_edge(pos: Vector2) -> float:
 func clamp_to_boundary(pos: Vector2) -> Vector2:
 	if is_inside(pos):
 		return pos
+	if shape == Shape.POLYGON:
+		# Onto the edge, then a pixel inward.
+		var e := _nearest_edge_point(pos)
+		return e + (e - pos).normalized() * 1.0
 	var local = _local(pos)
 	match shape:
 		Shape.CIRCLE:
@@ -92,6 +158,13 @@ func clamp_to_boundary(pos: Vector2) -> Vector2:
 
 ## Unit vector pointing from pos toward the safest interior direction.
 func direction_to_safety(pos: Vector2) -> Vector2:
+	if shape == Shape.POLYGON:
+		# Away from the nearest bit of shore (toward it if outside).
+		var e := _nearest_edge_point(pos)
+		var away := pos - e
+		if away.length() < 0.001:
+			return (_polygon_bounds().get_center() - pos).normalized()
+		return away.normalized() if Geometry2D.is_point_in_polygon(pos, points) else -away.normalized()
 	var local = _local(pos)
 	match shape:
 		Shape.CIRCLE, Shape.ELLIPSE:
@@ -114,6 +187,14 @@ func direction_to_safety(pos: Vector2) -> Vector2:
 
 ## Returns a random point well inside the boundary (useful for wander targets).
 func get_random_interior_point() -> Vector2:
+	if shape == Shape.POLYGON:
+		var r := _polygon_bounds()
+		var margin := minf(r.size.x, r.size.y) * 0.08
+		for i in 60:
+			var p := r.position + Vector2(randf(), randf()) * r.size
+			if distance_from_edge(p) > margin:
+				return p
+		return r.get_center()
 	match shape:
 		Shape.CIRCLE:
 			var angle = randf() * TAU
@@ -169,6 +250,12 @@ func apply_to_material(mat: ShaderMaterial) -> void:
 			kind = 2
 		Shape.RECTANGLE:
 			kind = 3
+		Shape.POLYGON:
+			kind = 4
+			var pts := resampled(SHADER_POINTS)
+			mat.set_shader_parameter("area_point_count", pts.size())
+			pts.resize(SHADER_POINTS)
+			mat.set_shader_parameter("area_points", pts)
 	mat.set_shader_parameter("area_shape", kind)
 	mat.set_shader_parameter("area_center", center)
 	mat.set_shader_parameter("area_size", s)
