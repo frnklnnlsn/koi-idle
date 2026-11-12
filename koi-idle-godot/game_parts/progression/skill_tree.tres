@@ -2,11 +2,27 @@
 
 [ext_resource type="Script" path="res://scripts/progression/skill_def.gd" id="1_def"]
 [ext_resource type="Script" path="res://scripts/progression/skill_tree.gd" id="2_tree"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/rich_water.png" id="icon_rich_water"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/big_appetite.png" id="icon_big_appetite"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/night_shift.png" id="icon_night_shift"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/slow_food.png" id="icon_slow_food"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/quick_hands.png" id="icon_quick_hands"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/fat_fry.png" id="icon_fat_fry"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/chain_master.png" id="icon_chain_master"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/swift_ladder.png" id="icon_swift_ladder"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/hungry_bait.png" id="icon_hungry_bait"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/old_timers.png" id="icon_old_timers"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/full_house.png" id="icon_full_house"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/patient_angler.png" id="icon_patient_angler"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/welcome_back.png" id="icon_welcome_back"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/hot_streak.png" id="icon_hot_streak"]
+[ext_resource type="Texture2D" path="res://art/skill_icons/empty_bowl.png" id="icon_empty_bowl"]
 
 [sub_resource type="Resource" id="Skill_rich_water"]
 script = ExtResource("1_def")
 id = "rich_water"
 title = "Rich Water"
+icon = ExtResource("icon_rich_water")
 description = "Every toilet fish earns more."
 knob = "income"
 mult_per_level = 1.05
@@ -19,6 +35,7 @@ grid_pos = Vector2i(2, 0)
 script = ExtResource("1_def")
 id = "big_appetite"
 title = "Big Appetite"
+icon = ExtResource("icon_big_appetite")
 description = "Pond fish grow bigger before they stop."
 knob = "growth_potential"
 mult_per_level = 1.1
@@ -31,6 +48,7 @@ grid_pos = Vector2i(2, 1)
 script = ExtResource("1_def")
 id = "night_shift"
 title = "Night Shift"
+icon = ExtResource("icon_night_shift")
 description = "You earn more while the game is closed."
 knob = "offline_income"
 mult_per_level = 1.1
@@ -43,6 +61,7 @@ grid_pos = Vector2i(2, 2)
 script = ExtResource("1_def")
 id = "slow_food"
 title = "Slow Food"
+icon = ExtResource("icon_slow_food")
 description = "Pond fish grow faster while the game is closed."
 knob = "offline_growth"
 mult_per_level = 1.1
@@ -55,6 +74,7 @@ grid_pos = Vector2i(2, 3)
 script = ExtResource("1_def")
 id = "quick_hands"
 title = "Quick Hands"
+icon = ExtResource("icon_quick_hands")
 description = "Fish bite sooner."
 knob = "bite_time"
 mult_per_level = 0.9
@@ -67,6 +87,7 @@ grid_pos = Vector2i(3, 0)
 script = ExtResource("1_def")
 id = "fat_fry"
 title = "Fat Fry"
+icon = ExtResource("icon_fat_fry")
 description = "New fish start heavier, so they pay more when caught."
 knob = "start_mass"
 mult_per_level = 1.1
@@ -79,6 +100,7 @@ grid_pos = Vector2i(3, 1)
 script = ExtResource("1_def")
 id = "chain_master"
 title = "Chain Master"
+icon = ExtResource("icon_chain_master")
 description = "Each fish added to a chain snowballs its value harder."
 knob = "chain_bonus"
 extra_per_level = 0.1
@@ -91,6 +113,7 @@ grid_pos = Vector2i(3, 2)
 script = ExtResource("1_def")
 id = "swift_ladder"
 title = "Swift Ladder"
+icon = ExtResource("icon_swift_ladder")
 description = "A chain kept faster than its par time pays more. Par is each rank's usual bite time plus 3 seconds to react."
 knob = "swift_ladder"
 extra_per_level = 0.3333
@@ -104,6 +127,7 @@ grid_pos = Vector2i(4, 0)
 script = ExtResource("1_def")
 id = "hungry_bait"
 title = "Hungry Bait"
+icon = ExtResource("icon_hungry_bait")
 description = "After you Keep a chain, the low ranks of your next chain bite instantly, so climbing back up is quick."
 knob = "instant_bites"
 extra_per_level = 1.0
@@ -117,6 +141,7 @@ grid_pos = Vector2i(4, 2)
 script = ExtResource("1_def")
 id = "old_timers"
 title = "Old Timers"
+icon = ExtResource("icon_old_timers")
 description = "Toilet fish earn more the longer they've worked, even while the game is closed. Flushing them starts the new ones from scratch."
 knob = "old_timers"
 extra_per_level = 0.01
@@ -130,6 +155,7 @@ grid_pos = Vector2i(1, 0)
 script = ExtResource("1_def")
 id = "full_house"
 title = "Full House"
+icon = ExtResource("icon_full_house")
 description = "Your whole toilet earns more while every slot is filled."
 knob = "full_house"
 extra_per_level = 0.1
@@ -143,6 +169,7 @@ grid_pos = Vector2i(1, 2)
 script = ExtResource("1_def")
 id = "patient_angler"
 title = "Patient Angler"
+icon = ExtResource("icon_patient_angler")
 description = "A fish whose bite took a long time pays more when kept. Lone big fish are worth the wait."
 knob = "patient_angler"
 extra_per_level = 0.1
@@ -156,6 +183,7 @@ grid_pos = Vector2i(1, 1)
 script = ExtResource("1_def")
 id = "welcome_back"
 title = "Welcome Back"
+icon = ExtResource("icon_welcome_back")
 description = "Your first Keep after coming back from an hour or more away pays extra."
 knob = "welcome_back"
 extra_per_level = 0.5
@@ -169,6 +197,7 @@ grid_pos = Vector2i(1, 3)
 script = ExtResource("1_def")
 id = "hot_streak"
 title = "Hot Streak"
+icon = ExtResource("icon_hot_streak")
 description = "Hook fish one after another to build a streak. Each catch in time adds to the bonus; the window grows with the rank's bite time."
 knob = "hot_streak"
 extra_per_level = 0.05
@@ -182,6 +211,7 @@ grid_pos = Vector2i(4, 1)
 script = ExtResource("1_def")
 id = "empty_bowl"
 title = "Empty Bowl"
+icon = ExtResource("icon_empty_bowl")
 description = "Catches pay more while the toilet is empty: give up idle income for fishing income."
 knob = "empty_bowl"
 extra_per_level = 0.25

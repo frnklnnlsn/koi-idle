@@ -47,6 +47,43 @@ class_name Pond extends SubViewport
 ## How far toward depth_tint each level goes: 0.28 = level 3 is 84% of the way.
 @export_range(0.0, 0.5, 0.01) var depth_darken: float = 0.28
 
+# ── Visible fish ────────────────────────────────────────────────────────────
+# Only max_visible fish swim at once; the rest wait "down in the deep" (kept
+# in the save, not drawn, so a big pond stays cheap). Every rotate_every
+# seconds the fish that has been up longest sinks out of sight (fades and
+# darkens) and the one that has waited longest rises in its place.
+# Fish arriving through the pipe swim in the top arrival_levels levels for
+# arrival_settle_seconds before they join the rotation. Visible fish drift
+# up or down a level now and then (drift_every), blending smoothly.
+# Clicking a fish in the list brings it to the surface (Pond.surface()).
+@export_group("Visible fish")
+## Most fish swimming at once.
+@export_range(1, 200) var max_visible: int = 20
+## Seconds between one fish sinking and another rising.
+@export_range(1.0, 120.0, 0.5) var rotate_every: float = 8.0
+## Seconds a fish takes to fade out (sinking) or in (rising).
+@export_range(0.2, 10.0, 0.1) var fade_seconds: float = 2.5
+## New arrivals swim in this many top levels (3 = levels 0, 1, 2).
+@export_range(1, 10) var arrival_levels: int = 3
+## Seconds new arrivals stay near the surface, out of the rotation.
+@export_range(0.0, 600.0, 1.0) var arrival_settle_seconds: float = 45.0
+## Seconds between a fish's depth changes (random in this range).
+@export var drift_every: Vector2 = Vector2(15.0, 40.0)
+## Seconds a depth change takes to blend.
+@export_range(0.1, 10.0, 0.1) var depth_change_seconds: float = 3.0
+
+## Fish that must not sink (main_ui: the one the close-up is following).
+var keep_visible: Callable
+
+var _hidden: Array = []       # fish_conf down in the deep, longest-waiting first
+var _settling := {}           # ID -> seconds left near the surface
+var _drift_timers := {}       # ID -> seconds until its next depth change
+var _shown_since := {}        # ID -> _clock when it came up
+var _leaving := {}            # ID -> true while sinking out
+var _fading := {}             # ID -> true while fading in or out
+var _rotate_timer := 0.0
+var _clock := 0.0
+
 # ── Pixel size ──────────────────────────────────────────────────────────────
 # Bigger fish get bigger pixels so they keep the pixel-art look (see
 # pond_pixel_layers.gd). Every time a fish gets pixel_step bigger than it was
@@ -104,11 +141,18 @@ func _ready() -> void:
 	if save_data == null:
 		push_warning("No save data found.")
 		return
-	_display.display_all(save_data.list_of_retired_fish, fish_container_pond)
+	# Up to max_visible fish come up; the rest start down in the deep.
+	var all: Array = save_data.list_of_retired_fish.duplicate()
+	all.shuffle()
+	_hidden = all.slice(max_visible)
+	for f in all.slice(0, max_visible):
+		_show(f, false)
 	_update_sizes(0.0)
+	_rotate_timer = rotate_every
 
 
 func _process(delta: float) -> void:
+	_update_visible(delta)
 	if _spawn_queue.is_empty():
 		return
 	_spawn_timer -= delta
@@ -158,7 +202,16 @@ func _spawn_one(fish_data) -> void:
 	var node = fish_container_pond.get_node_or_null(fish_data.ID)
 	if node == null:
 		return
+	# New arrivals swim near the surface for a while, out of the rotation.
+	fish_data.depth = randi() % mini(arrival_levels, depth_levels)
+	_settling[fish_data.ID] = arrival_settle_seconds
+	_came_up(node)
 	_size_fish(node, 0.0)
+	# Make room: someone who's been up a while sinks.
+	if _visible_count() > max_visible:
+		var out := _pick_sinker()
+		if out:
+			_sink(out, fade_seconds * 0.6)
 
 	# Position it at the pipe channel (convert world → SubViewport local)
 	var spawn_world = _next_spawn_position()
@@ -168,9 +221,12 @@ func _spawn_one(fish_data) -> void:
 	var angle_wobble = randf_range(-0.25, 0.25)   # ± ~14° in radians
 	var exit_dir     = channel_exit_dir.rotated(angle_wobble).normalized()
 
-	# Tell the fish to swim straight out for a while before wandering
+	# Tell the fish to swim straight out for a while before wandering,
+	# shot out fast by the water (it eases back to its normal pace).
 	if node.has_method("begin_entry"):
 		node.begin_entry(exit_dir, entry_swim_duration)
+	if node.has_method("force_state"):
+		node.force_state(node.FishState.FAST_SWIM)
 
 
 # ── Signal handlers ─────────────────────────────────────────────────────────
@@ -196,13 +252,28 @@ func _try_spawn_pending() -> void:
 
 
 func _spawn_filtered(list: Array) -> void:
-	var existing_ids: Array = []
+	# Known fish: swimming, queued, or down in the deep. Only new ones come
+	# through the pipe.
+	var known := {}
 	for child in fish_container_pond.get_children():
-		existing_ids.append(child.name)
+		known[str(child.name)] = true
+	for f in _hidden:
+		known[f.ID] = true
+	for f in _spawn_queue:
+		known[f.ID] = true
+	var ids := {}
+	for f in list:
+		ids[f.ID] = true
+	_hidden = _hidden.filter(func(f): return ids.has(f.ID))   # gone from the pond
 
-	var new_fish = list.filter(func(f): return f.ID not in existing_ids)
+	var new_fish = list.filter(func(f): return not known.has(f.ID))
 	if new_fish.is_empty():
 		return
+	# More arrivals than can be seen at once: the extra go straight down,
+	# first in line to rise.
+	if new_fish.size() > max_visible:
+		_hidden = new_fish.slice(max_visible) + _hidden
+		new_fish = new_fish.slice(0, max_visible)
 
 	# Queue them — _process will drip them out one per stagger interval
 	_spawn_queue.append_array(new_fish)
@@ -237,6 +308,22 @@ static func size_of(fish: fish_conf) -> float:
 	return growth_size(fish, 0.333, 4.0)
 
 
+## How many times bigger than normal `fish`'s pixels are in the pond
+## (1 = normal; one more each pixel_step it grows, see pixel_group).
+static func pixel_scale_of(fish: fish_conf) -> int:
+	var s := size_of(fish)
+	if current and is_instance_valid(current):
+		return current.pixel_group(s) + 1
+	return clampi(floori(s - 1.0 + 0.01) + 1, 1, 4)
+
+
+## Picture pixels per pond pixel for `fish` (FishIconRenderer): its size
+## spread over its pixel scale, so a picture blown up by pixel_scale_of()
+## has the same chunky pixels as the fish in the pond.
+static func icon_density(fish: fish_conf) -> float:
+	return size_of(fish) / float(pixel_scale_of(fish))
+
+
 ## The biggest size a fish can reach in the pond.
 static func max_size() -> float:
 	return current.max_size_factor if current and is_instance_valid(current) else 4.0
@@ -244,7 +331,8 @@ static func max_size() -> float:
 
 func _update_sizes(seconds: float) -> void:
 	for node in fish_container_pond.get_children():
-		_size_fish(node, seconds)
+		if not _leaving.has(str(node.name)):
+			_size_fish(node, seconds)
 
 
 func _size_fish(node: Node, seconds: float) -> void:
@@ -260,7 +348,14 @@ func _size_fish(node: Node, seconds: float) -> void:
 	if body and smooth_big_patterns:
 		body.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	node.z_index = -level   # deeper fish drawn behind
-	node.modulate = Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
+	# Fading fish (rising / sinking) have their own tween on modulate.
+	if _fading.has(str(node.name)):
+		return
+	var look := Color.WHITE.lerp(depth_tint, clampf(depth_darken * level, 0.0, 1.0))
+	if seconds > 0.0:
+		node.create_tween().tween_property(node, "modulate", look, seconds)
+	else:
+		node.modulate = look
 
 
 ## Pixel size group for a fish drawn `drawn` × normal size: 0 = normal
@@ -279,7 +374,192 @@ func depth_of(fish: fish_conf) -> int:
 
 
 func _on_fish_caught(fish_list: Array) -> void:
+	var ids := {}
 	for fish in fish_list:
+		ids[fish.ID] = true
 		var node = fish_container_pond.get_node_or_null(fish.ID)
 		if node:
 			node.queue_free()
+		_forget(fish.ID)
+	_hidden = _hidden.filter(func(f): return not ids.has(f.ID))
+
+
+# ── Visible fish ────────────────────────────────────────────────────────────
+
+## Where the pipe is on screen, kept a little inside the pond view (the
+## pipe sits just off its top edge). For the flush cut scene.
+func pipe_screen_position() -> Vector2:
+	var c := get_parent() as SubViewportContainer
+	var shrink := float(c.stretch_shrink) if c else 1.0
+	var local := (canvas_transform * pipe_origin) * shrink
+	if c == null:
+		return local
+	local = local.clamp(Vector2(40, 40), c.size - Vector2(40, 40))
+	return c.get_global_transform() * local
+
+
+## Brings `fish` to the surface (from the deep if it's hidden) and keeps it
+## near the top for arrival_settle_seconds. For the fish list.
+static func surface(fish: fish_conf) -> void:
+	if current and is_instance_valid(current) and fish:
+		current._surface(fish)
+
+
+## Is `fish` swimming in view (not down in the deep)?
+static func is_visible_fish(fish: fish_conf) -> bool:
+	if not (current and is_instance_valid(current) and fish):
+		return false
+	return current.fish_container_pond.has_node(fish.ID) and not current._leaving.has(fish.ID)
+
+
+func _surface(fish: fish_conf) -> void:
+	var node := fish_container_pond.get_node_or_null(fish.ID)
+	if node == null or _leaving.has(fish.ID):
+		if node:   # sinking right now: let it go and bring it straight back
+			_leaving.erase(fish.ID)
+			_fading.erase(fish.ID)
+			node.queue_free()
+			await get_tree().process_frame
+		_hidden.erase(fish)
+		fish.depth = 0
+		node = _show(fish, true)
+		if _visible_count() > max_visible:
+			var out := _pick_sinker()
+			if out:
+				_sink(out, fade_seconds * 0.6)
+	else:
+		fish.depth = 0
+		_size_fish(node, depth_change_seconds)
+	_settling[fish.ID] = arrival_settle_seconds
+	_shown_since[fish.ID] = _clock
+
+
+func _update_visible(delta: float) -> void:
+	_clock += delta
+	for id in _settling.keys():
+		_settling[id] -= delta
+		if _settling[id] <= 0.0:
+			_settling.erase(id)
+	# Depth drift.
+	for node in fish_container_pond.get_children():
+		var id := str(node.name)
+		if _leaving.has(id) or _settling.has(id) or not ("fish_res" in node) or node.fish_res == null:
+			continue
+		_drift_timers[id] = _drift_timers.get(id, randf_range(drift_every.x, drift_every.y)) - delta
+		if _drift_timers[id] <= 0.0:
+			_drift_timers[id] = randf_range(drift_every.x, drift_every.y)
+			_change_depth(node)
+	# Rotation.
+	_rotate_timer -= delta
+	if _rotate_timer <= 0.0:
+		_rotate_timer = rotate_every
+		_rotate_once()
+
+
+func _rotate_once() -> void:
+	if _hidden.is_empty():
+		return
+	if _visible_count() >= max_visible:
+		var out := _pick_sinker()
+		if out == null:
+			return
+		_sink(out, fade_seconds)
+	_show(_hidden.pop_front(), true)
+
+
+## One level up or down (whichever is possible; random when both are).
+func _change_depth(node: Node) -> void:
+	if depth_levels < 2:
+		return
+	var f: fish_conf = node.fish_res
+	var step := -1 if randf() < 0.5 else 1
+	if f.depth + step < 0 or f.depth + step >= depth_levels:
+		step = -step
+	f.depth = clampi(f.depth + step, 0, depth_levels - 1)
+	_size_fish(node, depth_change_seconds)
+
+
+## Visible fish that aren't on their way out.
+func _visible_count() -> int:
+	var n := 0
+	for node in fish_container_pond.get_children():
+		if not _leaving.has(str(node.name)):
+			n += 1
+	return n
+
+
+## The fish that has been up longest and may sink (not settling, entering,
+## or followed by the close-up), or null.
+func _pick_sinker() -> Node:
+	var best: Node = null
+	var best_since := INF
+	for node in fish_container_pond.get_children():
+		var id := str(node.name)
+		if _leaving.has(id) or _settling.has(id):
+			continue
+		var steering := node.get_node_or_null("FishSteering")
+		if steering and steering.is_entering():
+			continue
+		if keep_visible.is_valid() and keep_visible.call(node):
+			continue
+		var since: float = _shown_since.get(id, 0.0)
+		if since < best_since:
+			best_since = since
+			best = node
+	return best
+
+
+## Puts `fish` in the water. `rise`: fade in from the deep (else appear as is).
+func _show(fish: fish_conf, rise: bool) -> Node:
+	_display.display_all([fish], fish_container_pond)
+	var node := fish_container_pond.get_node_or_null(fish.ID)
+	if node == null:
+		return null
+	if fish.swim_heading == Vector2.ZERO and _swim_area:
+		node.position = fish_container_pond.to_local(_swim_area.get_random_interior_point())
+	_came_up(node)
+	_size_fish(node, 0.0)
+	if rise:
+		var id := fish.ID
+		_fading[id] = true
+		var look: Color = node.modulate
+		node.modulate = Color(depth_tint, 0.0)
+		var t := node.create_tween()
+		t.tween_property(node, "modulate", look, fade_seconds)
+		t.finished.connect(func(): _fading.erase(id))
+	return node
+
+
+func _came_up(node: Node) -> void:
+	var id := str(node.name)
+	_shown_since[id] = _clock
+	_drift_timers[id] = randf_range(drift_every.x, drift_every.y)
+
+
+## Fades `node` out into the deep, then frees it and puts its fish at the
+## back of the line.
+func _sink(node: Node, seconds: float) -> void:
+	var id := str(node.name)
+	_leaving[id] = true
+	_fading[id] = true
+	node.z_index = -depth_levels   # behind everyone while it goes
+	if node.has_method("set_size_factor") and "size_factor" in node:
+		node.set_size_factor(node.size_factor * 0.7, seconds)
+	var t := node.create_tween()
+	t.tween_property(node, "modulate", Color(depth_tint, 0.0), seconds)
+	t.finished.connect(func():
+		if not _leaving.has(id):
+			return   # surfaced again meanwhile
+		var fish: fish_conf = node.fish_res
+		_forget(id)
+		node.queue_free()
+		if fish and fish in SaveManager.load_saved_data().list_of_retired_fish:
+			_hidden.append(fish))
+
+
+func _forget(id: String) -> void:
+	_leaving.erase(id)
+	_fading.erase(id)
+	_settling.erase(id)
+	_drift_timers.erase(id)
+	_shown_since.erase(id)

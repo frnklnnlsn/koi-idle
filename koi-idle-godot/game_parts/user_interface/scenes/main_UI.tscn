@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://r5jvkc4i6dis" path="res://game_parts/pond_scenes/scenes/pond_area.tscn" id="8_xc818"]
 [ext_resource type="PackedScene" uid="uid://kctuxuaxjl0r" path="res://game_parts/user_interface/scenes/fishing_ui.tscn" id="10_y4jyc"]
 [ext_resource type="PackedScene" uid="uid://bm0if5kw5881g" path="res://SandBox/ListviewTest/fish_interface_list.tscn" id="11_o70p8"]
-[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/command_line.tscn" id="12_cmdl"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/toast.tscn" id="12_toast"]
 [ext_resource type="Texture2D" uid="uid://v5p8opmgscx5" path="res://art/ui_icons/menu.png" id="13_ic_menu"]
 [ext_resource type="Texture2D" uid="uid://20ftdpnkhqtm" path="res://art/ui_icons/flush.png" id="14_ic_flush"]
 [ext_resource type="Texture2D" uid="uid://dkgc0laeiyoc4" path="res://art/ui_icons/view.png" id="15_ic_view"]
@@ -30,6 +30,11 @@
 [ext_resource type="Texture2D" path="res://art/ui_icons/skills.png" id="32_ic_skills"]
 [ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/fish_peek.tscn" id="33_peek"]
 [ext_resource type="Script" path="res://game_parts/user_interface/scripts/pond_pixel_layers.gd" id="34_pixlayers"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/settings_menu.tscn" id="40_settings"]
+[ext_resource type="PackedScene" path="res://game_parts/fishing_scene/fishing_scene.tscn" id="41_fishscene"]
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/flush_water.tres" id="42_flushwater"]
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/fan_tiles.tres" id="43_fantiles"]
+[ext_resource type="PackedScene" path="res://game_parts/user_interface/scenes/iris_transition.tscn" id="43_iris"]
 
 [node name="Main_UI" type="Control" unique_id=1097480472]
 layout_mode = 3
@@ -60,6 +65,15 @@ script = ExtResource("2_11njf")
 
 [node name="Camera2D" type="Camera2D" parent="ToiletViewportContainer/ToiletViewport" unique_id=102619028]
 
+[node name="Floor" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
+z_index = -50
+material = ExtResource("43_fantiles")
+offset_left = -420.0
+offset_top = -260.0
+offset_right = 420.0
+offset_bottom = 260.0
+mouse_filter = 2
+
 [node name="FishDisplay" type="Node" parent="ToiletViewportContainer/ToiletViewport" unique_id=426772673]
 script = ExtResource("7_k1q3n")
 
@@ -70,10 +84,22 @@ script = ExtResource("8_7vram")
 unique_name_in_owner = true
 
 [node name="ToiletArea" parent="ToiletViewportContainer/ToiletViewport" unique_id=1143554548 instance=ExtResource("5_88aja")]
+position = Vector2(0, 45)
+scale = Vector2(0.8, 0.8)
 
 [node name="WaterSurface" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
 z_index = 10
 material = ExtResource("25_watersurface")
+offset_left = -320.0
+offset_top = -200.0
+offset_right = 320.0
+offset_bottom = 200.0
+mouse_filter = 2
+
+[node name="FlushWater" type="ColorRect" parent="ToiletViewportContainer/ToiletViewport"]
+visible = false
+z_index = 11
+material = ExtResource("42_flushwater")
 offset_left = -320.0
 offset_top = -200.0
 offset_right = 320.0
@@ -160,6 +186,10 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.054902, 0.066667, 0.176471, 0.6)
 
+[node name="FishingScene" parent="." instance=ExtResource("41_fishscene")]
+unique_name_in_owner = true
+visible = false
+
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=296132464]
 clip_contents = true
 layout_mode = 1
@@ -213,6 +243,28 @@ text = "0 skill points"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="ToiletMeter" type="ProgressBar" parent="VBoxContainer/Panel/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 26)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Fish in the toilet / how many fit. Flush them into the pond to make room."
+max_value = 20.0
+step = 1.0
+show_percentage = false
+
+[node name="Text" type="Label" parent="VBoxContainer/Panel/HBoxContainer2/ToiletMeter"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "Toilet 0/20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="ListUI" parent="VBoxContainer" unique_id=668367678 instance=ExtResource("11_o70p8")]
 unique_name_in_owner = true
 visible = false
@@ -254,12 +306,13 @@ theme_override_constants/separation = 4
 [node name="Button" type="Button" parent="Sidebar/Buttons" unique_id=1291562547]
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-tooltip_text = "Menu"
+tooltip_text = "Settings (Esc)"
 focus_mode = 0
 icon = ExtResource("13_ic_menu")
 icon_alignment = 1
 
 [node name="Flush" type="Button" parent="Sidebar/Buttons" unique_id=805965955]
+visible = false
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 tooltip_text = "Flush the toilet into the pond"
@@ -374,15 +427,21 @@ layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="CommandLine" parent="." unique_id=1830276273 instance=ExtResource("12_cmdl")]
+[node name="Toast" parent="." instance=ExtResource("12_toast")]
 unique_name_in_owner = true
-layout_mode = 1
 
 [node name="FishPeek" parent="." instance=ExtResource("33_peek")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
 
+[node name="SettingsMenu" parent="." instance=ExtResource("40_settings")]
+unique_name_in_owner = true
+
+[node name="IrisTransition" parent="." instance=ExtResource("43_iris")]
+unique_name_in_owner = true
+
+[connection signal="pressed" from="Sidebar/Buttons/Button" to="." method="_on_menu_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Flush" to="." method="_on_flush_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Skills" to="." method="_on_skills_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/View" to="." method="_on_view_pressed"]

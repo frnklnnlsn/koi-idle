@@ -3,7 +3,8 @@
 # two of its stats are. Right / up = rarer; the middle is average, and the
 # top-right corner is great at both. The selected fish is yellow.
 # Tabs pick which two stats to compare (the title says which axis is which).
-# Clicking a dot selects that fish.
+# Clicking a dot selects that fish. Scroll to zoom, right-drag to pan,
+# double-click to reset (see "Zoom and pan" below).
 #
 # Same method names as the old value chart (set_fish / clear_fish_value), plus
 # set_fish_collection(), so ShopGraphManager can drive it.
@@ -31,19 +32,26 @@ var _earlier: Array = []  # fishing: caught earlier this session (faded)
 var _mode := 0
 var _series_fish := {}   # series name -> Array of fish, in point order (for clicks)
 
+# --- Zoom and pan (mouse handling in KoiChart) ------------------------------
+## Deepest zoom: the view's width in spreads (full view = 2 × REACH).
+@export var min_view_width := 0.25
+var _view := Rect2(-REACH, -REACH, 2.0 * REACH, 2.0 * REACH)
+
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
-## data: {"series": {name: [xs, ys]} in draw order, "colors": Array[Color], "title"}
+## data: {"series": {name: [xs, ys]} in draw order, "colors": Array[Color], "title",
+##        "view": Rect2 (optional; the part of the chart to show)}
 static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var series: Dictionary = data.get("series", {})
 	if series.is_empty():
 		p.reset()
 		p.title = "No fish selected"
 		return
+	var view: Rect2 = data.get("view", Rect2(-REACH, -REACH, 2.0 * REACH, 2.0 * REACH))
 	var opts := {
-		"x_range": Vector2(-REACH, REACH),
-		"y_range": Vector2(-REACH, REACH),
+		"x_range": Vector2(view.position.x, view.end.x),
+		"y_range": Vector2(view.position.y, view.end.y),
 		"colors": data.get("colors", []),
 		"minimal": true,
 		"circles": true,
@@ -64,6 +72,7 @@ static func sample_data() -> Dictionary:
 # --- Shop API ------------------------------------------------------------------
 
 func _ready() -> void:
+	zoomable = true
 	var names := PackedStringArray()
 	for m in MODES:
 		names.append(m[0])
@@ -123,7 +132,66 @@ func _redraw_now() -> void:
 		_add_series(series, "Selected", [_selected], mode)   # drawn last, on top
 		colors.append(UIPalette.get_palette().accent)
 	var title := "%s ↑  %s →" % [STAT_NAMES[mode[2]], STAT_NAMES[mode[1]]]
-	draw(plot, {"series": series, "colors": colors, "title": title}, _on_plot_clicked)
+	var zoom := 2.0 * REACH / _view.size.x
+	if zoom > 1.01:
+		title += "   %.1f×" % zoom
+	draw(plot, {"series": series, "colors": colors, "title": title, "view": _view}, _on_plot_clicked)
+
+
+func _pan_pixels(relative: Vector2) -> void:
+	var scale := _data_per_pixel()
+	if scale != Vector2.ZERO:
+		_set_view(Rect2(_view.position - relative * scale, _view.size))
+
+
+func _zoom_at(screen_pos: Vector2, factor: float) -> void:
+	zoom_at(screen_pos, factor)
+
+
+func _reset_zoom() -> void:
+	reset_view()
+
+
+## Zoom by `factor` (< 1 = in) keeping the point under `screen_pos` still.
+func zoom_at(screen_pos: Vector2, factor: float) -> void:
+	var at := _to_data(screen_pos)
+	if not at.is_finite():
+		return
+	var w := clampf(_view.size.x * factor, min_view_width, 2.0 * REACH)
+	var k := w / _view.size.x
+	_set_view(Rect2(at - (at - _view.position) * k, _view.size * k))
+
+
+## Back to the whole chart.
+func reset_view() -> void:
+	_set_view(Rect2(-REACH, -REACH, 2.0 * REACH, 2.0 * REACH))
+
+
+func _set_view(v: Rect2) -> void:
+	# Stay inside the full chart.
+	v.size = v.size.clamp(Vector2.ONE * min_view_width, Vector2.ONE * 2.0 * REACH)
+	v.position = v.position.clamp(Vector2.ONE * -REACH, Vector2.ONE * REACH - v.size)
+	if v.is_equal_approx(_view):
+		return
+	_view = v
+	_redraw()
+
+
+## Chart units per screen pixel (y is negative: up the screen = bigger).
+func _data_per_pixel() -> Vector2:
+	var p0 := TauCharts.data_to_global(plot, 0.0, 0.0)
+	var p1 := TauCharts.data_to_global(plot, 1.0, 1.0)
+	if not p0.is_finite() or not p1.is_finite() or p1.x == p0.x or p1.y == p0.y:
+		return Vector2.ZERO
+	return Vector2(1.0 / (p1.x - p0.x), 1.0 / (p1.y - p0.y))
+
+
+func _to_data(screen_pos: Vector2) -> Vector2:
+	var p0 := TauCharts.data_to_global(plot, 0.0, 0.0)
+	var scale := _data_per_pixel()
+	if scale == Vector2.ZERO:
+		return Vector2.INF
+	return (screen_pos - p0) * scale
 
 
 ## Fishing: fish on the line now (accent colour) and fish caught earlier this

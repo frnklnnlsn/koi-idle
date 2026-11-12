@@ -67,7 +67,7 @@ func _on_button_input(event: InputEvent) -> void:
 func _apply_rarity() -> void:
 	var cz := FishStats.fish_combined_z(fish_resource)
 	var tier := FishStats.tier_index(cz)
-	$card_button.tooltip_text = "%s  (top %s%% overall)" % [FishStats.TIERS[tier][0], FishStats._pct(FishStats.top_percent(cz))]
+	$card_button.tooltip_text = ""   # no hover text on cards
 	if tier == FishStats.TIERS.size() - 1:
 		return
 	var style := StyleBoxFlat.new()

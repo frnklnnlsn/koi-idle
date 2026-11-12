@@ -141,6 +141,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
 size_flags_vertical = 3
+zoomable = true
 
 [node name="SeniorityList" parent="Backdrop/Columns/Charts" instance=ExtResource("5_senior")]
 unique_name_in_owner = true
@@ -154,3 +155,4 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
 size_flags_vertical = 3
+zoomable = true

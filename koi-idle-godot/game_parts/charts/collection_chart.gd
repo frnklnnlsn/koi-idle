@@ -24,13 +24,22 @@ var _caught: Array = []   # fishing: on the line now (accent)
 var _earlier: Array = []  # fishing: caught earlier this session (faded)
 var _stat := 0
 
+# Zoom (when `zoomable`): a window of the sorted bars. Scroll zooms around the
+# bar under the mouse, right-drag scrolls sideways, double-click shows all.
+## Fewest bars a zoom shows.
+@export var min_bars := 5
+var _first := 0      # first bar in view
+var _count := 0      # bars in view (0 = all)
+var _pan_left := 0.0 # sideways drag not yet turned into whole bars
+
 
 # --- Chart definition (shared by the game and ChartPreview) -----------------
 
 ## data: {"values": Array[float] sorted ascending, "highlight": int (-1 = none),
 ##        "picked": Array[int] (box-selected bars), "caught": Array[int] (fishing:
 ##        on the line, accent), "earlier": Array[int] (fishing: caught earlier,
-##        faded), "title": String (optional)}
+##        faded), "title": String (optional), "offset": int (the first value is bar
+##        number offset + 1, for a zoomed-in window)}
 ## Highlighted and picked bars are drawn as their own stacked series so they
 ## can be coloured.
 static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
@@ -49,8 +58,9 @@ static func draw(p: TauPlot, data: Dictionary, on_click := Callable()) -> void:
 	var faded := []
 	var boxed := []
 	var picked := []
+	var offset: int = data.get("offset", 0)
 	for i in values.size():
-		labels.append(str(i + 1))
+		labels.append(str(i + offset + 1))
 		# 2 = accent (hovered or on the line), 1 = box-selected, 3 = caught earlier
 		var kind := 0
 		if i == highlight or i in caught_ids:
@@ -143,10 +153,56 @@ func set_picked(fish: Array) -> void:
 ## Fish whose bar touches `rect` (screen coordinates).
 func fish_in_rect(rect: Rect2) -> Array:
 	var out := []
-	for i in _sorted.size():
-		if rect.intersects(TauCharts.bar_global_rect(plot, i, stat_value(_sorted[i], _stat))):
-			out.append(_sorted[i])
+	var w := _window()
+	for k in w.y:
+		var f: fish_conf = _sorted[w.x + k]
+		if rect.intersects(TauCharts.bar_global_rect(plot, k, stat_value(f, _stat))):
+			out.append(f)
 	return out
+
+
+## Bars in view: Vector2i(first, count).
+func _window() -> Vector2i:
+	var n := _sorted.size()
+	var c := n if _count <= 0 or _count >= n else _count
+	return Vector2i(clampi(_first, 0, maxi(n - c, 0)), c)
+
+
+func _zoom_at(screen_pos: Vector2, factor: float) -> void:
+	var n := _sorted.size()
+	var area := pane_rect()
+	if n == 0 or area.size.x <= 0.0:
+		return
+	var w := _window()
+	var frac := clampf((screen_pos.x - area.position.x) / area.size.x, 0.0, 1.0)
+	var at := w.x + frac * w.y   # bar position under the mouse
+	var c := clampi(roundi(w.y * factor), mini(min_bars, n), n)
+	if c == w.y:
+		c = clampi(w.y + (-1 if factor < 1.0 else 1), mini(min_bars, n), n)
+	_first = clampi(roundi(at - frac * c), 0, n - c)
+	_count = 0 if c >= n else c
+	_redraw()
+
+
+func _pan_pixels(relative: Vector2) -> void:
+	var w := _window()
+	var area := pane_rect()
+	if _count <= 0 or area.size.x <= 0.0:
+		return
+	_pan_left -= relative.x / (area.size.x / w.y)
+	var step := int(_pan_left)
+	if step != 0:
+		_pan_left -= step
+		_first = clampi(w.x + step, 0, _sorted.size() - w.y)
+		_redraw()
+
+
+func _reset_zoom() -> void:
+	if _count == 0:
+		return
+	_first = 0
+	_count = 0
+	_redraw()
 
 
 func get_hovered_fish() -> fish_conf:
@@ -163,6 +219,8 @@ static func stat_value(f: fish_conf, stat: int) -> float:
 
 func _on_stat(i: int) -> void:
 	_stat = i
+	_first = 0
+	_count = 0
 	_sort()
 	_redraw()
 
@@ -175,29 +233,34 @@ func _sort() -> void:
 func _redraw_now() -> void:
 	if not plot:
 		return
+	# Only the bars in view (all of them unless zoomed in).
+	var w := _window()
+	var shown := _sorted.slice(w.x, w.x + w.y)
 	var values := []
-	for f in _sorted:
+	for f in shown:
 		values.append(stat_value(f, _stat))
 	var title := chart_title if chart_title != "" else "By " + String(STATS[_stat][0]).to_lower()
+	if w.y < _sorted.size():
+		title += "   %d–%d of %d" % [w.x + 1, w.x + w.y, _sorted.size()]
 	var picked := []
 	var caught := []
 	var earlier := []
-	for i in _sorted.size():
-		if _sorted[i] in _picked:
+	for i in shown.size():
+		if shown[i] in _picked:
 			picked.append(i)
-		if _sorted[i] in _caught:
+		if shown[i] in _caught:
 			caught.append(i)
-		elif _sorted[i] in _earlier:
+		elif shown[i] in _earlier:
 			earlier.append(i)
-	draw(plot, {"values": values, "highlight": _sorted.find(_hovered), "picked": picked,
-		"caught": caught, "earlier": earlier, "title": title,
+	draw(plot, {"values": values, "highlight": shown.find(_hovered), "picked": picked,
+		"caught": caught, "earlier": earlier, "title": title, "offset": w.x,
 		"y_title": STATS[_stat][1]}, _on_plot_clicked)
 
 
 func _on_plot_clicked(hits: Array) -> void:
 	if hits.is_empty():
 		return
-	var i: int = hits[0].sample_index
+	var i: int = hits[0].sample_index + _window().x   # bars in view start at _first
 	if i >= 0 and i < _sorted.size():
 		# Deferred: the shop redraws this chart in response, and rebuilding a
 		# TauPlot from inside its own click signal breaks TauPlot mid-click.

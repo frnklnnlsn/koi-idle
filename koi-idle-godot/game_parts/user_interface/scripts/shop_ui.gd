@@ -1,7 +1,8 @@
 # shop_ui.gd
 # The shop: a pool of fish cards to screen, and the three charts. Buying,
 # keeping and recycling are done with keys through the terminal (see
-# CommandLine / VimKeys); the selected fish's details show there too.
+# CommandLine / VimKeys, not shown at the moment). The toilet count is in the
+# top bar (main_ui).
 #
 # Mouse:
 #   drag a card up / down         keep / recycle it (the whole selection if the
@@ -20,6 +21,9 @@ signal sell(fish_resource_array: Array)
 signal drag_zone_changed(zone: String)
 ## A message for the terminal from a mouse action (drag, buttons).
 signal action_message(text: String)
+## Settings "Ask before big sells": main_ui shows a yes / no box and runs
+## `on_yes` if confirmed.
+signal confirm_requested(question: String, yes_text: String, on_yes: Callable)
 
 
 @onready var fish_card_hbox:    HBoxContainer = %fish_card_hbox
@@ -72,6 +76,10 @@ const CARD_MARGIN := 10.0
 func _ready() -> void:
 	resized.connect(_place_cards)
 	visibility_changed.connect(_place_cards)
+	# The charts rise up from the bottom when the shop opens.
+	visibility_changed.connect(func():
+		if visible:
+			UiSlide.up_from_bottom(%bellcurve.get_parent().get_parent()))
 	get_viewport().size_changed.connect(_place_cards)
 	_init_managers()
 	_connect_signals()
@@ -527,6 +535,12 @@ func run_command(cmd: Dictionary) -> String:
 			var refund := 0.0
 			for f in fish:
 				refund += PassiveSystems.recycle_refund(f)
+			if fish.size() >= Settings.BIG_SELL and Settings.get_value("gameplay/confirm_big_sells") \
+					and not cmd.get("confirmed", false):
+				var again := {"cmd": "recycle", "fish": fish, "confirmed": true}
+				confirm_requested.emit("Recycle %d fish for $%s?" % [fish.size(), FishLabelDisplay.num(refund)],
+					"Recycle", func(): action_message.emit(run_command(again)))
+				return "Recycle %d fish? (confirm in the box)" % fish.size()
 			sell.emit(fish)
 			return "Recycled %d fish for $%s" % [fish.size(), FishLabelDisplay.num(refund)]
 		"buy", "fill":

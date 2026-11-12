@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://wlirjcjcj5om"]
+
+[ext_resource type="Shader" uid="uid://b861mv32modlt" path="res://game_parts/FishComposition/shaders/fan_tiles.gdshader" id="1_tiles"]
+
+[resource]
+shader = ExtResource("1_tiles")
+shader_parameter/radius = 26.0
+shader_parameter/tile_color = Color(0.9744436, 0.96174103, 0.9101909, 1)
+shader_parameter/edge_color = Color(0.86061263, 0.85851246, 0.87251973, 1)
+shader_parameter/grout_color = Color(0.46928596, 0.5090129, 0.56859726, 1)
+shader_parameter/grout = 2.0
+shader_parameter/edge_width = 3.0
+shader_parameter/variation = 0.03
+shader_parameter/pixel_size = 1.0
+shader_parameter/hue = 0.58
+shader_parameter/saturation = 0.35
+shader_parameter/tint_amount = 0.0
+shader_parameter/tint_grout = false

@@ -28,7 +28,7 @@ func add_row(fish: fish_conf, icons: FishIconRenderer) -> Control:
 		   "fish_list_row.tscn root node is missing fish_list_row.gd script")
 
 	row.fish_resource = fish
-	icons.request(fish, row.get_node("%FishIcon"))
+	row.icon_renderer = icons   # the row asks for its picture (size depends on the view)
 	_populate_row_labels(row, fish)
 	_connect_row_signals(row)
 	vbox.add_child(row)

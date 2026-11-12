@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game_parts/user_interface/scripts/iris_transition.gd" id="1_iris"]
+[ext_resource type="Shader" path="res://game_parts/user_interface/shaders/iris.gdshader" id="2_iris"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_iris"]
+shader = ExtResource("2_iris")
+shader_parameter/pixel_size = 4.0
+shader_parameter/color = Color(0, 0, 0, 1)
+
+[node name="IrisTransition" type="ColorRect"]
+visible = false
+material = SubResource("ShaderMaterial_iris")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_iris")

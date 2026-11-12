@@ -76,6 +76,9 @@ func _ready() -> void:
 	# Clicking a curve on the growth chart selects that fish's row.
 	if growth_curve and growth_curve.has_signal("fish_clicked"):
 		growth_curve.fish_clicked.connect(_select_from_chart)
+	# Clicking a bar selects that fish's row too.
+	if histogram_graph and histogram_graph.has_signal("bar_clicked"):
+		histogram_graph.bar_clicked.connect(func(f, _i): _select_from_chart(f))
 	FishHandler.keep_fish.connect(_on_fish_list_updated)
 	_update_label_visibility()
 
@@ -157,12 +160,14 @@ func _on_row_unhovered(_fish: fish_conf) -> void:
 		seniority_chart.set_selected(_selected_fish)
 
 
+## A chart picked `fish`: select its row and scroll the list to it.
 func _select_from_chart(fish: fish_conf) -> void:
-	if fish == _selected_fish:
-		return
-	_on_row_clicked(fish)
-	if _selected_row:
-		_selected_row.select()
+	if fish != _selected_fish:
+		_on_row_clicked(fish)
+		if _selected_row:
+			_selected_row.select()
+	if _selected_row and _scroll:
+		_scroll.ensure_control_visible.call_deferred(_selected_row)
 
 
 func _on_row_clicked(fish: fish_conf) -> void:
@@ -176,6 +181,9 @@ func _on_row_clicked(fish: fish_conf) -> void:
 
 	_selected_fish = fish
 	_selected_row  = _get_row_for_fish(fish)
+	# Pond list: bring the fish up from the deep so you can see it.
+	if _showing_pond:
+		Pond.surface(fish)
 	_graph_manager.update_for_fish(fish)
 	if seniority_chart and seniority_chart.visible:
 		seniority_chart.set_selected(fish)

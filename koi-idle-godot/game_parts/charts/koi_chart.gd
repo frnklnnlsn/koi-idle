@@ -13,6 +13,17 @@ extends MarginContainer
 @onready var plot: TauPlot = $Plot
 
 
+# --- Zoom and pan (charts that turn on `zoomable`) ----------------------------
+# Scroll over the chart to zoom in / out around the mouse, drag with the right
+# mouse button to pan, double-click to see everything again. (A plain left
+# drag is box selection in the shop.) What zooming means is up to each chart:
+# it implements _zoom_at, _pan_pixels and _reset_zoom.
+## Zoom with the mouse (scroll / right-drag / double-click).
+@export var zoomable := false
+## Zoom per scroll step.
+@export_range(1.05, 2.0, 0.05) var zoom_step := 1.25
+var _panning := false
+
 var _tab_buttons: Array[Button] = []
 var _tab_row: HBoxContainer
 var _redraw_queued := false
@@ -38,6 +49,46 @@ func _flush_redraw() -> void:
 ## Builds the chart from its current data. Each chart implements this.
 func _redraw_now() -> void:
 	pass
+
+
+func _input(event: InputEvent) -> void:
+	if not zoomable or not is_visible_in_tree() or plot == null:
+		return
+	var mb := event as InputEventMouseButton
+	if mb:
+		var inside := plot.get_global_rect().has_point(mb.global_position)
+		if mb.pressed and inside and mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			_zoom_at(mb.global_position, 1.0 / zoom_step if mb.button_index == MOUSE_BUTTON_WHEEL_UP else zoom_step)
+			get_viewport().set_input_as_handled()
+		elif mb.button_index == MOUSE_BUTTON_RIGHT:
+			_panning = mb.pressed and inside
+			if inside:
+				get_viewport().set_input_as_handled()
+		elif mb.pressed and inside and mb.double_click and mb.button_index == MOUSE_BUTTON_LEFT:
+			_reset_zoom()
+	elif event is InputEventMouseMotion and _panning:
+		_pan_pixels(event.relative)
+		get_viewport().set_input_as_handled()
+
+
+## Zoom by `factor` (< 1 = in) keeping the point under `screen_pos` still.
+func _zoom_at(_screen_pos: Vector2, _factor: float) -> void:
+	pass
+
+
+## Move the view with the mouse by `relative` screen pixels.
+func _pan_pixels(_relative: Vector2) -> void:
+	pass
+
+
+## Back to the whole chart.
+func _reset_zoom() -> void:
+	pass
+
+
+## The chart's plotting area in screen coordinates (empty before layout).
+func pane_rect() -> Rect2:
+	return TauCharts.pane_global_rect(plot) if plot else Rect2()
 
 
 ## A small row of toggle buttons above the chart, right-aligned, for charts

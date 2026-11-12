@@ -315,6 +315,15 @@ static func data_to_global(plot: TauPlot, x: float, y: float) -> Vector2:
 	return xy._pane_renderers[0].get_global_transform() * local
 
 
+## The plotting area (inside the axes) in screen coordinates. Empty Rect2 if
+## not laid out.
+static func pane_global_rect(plot: TauPlot) -> Rect2:
+	var xy = _xy(plot)
+	if xy == null:
+		return Rect2()
+	return xy._pane_renderers[0].get_global_transform() * xy._xy_layout.pane_layouts[0].pane_rect
+
+
 ## Screen rectangle of bar `index` of a bar chart (from 0 up to `value`),
 ## `width` = share of its slot the bar fills. Empty Rect2 if not laid out.
 static func bar_global_rect(plot: TauPlot, index: int, value: float, width := 0.8) -> Rect2:

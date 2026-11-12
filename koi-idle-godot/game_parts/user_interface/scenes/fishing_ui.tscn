@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://kctuxuaxjl0r"]
 
 [ext_resource type="Script" path="res://game_parts/user_interface/scenes/fishing_ui.gd" id="1_31oin"]
-[ext_resource type="PackedScene" path="res://game_parts/charts/fish_scatter_chart.tscn" id="2_scatter"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/growth_chart.tscn" id="3_growth"]
 [ext_resource type="PackedScene" path="res://game_parts/charts/collection_chart.tscn" id="4_bars"]
 
@@ -12,139 +11,28 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_31oin")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
-layout_mode = 1
-anchor_left = 0.5
-anchor_top = 0.25
-anchor_right = 0.5
-anchor_bottom = 0.25
-offset_left = -101.5
-offset_top = -60.0
-offset_right = 101.5
-offset_bottom = 60.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-
-[node name="Title" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Go Fishing"
-horizontal_alignment = 1
-
-[node name="BossHint" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_type_variation = &"DimLabel"
-theme_override_font_sizes/font_size = 13
-text = "Boss: hook a fish of 1 kg"
-horizontal_alignment = 1
-
-[node name="FishingButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Cast"
-
-[node name="FishingStatus" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-bbcode_enabled = true
-text = "[center][wave amp=20 freq=5 connected=1]Waiting...[/wave]
-
-"
-fit_content = true
-
-[node name="ChainLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Line: empty"
-horizontal_alignment = 1
-
-[node name="FishStats" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "??? kg"
-horizontal_alignment = 1
-
-[node name="BiteTimer" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Next bite: 1–2s"
-horizontal_alignment = 1
-
-[node name="BiteBar" type="ProgressBar" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 8)
-layout_mode = 2
-max_value = 2.0
-step = 0.01
-show_percentage = false
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="KeepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Keep
-"
-
-[node name="ReleaseButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Release
-"
-
-[node name="LeaveOnButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Leave On
-"
-
-[node name="SellPondButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Sell every fish in the pond at a discount. Asks you to confirm first."
-text = "Sell Pond"
-
-[node name="Charts" type="HBoxContainer" parent="."]
+[node name="Charts" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.5
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="ScatterMargin" type="MarginContainer" parent="Charts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
-theme_override_constants/margin_bottom = 4
-
-[node name="Scatter" parent="Charts/ScatterMargin" instance=ExtResource("2_scatter")]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 130)
-layout_mode = 2
+mouse_filter = 2
 
 [node name="GrowthMargin" type="MarginContainer" parent="Charts"]
-layout_mode = 2
-size_flags_horizontal = 3
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.52
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -175.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 5
 theme_override_constants/margin_right = 5
@@ -156,11 +44,18 @@ custom_minimum_size = Vector2(0, 130)
 layout_mode = 2
 
 [node name="BarsMargin" type="MarginContainer" parent="Charts"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/margin_left = 10
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.52
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 175.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 5
-theme_override_constants/margin_right = 5
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 4
 
 [node name="Bars" parent="Charts/BarsMargin" instance=ExtResource("4_bars")]
@@ -169,11 +64,105 @@ custom_minimum_size = Vector2(0, 130)
 layout_mode = 2
 chart_title = "Pond fish"
 
+[node name="ChartsTab" type="Button" parent="Charts"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.52
+anchor_bottom = 0.52
+offset_left = 10.0
+offset_top = -30.0
+offset_right = 120.0
+offset_bottom = -2.0
+tooltip_text = "Show / hide the charts"
+focus_mode = 0
+text = "Charts"
+
+[node name="Controls" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -170.0
+offset_top = -200.0
+offset_right = 170.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 2
+
+[node name="FishingStatus" type="RichTextLabel" parent="Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = ""
+fit_content = true
+scroll_active = false
+
+[node name="ChainLabel" type="Label" parent="Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="FishStats" type="Label" parent="Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"DimLabel"
+horizontal_alignment = 1
+
+[node name="BiteBar" type="ProgressBar" parent="Controls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+max_value = 2.0
+step = 0.01
+show_percentage = false
+
+[node name="Actions" type="HBoxContainer" parent="Controls"]
+layout_mode = 2
+alignment = 1
+
+[node name="FishingButton" type="Button" parent="Controls/Actions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+focus_mode = 0
+text = "Cast"
+
+[node name="KeepButton" type="Button" parent="Controls/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "Keep"
+
+[node name="ReleaseButton" type="Button" parent="Controls/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "Release"
+
+[node name="LeaveOnButton" type="Button" parent="Controls/Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "Leave On"
+
+[node name="SellPondButton" type="Button" parent="Controls"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Sell every fish in the pond at a discount. Asks you to confirm first."
+focus_mode = 0
+text = "Sell Pond"
+
 [node name="FishingTimer" type="Timer" parent="."]
 unique_name_in_owner = true
 
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/FishingButton" to="." method="_on_fishing_button_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/KeepButton" to="." method="_on_keep_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/ReleaseButton" to="." method="_on_release_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/LeaveOnButton" to="." method="_on_leave_on_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/SellPondButton" to="." method="_on_sell_pond_pressed"]
+[connection signal="pressed" from="Controls/Actions/FishingButton" to="." method="_on_fishing_button_pressed"]
+[connection signal="pressed" from="Controls/Actions/KeepButton" to="." method="_on_keep_pressed"]
+[connection signal="pressed" from="Controls/Actions/ReleaseButton" to="." method="_on_release_pressed"]
+[connection signal="pressed" from="Controls/Actions/LeaveOnButton" to="." method="_on_leave_on_pressed"]
+[connection signal="pressed" from="Controls/SellPondButton" to="." method="_on_sell_pond_pressed"]

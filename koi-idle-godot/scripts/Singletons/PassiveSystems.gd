@@ -144,7 +144,9 @@ func _process(delta: float) -> void:
 			f.work_time += delta
 
 	_save_timer += delta
-	if _save_timer >= SAVE_INTERVAL:
+	# How often: Settings "Autosave every" (SAVE_INTERVAL until Settings loads).
+	var interval: float = Settings.autosave_seconds() if Settings else SAVE_INTERVAL
+	if _save_timer >= interval:
 		_save_timer = 0.0
 		_flush_to_save()
 

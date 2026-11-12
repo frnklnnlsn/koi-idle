@@ -21,6 +21,7 @@ config/icon="res://art/icon.svg"
 
 [autoload]
 
+Settings="*res://scripts/Singletons/Settings.gd"
 FishGenerator="*res://scripts/Singletons/FishGenerator.gd"
 SaveManager="*res://scripts/Singletons/SaveManager.gd"
 FishHandler="*res://scripts/Singletons/FishHandler.gd"

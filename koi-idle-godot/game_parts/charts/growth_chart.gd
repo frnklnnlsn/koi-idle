@@ -37,6 +37,13 @@ var _drawn_x_max := 1.0        # hours the x axis spanned when they were drawn
 var _caught: Array = []   # fishing: on the line now (accent)
 var _earlier: Array = []  # fishing: caught earlier this session (faded)
 
+# Zoom (when `zoomable`): the view in (hours, log10 mass), so zooming up and
+# down spreads curves that sit on top of each other. Empty = whole chart.
+## Deepest zoom, as a share of the whole chart (0.02 = 50×).
+@export_range(0.005, 0.5, 0.005) var min_zoom_share := 0.02
+var _view := Rect2()
+var _full := Rect2()   # the whole chart, as last drawn
+
 
 # --- Chart definitions (shared by the game and ChartPreview) ----------------
 
@@ -50,17 +57,18 @@ static func draw(p: TauPlot, data: Dictionary) -> void:
 	if hours_now > 0.0:
 		x_max = maxf(x_max, hours_now * 1.05)
 
-	var xs := _hours(x_max)
+	var xs := _xs_for(data, x_max)
 	var mass := PackedFloat64Array()
 	for h in xs:
 		mass.append(_mass(data, h))
 
 	var opts := {"y_log": true, "minimal": true, "hover_nearest": false, "colors": [UIPalette.get_palette().accent], "marker_color": now_color()}
+	_apply_view(opts, data)
 	if hours_now >= 0.0:
 		opts["markers"] = {"Now": Vector2(hours_now, maxf(data.get("mass", base), base))}
 		opts["marker_drops"] = false
 
-	TauCharts.line(p, "Growth", xs, {"Mass": mass}, opts)
+	TauCharts.line(p, "Growth" + data.get("suffix", ""), xs, {"Mass": mass}, opts)
 
 
 ## Many fish. data: {"curves": Array of curve dicts (as draw()), "selected": int
@@ -81,7 +89,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 	var earlier: Array = data.get("earlier", [])
 	var now: Array = data.get("now", [])
 	var x_max := all_x_max(curves, now)
-	var xs := _hours(x_max)
+	var xs := _xs_for(data, x_max)
 
 	var pal := UIPalette.get_palette()
 	var series := {}
@@ -109,6 +117,7 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		colors.append(c)
 
 	var opts := {"y_log": true, "minimal": true, "colors": colors, "hover_nearest": true}
+	_apply_view(opts, data)
 	if on_click.is_valid():
 		opts["on_click"] = on_click
 	# "Now" dots: on the curve at the fish's age (past the axis end: at the end).
@@ -121,7 +130,29 @@ static func draw_all(p: TauPlot, data: Dictionary, on_click := Callable()) -> vo
 		opts["markers"] = markers
 		opts["marker_color"] = now_color()
 		opts["marker_drops"] = false
-	TauCharts.line(p, "Growth · all fish", xs, series, opts)
+	TauCharts.line(p, "Growth · all fish" + data.get("suffix", ""), xs, series, opts)
+
+
+## Hours to sample: the zoomed view's span if data has a "view" (Rect2 in
+## hours, log10 mass), else 0..x_max.
+static func _xs_for(data: Dictionary, x_max: float) -> PackedFloat64Array:
+	var view: Rect2 = data.get("view", Rect2())
+	if view.size.x <= 0.0:
+		return _hours(x_max)
+	var xs := PackedFloat64Array()
+	var a := maxf(view.position.x, 0.0)
+	for i in STEPS + 1:
+		xs.append(lerpf(a, maxf(view.end.x, a + 0.001), float(i) / STEPS))
+	return xs
+
+
+## Fixed axis ranges for a zoomed view.
+static func _apply_view(opts: Dictionary, data: Dictionary) -> void:
+	var view: Rect2 = data.get("view", Rect2())
+	if view.size.x <= 0.0:
+		return
+	opts["x_range"] = Vector2(view.position.x, view.end.x)
+	opts["y_range"] = Vector2(pow(10.0, view.position.y), pow(10.0, view.end.y))
 
 
 ## Hours the All view's x axis spans: until the slowest curve is grown (at
@@ -279,6 +310,84 @@ func _now_moved() -> bool:
 
 func _on_view(i: int) -> void:
 	_all_view = i == 0
+	_view = Rect2()   # each view starts zoomed out
+	_redraw()
+
+
+# --- Zoom -----------------------------------------------------------------------
+
+## The whole chart for these curves: Rect2 in (hours, log10 mass).
+static func _extent(curves: Array, x_max: float) -> Rect2:
+	var lo := INF
+	var hi := -INF
+	for c in curves:
+		lo = minf(lo, _mass(c, 0.0))
+		hi = maxf(hi, _mass(c, x_max))
+	if not is_finite(lo) or hi <= 0.0:
+		return Rect2(0, 0, maxf(x_max, 1.0), 1)
+	var y0 := log(maxf(lo, 1e-6)) / log(10.0)
+	var y1 := log(maxf(hi, 1e-6)) / log(10.0)
+	return Rect2(0.0, y0, maxf(x_max, 1.0), maxf(y1 - y0, 0.1))
+
+
+func _add_view(d: Dictionary) -> void:
+	if _view.size.x <= 0.0:
+		return
+	d["view"] = _view
+	d["suffix"] = "   %.1f×" % (_full.size.x / _view.size.x)
+
+
+## Screen pixels per hour (x) and per tenfold of mass (y, negative: up).
+func _pixels_per_unit() -> Vector2:
+	var p0 := TauCharts.data_to_global(plot, 0.0, 1.0)
+	var p1 := TauCharts.data_to_global(plot, 1.0, 10.0)
+	if not p0.is_finite() or not p1.is_finite() or p1.x == p0.x or p1.y == p0.y:
+		return Vector2.ZERO
+	return p1 - p0
+
+
+func _screen_to_view(pos: Vector2) -> Vector2:
+	var p0 := TauCharts.data_to_global(plot, 0.0, 1.0)
+	var ppu := _pixels_per_unit()
+	if ppu == Vector2.ZERO:
+		return Vector2.INF
+	return (pos - p0) / ppu
+
+
+func _zoom_at(screen_pos: Vector2, factor: float) -> void:
+	if _full.size.x <= 0.0:
+		return
+	var v := _view if _view.size.x > 0.0 else _full
+	var at := _screen_to_view(screen_pos)
+	if not at.is_finite():
+		return
+	var new_size := (v.size * factor).clamp(_full.size * min_zoom_share, _full.size)
+	var k := new_size / v.size
+	_set_view(Rect2(at - (at - v.position) * k, new_size))
+
+
+func _pan_pixels(relative: Vector2) -> void:
+	if _view.size.x <= 0.0:
+		return
+	var ppu := _pixels_per_unit()
+	if ppu == Vector2.ZERO:
+		return
+	_set_view(Rect2(_view.position - relative / ppu, _view.size))
+
+
+func _reset_zoom() -> void:
+	_set_view(Rect2())
+
+
+func _set_view(v: Rect2) -> void:
+	if v.size.x > 0.0:
+		# Stay inside the whole chart; fully zoomed out = no zoom.
+		v.position = v.position.clamp(_full.position, _full.end - v.size)
+		if v.size.x >= _full.size.x * 0.999 and v.size.y >= _full.size.y * 0.999:
+			v = Rect2()
+	if v.is_equal_approx(_view):
+		return
+	_view = v
 	_redraw()
 
 
@@ -322,8 +431,11 @@ func _redraw_now() -> void:
 				now.append([i, pt.x])
 				_drawn_now.append(pt)
 		_drawn_x_max = all_x_max(curves, now)
-		draw_all(plot, {"curves": curves, "selected": _fish.find(_selected), "picked": picked,
-			"caught": caught, "earlier": earlier, "now": now}, _on_plot_clicked)
+		_full = _extent(curves, _drawn_x_max)
+		var d := {"curves": curves, "selected": _fish.find(_selected), "picked": picked,
+			"caught": caught, "earlier": earlier, "now": now}
+		_add_view(d)
+		draw_all(plot, d, _on_plot_clicked)
 	else:
 		# One fish: the hovered / selected one, else the newest "Now" fish
 		# (fishing: the fish just caught), with its dot if it has one.
@@ -339,6 +451,11 @@ func _redraw_now() -> void:
 			data["mass"] = pt.y
 			_drawn_now.append(pt)
 			_drawn_x_max = maxf(grown_hours(data), pt.x * 1.05)
+		var x_max := maxf(grown_hours(data), 1.0)
+		if data.get("hours", -1.0) > 0.0:
+			x_max = maxf(x_max, data["hours"] * 1.05)
+		_full = _extent([data], x_max)
+		_add_view(data)
 		draw(plot, data)
 
 
