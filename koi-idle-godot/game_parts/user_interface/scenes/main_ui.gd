@@ -47,6 +47,17 @@ var _confirm_action: Callable
 var _fishing_open := false
 ## Flush cut scene's circle wipe.
 @onready var iris: IrisTransition = %IrisTransition
+@export_group("Pond camera")
+## Scroll zoom limits for the pond view (1 = the normal view) and how much
+## one scroll step zooms.
+@export var pond_zoom_min := 1.0
+@export var pond_zoom_max := 4.0
+@export var pond_zoom_step := 1.15
+@export_group("")
+var _pond_dragging := false
+## True while the flush cut scene is moving the pond camera.
+var _pond_cam_locked := false
+
 ## Flush cut scene: how close it shows the pipe (pond camera zoom), how far
 ## below the pipe it centres (pond pixels), and how long before pulling back.
 @export var flush_pipe_zoom := 2.5
@@ -177,6 +188,9 @@ func _on_drag_zone(zone: String) -> void:
 ## nearest the click and opens the close-up on it. Clicks on buttons, panels
 ## and the close-up itself go to them as usual.
 func _input(event: InputEvent) -> void:
+	if _pond_camera_input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseMotion:
 		_update_button_cursor(event.position)
 		return
@@ -197,6 +211,72 @@ func _input(event: InputEvent) -> void:
 	if fish:
 		fish_peek.open(fish, container.get_child(0), event.position)
 		get_viewport().set_input_as_handled()
+
+
+# ── Pond camera ───────────────────────────────────────────────────────────────
+## In the pond view: hold the middle mouse button and drag to move around,
+## scroll to zoom in and out (toward the mouse). The view stays over the
+## water (the pond's WaterFloor). Off while fishing and during the flush
+## cut scene.
+func _pond_camera_input(event: InputEvent) -> bool:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+		var was := _pond_dragging
+		_pond_dragging = false
+		return was
+	if _pond_dragging and event is InputEventMouseMotion:
+		var cam := _pond_cam()
+		if cam:
+			cam.position -= event.relative / (cam.zoom * float(pond.stretch_shrink))
+			_clamp_pond_cam(cam)
+		return true
+	if not (event is InputEventMouseButton and event.pressed):
+		return false
+	if not pond.visible or fishing_ui.visible or _pond_cam_locked:
+		return false
+	if get_viewport().gui_get_hovered_control() not in [null, self, _main_column, pond]:
+		return false   # over a panel / chart / button: leave it the scroll
+	var cam := _pond_cam()
+	if cam == null:
+		return false
+	match event.button_index:
+		MOUSE_BUTTON_MIDDLE:
+			_pond_dragging = true
+			return true
+		MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN:
+			var f := pond_zoom_step if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / pond_zoom_step
+			_zoom_pond_cam(cam, f, event.position)
+			return true
+	return false
+
+
+func _pond_cam() -> Camera2D:
+	return pond.get_node_or_null("PondViewport/Camera2D") as Camera2D
+
+
+## Zooms by `factor`, keeping the pond point under `screen_pos` in place.
+func _zoom_pond_cam(cam: Camera2D, factor: float, screen_pos: Vector2) -> void:
+	var z := clampf(cam.zoom.x * factor, pond_zoom_min, pond_zoom_max)
+	var vp := pond.get_child(0) as SubViewport
+	var local := (pond.get_global_transform().affine_inverse() * screen_pos) / float(pond.stretch_shrink)
+	var from_centre := local - Vector2(vp.size) * 0.5
+	var under := cam.position + from_centre / cam.zoom.x
+	cam.zoom = Vector2.ONE * z
+	cam.position = under - from_centre / z
+	_clamp_pond_cam(cam)
+
+
+## Keeps the view inside the pond's water floor.
+func _clamp_pond_cam(cam: Camera2D) -> void:
+	var floor := pond.get_node_or_null("PondViewport/WaterFloor") as Control
+	var vp := pond.get_child(0) as SubViewport
+	if floor == null or vp == null:
+		return
+	var area := Rect2(floor.position, floor.size)
+	var half := Vector2(vp.size) * 0.5 / cam.zoom
+	var lo := area.position + half
+	var hi := area.end - half
+	cam.position.x = clampf(cam.position.x, minf(lo.x, area.get_center().x), maxf(hi.x, area.get_center().x))
+	cam.position.y = clampf(cam.position.y, minf(lo.y, area.get_center().y), maxf(hi.y, area.get_center().y))
 
 
 func _toilet_vp() -> SubViewport:
@@ -451,6 +531,8 @@ func _play_flush_cutscene() -> void:
 	# Open on a close-up of the pipe as the fish swim out, then pull back.
 	var cam := Pond.current.get_node_or_null("Camera2D") as Camera2D
 	var home := {"position": cam.position, "zoom": cam.zoom} if cam else {}
+	_pond_cam_locked = cam != null
+	_pond_dragging = false
 	if cam:
 		cam.position = Pond.current.pipe_origin + Vector2(0, flush_pipe_focus_offset)
 		cam.zoom = Vector2.ONE * flush_pipe_zoom
@@ -461,6 +543,8 @@ func _play_flush_cutscene() -> void:
 		var back := create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		back.tween_property(cam, "position", home["position"], 1.2)
 		back.tween_property(cam, "zoom", home["zoom"], 1.2)
+		await back.finished
+	_pond_cam_locked = false
 
 
 func _on_go_fishing_pressed() -> void:
