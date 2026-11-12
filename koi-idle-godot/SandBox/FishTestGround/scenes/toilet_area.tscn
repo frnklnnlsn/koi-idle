@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/ellipse_shape.gd" id="6_ellipse"]
 [ext_resource type="Script" path="res://scripts/toilet_body.gd" id="7_body"]
 [ext_resource type="Script" path="res://scripts/toilet_seat_up.gd" id="8_seat"]
+[ext_resource type="Material" path="res://game_parts/FishComposition/resources/pond_water_floor.tres" id="9_floor"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lsxmt"]
 radius = 33.0
@@ -44,6 +45,14 @@ shade_color = Color(0.22, 0.21, 0.25, 1)
 shade_center = Vector2(0, -0.45)
 shade_reach = 0.85
 bands = 4
+
+[node name="WaterFloor" type="ColorRect" parent="Underwater"]
+material = ExtResource("9_floor")
+offset_left = -140.0
+offset_top = -160.0
+offset_right = 140.0
+offset_bottom = 160.0
+mouse_filter = 2
 
 [node name="ToiletSprite" type="Sprite2D" parent="Underwater" unique_id=1309309159]
 visible = false

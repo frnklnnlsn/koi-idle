@@ -75,6 +75,7 @@ func _ready() -> void:
 	# Water layers (WaterSurface sparkles, ToiletArea/Underwater bowl bottom)
 	# get the bowl's shape. The full shape, not the one the flush shrinks.
 	_base_area.setup_water_layers([get_node_or_null("WaterSurface"), get_node_or_null("ToiletArea/Underwater"),
+		get_node_or_null("ToiletArea/Underwater/WaterFloor"),
 		get_node_or_null("FlushWater")], clip_water_to_swim_area)
 	_set_flush_water(0.0)
 	# Every toilet fish gets the toilet's boundary as it's added.
