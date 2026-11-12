@@ -19,6 +19,11 @@ extends Polygon2D
 @export_range(0, 5, 1) var smooth_steps := 3:
 	set(v): smooth_steps = v; queue_redraw()
 
+## How far inside the shoreline the fish stay, in pond pixels (so their
+## tails don't swish over the shallows and bank). The water effects still
+## reach the shore.
+@export_range(0.0, 200.0, 1.0) var swim_inset := 45.0
+
 @export_group("Bands")
 ## How far each band reaches from the outline, in pond pixels: positive =
 ## out onto the bank, negative = in toward the middle. Listed outermost
@@ -66,12 +71,24 @@ func outline() -> PackedVector2Array:
 	return pts
 
 
-## The swim area fish use: the smoothed outline in world coordinates.
-func make_swim_area() -> SwimArea:
+## The swim area fish use: the smoothed outline in world coordinates, pulled
+## in by `inset` pond pixels (-1 = Swim Inset; 0 = the shoreline itself).
+func make_swim_area(inset := -1.0) -> SwimArea:
+	if inset < 0.0:
+		inset = swim_inset
 	var area := SwimArea.new()
 	area.shape = SwimArea.Shape.POLYGON
+	var line := outline()
+	if inset > 0.0:
+		# Biggest piece left after pulling the outline in.
+		var best := PackedVector2Array()
+		for poly in Geometry2D.offset_polygon(line, -inset, Geometry2D.JOIN_ROUND):
+			if Geometry2D.is_polygon_clockwise(poly) == Geometry2D.is_polygon_clockwise(line) and poly.size() > best.size():
+				best = poly
+		if best.size() >= 3:
+			line = best
 	var world := PackedVector2Array()
-	for p in outline():
+	for p in line:
 		world.append(global_transform * p)
 	area.points = world
 	area.center = global_transform * _centre(polygon)

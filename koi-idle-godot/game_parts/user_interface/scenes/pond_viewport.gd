@@ -128,7 +128,9 @@ func _ready() -> void:
 		_swim_area = pond_shape.make_swim_area() if pond_shape else swim_shape.make_swim_area()
 		# Water layers get the pond's shape (for foam / clipping, see
 		# pond_water.gdshader). Not clipped: the pond's water fills the view.
-		_swim_area.setup_water_layers([get_node_or_null("WaterFloor"), get_node_or_null("WaterSurface"), get_node_or_null("Underwater")], clip_water_to_swim_area)
+		# The water effects reach the shoreline (the fish stay further in).
+		var water_area: SwimArea = pond_shape.make_swim_area(0.0) if pond_shape else _swim_area
+		water_area.setup_water_layers([get_node_or_null("WaterFloor"), get_node_or_null("WaterSurface"), get_node_or_null("Underwater")], clip_water_to_swim_area)
 		fish_container_pond.child_entered_tree.connect(func(n):
 			if "swim_area" in n:
 				n.swim_area = _swim_area)
