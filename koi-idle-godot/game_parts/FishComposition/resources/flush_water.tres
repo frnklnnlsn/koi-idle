@@ -1,6 +1,6 @@
-[gd_resource type="ShaderMaterial" format=3]
+[gd_resource type="ShaderMaterial" format=3 uid="uid://cuqg6dvj5kyim"]
 
-[ext_resource type="Shader" path="res://game_parts/FishComposition/shaders/flush_water.gdshader" id="1_flush"]
+[ext_resource type="Shader" uid="uid://ck6mprlm5fras" path="res://game_parts/FishComposition/shaders/flush_water.gdshader" id="1_flush"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_flush"]
 frequency = 0.03
@@ -8,9 +8,30 @@ frequency = 0.03
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_flush"]
 width = 128
 height = 128
-seamless = true
 noise = SubResource("FastNoiseLite_flush")
+seamless = true
 
 [resource]
 shader = ExtResource("1_flush")
+shader_parameter/area_shape = 0
+shader_parameter/area_center = Vector2(0, 0)
+shader_parameter/area_size = Vector2(0, 0)
+shader_parameter/area_rotation = 0.0
+shader_parameter/strength = 0.0
+shader_parameter/drain = Vector2(0, -60)
+shader_parameter/spin = 1.0
+shader_parameter/swirl_phase = 0.0
+shader_parameter/pixel_size = 2.0
+shader_parameter/clip_to_area = false
+shader_parameter/arms = 3.0
+shader_parameter/twist = 4.0
+shader_parameter/spin_speed = 6.0
+shader_parameter/streak_cut = 0.8
+shader_parameter/streak_color = Color(0.85, 0.95, 1, 0.55)
+shader_parameter/foam_color = Color(1, 1, 1, 0.8)
+shader_parameter/churn_color = Color(0.35, 0.55, 0.75, 0.06)
+shader_parameter/vortex_color = Color(0.02, 0.03, 0.08, 0.85)
+shader_parameter/vortex_radius = 14.0
+shader_parameter/noise_wobble = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_flush")
+shader_parameter/noise_px = 96.0

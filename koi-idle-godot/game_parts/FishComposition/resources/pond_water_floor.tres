@@ -4,24 +4,26 @@
 
 [resource]
 shader = ExtResource("1_water")
+shader_parameter/area_shape = 0
+shader_parameter/area_center = Vector2(0, 0)
+shader_parameter/area_size = Vector2(0, 0)
+shader_parameter/area_rotation = 0.0
 shader_parameter/surface_layer = false
 shader_parameter/pixel_size = 2.0
-shader_parameter/water_color = Color(0.05, 0.07, 0.18, 0)
+shader_parameter/clip_to_area = false
+shader_parameter/water_color = Color(0.050980393, 0.07058824, 0.18039216, 0.22352941)
 shader_parameter/noise_px = 256.0
 shader_parameter/rippling = 4.0
 shader_parameter/light_color = Color(0.11764706, 0.16078432, 0.25882354, 0.039215688)
 shader_parameter/highlight_color = Color(0.2509804, 0.28235295, 0.32156864, 0.039215688)
-shader_parameter/light_scale = 15.0
-shader_parameter/light_speed = 0.35000000521542
-shader_parameter/light_width = 0.38999999128272
-shader_parameter/band_at = 0.25
-shader_parameter/core_at = 0.7
-shader_parameter/sparkle_color = Color(1, 1, 1, 0.09411765)
+shader_parameter/light_scale = 10.0
+shader_parameter/light_speed = 2.30000003427276
+shader_parameter/light_width = 0.15999999642368
+shader_parameter/band_at = 0.40999999083568
+shader_parameter/core_at = 0.5499999877064
+shader_parameter/sparkle_color = Color(1, 1, 1, 0.7176471)
 shader_parameter/sparkle_threshold = 0.55
-shader_parameter/sparkle_scale = 20.0
+shader_parameter/sparkle_scale = 14.5
 shader_parameter/sparkles_only_on_light = true
 shader_parameter/foam_color = Color(0.85, 0.92, 1, 0.5)
 shader_parameter/foam_width = 0.0
-shader_parameter/foam_center = Vector2(0, 0)
-shader_parameter/foam_radii = Vector2(0, 0)
-shader_parameter/foam_rotation = 0.0
