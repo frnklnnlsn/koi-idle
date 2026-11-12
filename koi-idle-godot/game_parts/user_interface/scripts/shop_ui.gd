@@ -70,6 +70,8 @@ var _show_summary := false
 ## Charts collapse button (right of the last chart): how long the charts take
 ## to slide away / back.
 @export var charts_collapse_seconds := 0.3
+## How far above the bottom of the screen the arrow sits while collapsed.
+@export var charts_toggle_bottom_gap := 8.0
 ## True while the charts are tucked away below the screen.
 var charts_collapsed := false
 var _collapse_k := 0.0          # 0 shown .. 1 tucked away
@@ -688,6 +690,10 @@ func _apply_collapse() -> void:
 	for box in _chart_boxes():
 		box.position.y += dist * _collapse_k
 		box.modulate.a = 1.0 - _collapse_k * 0.5
+	# The arrow drops with them, to just above the bottom of the screen.
+	var toggle: Control = %ChartsToggle.get_parent()
+	var drop := get_viewport_rect().size.y - charts_toggle_bottom_gap - toggle.size.y - toggle.global_position.y
+	toggle.position.y += maxf(drop, 0.0) * _collapse_k
 
 
 ## Drops the selected rank to the best one you can afford.
