@@ -29,7 +29,8 @@ var _confirm_action: Callable
 ## Short messages fading in at the bottom ("Kept 3 fish"): toast.tscn.
 @onready var toast: Toast = %Toast
 @onready var _main_column: VBoxContainer = $VBoxContainer
-## Icon buttons down the left edge (menu, flush, view, list, shop, fishing).
+## Icon buttons down the left edge (menu, view, list, shop, fishing). Flushing
+## is the button on top of the toilet tank (the sidebar Flush button is hidden).
 @onready var _sidebar: Control = %Sidebar
 ## Shop-only bar down the right edge: buy buttons, keep / trash lights.
 @onready var _shop_bar: Control = %ShopBar
@@ -175,6 +176,9 @@ func _on_drag_zone(zone: String) -> void:
 ## nearest the click and opens the close-up on it. Clicks on buttons, panels
 ## and the close-up itself go to them as usual.
 func _input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion:
+		_update_button_cursor(event.position)
+		return
 	if not (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		return
 	if fishing_ui.visible:
@@ -182,11 +186,28 @@ func _input(event: InputEvent) -> void:
 	var hovered := get_viewport().gui_get_hovered_control()
 	if hovered not in [null, self, _main_column, toilet, pond]:
 		return
+	# The flush button on top of the tank.
+	if toilet.visible and _toilet_vp().is_over_flush_button(event.position):
+		_on_flush_pressed()
+		get_viewport().set_input_as_handled()
+		return
 	var container: SubViewportContainer = pond if pond.visible else toilet
 	var fish := fish_at(container, event.position)
 	if fish:
 		fish_peek.open(fish, container.get_child(0), event.position)
 		get_viewport().set_input_as_handled()
+
+
+func _toilet_vp() -> SubViewport:
+	return toilet.get_node("ToiletViewport")
+
+
+## Pointing-hand cursor over the tank's flush button.
+func _update_button_cursor(screen_pos: Vector2) -> void:
+	var over: bool = toilet.visible and not fishing_ui.visible \
+		and get_viewport().gui_get_hovered_control() in [null, self, _main_column, toilet] \
+		and _toilet_vp().is_over_flush_button(screen_pos)
+	toilet.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if over else Control.CURSOR_ARROW
 
 
 ## The fish under `screen_pos` in `container`'s water, or null.

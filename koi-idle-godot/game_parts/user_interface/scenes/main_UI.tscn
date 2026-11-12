@@ -312,6 +312,7 @@ icon = ExtResource("13_ic_menu")
 icon_alignment = 1
 
 [node name="Flush" type="Button" parent="Sidebar/Buttons" unique_id=805965955]
+visible = false
 custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 tooltip_text = "Flush the toilet into the pond"

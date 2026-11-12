@@ -35,6 +35,12 @@ signal flush_draining
 ## full speed (spin_speed on flush_water.tres); it builds to full speed over
 ## the flush and stays there while the water calms.
 @export_range(0.0, 1.0, 0.01) var swirl_start_speed: float = 0.1
+@export_group("Flush button")
+## How long the button takes to go down / come back up, and the least time
+## it stays down (an empty flush is over at once).
+@export var button_press_seconds: float = 0.08
+@export var button_release_seconds: float = 0.18
+@export var button_min_hold: float = 0.4
 @export_group("")
 ## Keep the water effects (sparkles, underwater bend and light) inside the
 ## swim area, so the porcelain around the water stays clean.
@@ -111,6 +117,7 @@ func Flush() -> void:
 	if _is_flushing:
 		return
 	_is_flushing = true
+	_animate_button()
 	DisplayManager.is_flushing = true
 	await _play_flush_animation()
 	Clear()
@@ -118,6 +125,45 @@ func Flush() -> void:
 	DisplayManager.is_flushing = false   # shared flag: the pond waits on it
 	DisplayManager.flush_completed.emit()
 
+
+
+## The flush button on the tank (ToiletArea/Underwater/Body), or null.
+func flush_button() -> ToiletBody:
+	return get_node_or_null("ToiletArea/Underwater/Body") as ToiletBody
+
+
+## True if the screen point is on the flush button.
+func is_over_flush_button(screen_pos: Vector2) -> bool:
+	var body := flush_button()
+	return body != null and body.is_visible_in_tree() and body.is_over_button(screen_to_world(screen_pos))
+
+
+## A point on screen, in toilet pixels.
+func screen_to_world(screen_pos: Vector2) -> Vector2:
+	var c := get_parent() as SubViewportContainer
+	var shrink := float(c.stretch_shrink) if c else 1.0
+	var local := (c.get_global_transform().affine_inverse() * screen_pos if c else screen_pos) / shrink
+	return canvas_transform.affine_inverse() * local
+
+
+## Push the button in, keep it in while the toilet flushes, let it back up.
+func _animate_button() -> void:
+	var body := flush_button()
+	if body == null:
+		return
+	var tw := create_tween()
+	tw.tween_property(body, "button_press", 1.0, button_press_seconds).set_ease(Tween.EASE_OUT)
+	var t0 := Time.get_ticks_msec()
+	while _is_flushing:
+		await get_tree().process_frame
+	var left := button_min_hold - (Time.get_ticks_msec() - t0) / 1000.0
+	if left > 0.0:
+		await get_tree().create_timer(left).timeout
+	if not is_instance_valid(body):
+		return
+	tw = create_tween()
+	tw.tween_property(body, "button_press", 0.0, button_release_seconds) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _play_flush_animation() -> void:

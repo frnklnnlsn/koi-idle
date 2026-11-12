@@ -72,6 +72,13 @@ enum FlushControl { BUTTON, LEVER }
 	set(v): dual_flush = v; queue_redraw()
 @export var dual_split := -4.0:
 	set(v): dual_split = v; queue_redraw()
+## How far the button is pushed in (0 up, 1 all the way). The toilet sets it
+## when it flushes; drag it here to preview.
+@export_range(0.0, 1.0, 0.01) var button_press := 0.0:
+	set(v): button_press = v; queue_redraw()
+## Shadow inside the bezel when the button is pushed in.
+@export var button_shadow := Color(0.25, 0.28, 0.35, 0.55):
+	set(v): button_shadow = v; queue_redraw()
 ## Lever: where its round base sits (on the tank's front, left side).
 @export var handle_base := Vector2(-118, -178):
 	set(v): handle_base = v; queue_redraw()
@@ -140,23 +147,49 @@ func _draw() -> void:
 		_lever()
 
 
-## Chrome push button on the tank lid (split in two for dual flush).
+## Chrome push button on the tank lid (split in two for dual flush). When
+## pushed in, the face sinks a little and darkens, with a shadow along the top
+## of the bezel and a smaller shine.
 func _button(c: Vector2) -> void:
 	var r := button_radius
+	var k := button_press
 	draw_circle(c, r + 3.0, outline)
 	draw_circle(c, r + 2.0, metal)          # bezel
-	draw_circle(c, r, metal_shine)
+	if k > 0.0:
+		draw_circle(c, r, button_shadow.lerp(metal, 1.0 - k))
+	var fc := c + Vector2(0, k * 1.5)       # the face sinks down a touch
+	var fr := r - k * 1.5
+	draw_circle(fc, fr, metal_shine.lerp(metal, k * 0.6))
 	if dual_flush:
 		# Small half on the left, a little sunk in.
 		var pts := PackedVector2Array()
 		var x := dual_split
 		for i in 25:
 			var a := PI * 0.5 + PI * i / 24.0
-			var p := c + Vector2(cos(a), sin(a)) * (r - 1.5)
-			pts.append(Vector2(minf(p.x, c.x + x - 1.0), p.y))
-		draw_colored_polygon(pts, metal.lerp(metal_shine, 0.45))
-		draw_line(c + Vector2(x, -r + 1), c + Vector2(x, r - 1), outline, 1.0)
-	draw_circle(c + Vector2(r * 0.35, -r * 0.35), r * 0.22, Color.WHITE)
+			var p := fc + Vector2(cos(a), sin(a)) * (fr - 1.5)
+			pts.append(Vector2(minf(p.x, fc.x + x - 1.0), p.y))
+		draw_colored_polygon(pts, metal.lerp(metal_shine, 0.45 - k * 0.3))
+		draw_line(fc + Vector2(x, -fr + 1), fc + Vector2(x, fr - 1), outline, 1.0)
+	if k > 0.0:
+		# Shadow cast by the bezel's top edge onto the sunken face.
+		var sh := PackedVector2Array()
+		for i in 25:
+			var a := PI + PI * i / 24.0
+			sh.append(c + Vector2(cos(a), sin(a)) * r)
+		for i in range(24, -1, -1):
+			var a := PI + PI * i / 24.0
+			sh.append(c + Vector2(0, 3.0 * k) + Vector2(cos(a), sin(a)) * r)
+		draw_colored_polygon(sh, Color(button_shadow, button_shadow.a * k))
+	draw_circle(fc + Vector2(fr * 0.35, -fr * 0.35), fr * 0.22 * (1.0 - k * 0.5), Color.WHITE)
+
+
+## True if `global_point` is on the flush button (or the lever's base).
+func is_over_button(global_point: Vector2) -> bool:
+	var p := to_local(global_point)
+	if flush_control == FlushControl.BUTTON:
+		return p.distance_to(tank_center + button_offset) <= button_radius + 4.0
+	return p.distance_to(handle_base) <= handle_base_radius + 4.0 \
+		or Rect2(handle_base + Vector2(-handle_length, -handle_thickness), Vector2(handle_length, handle_thickness * 2.0)).has_point(p)
 
 
 ## Lever handle on the tank's front, sticking out to the left.
