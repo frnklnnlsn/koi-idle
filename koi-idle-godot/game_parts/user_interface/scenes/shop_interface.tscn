@@ -29,6 +29,32 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_bpk44")
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
 layout_mode = 2
 
+[node name="BuyMargin" type="MarginContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 6
+
+[node name="BuyRow" type="HBoxContainer" parent="PanelContainer/VBoxContainer/BuyMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="Buy" type="Button" parent="PanelContainer/VBoxContainer/BuyMargin/BuyRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Buy"
+
+[node name="BuyMax" type="Button" parent="PanelContainer/VBoxContainer/BuyMargin/BuyRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 0
+text = "Buy Max"
+
 [node name="TopSpacer" type="Control" parent="PanelContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -62,6 +88,11 @@ size_flags_vertical = 3
 [node name="MarginContainer8" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="CollapseBalance" type="Control" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+mouse_filter = 2
 
 [node name="MarginContainer7" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -98,6 +129,19 @@ theme_override_constants/margin_bottom = 4
 unique_name_in_owner = true
 layout_mode = 2
 custom_minimum_size = Vector2(300, 130)
+
+[node name="CollapseMargin" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 5
+
+[node name="ChartsToggle" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer/CollapseMargin"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+focus_mode = 0
+text = "▼"
 
 [node name="MarginContainer5" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer"]
 visible = false

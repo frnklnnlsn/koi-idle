@@ -32,7 +32,8 @@ var _confirm_action: Callable
 ## Icon buttons down the left edge (menu, view, list, shop, fishing). Flushing
 ## is the button on top of the toilet tank (the sidebar Flush button is hidden).
 @onready var _sidebar: Control = %Sidebar
-## Shop-only bar down the right edge: buy buttons, keep / trash lights.
+## Shop-only bar down the right edge: rank meter, keep / trash lights (the buy
+## buttons are at the top of the shop panel).
 @onready var _shop_bar: Control = %ShopBar
 @onready var _keep_light: TextureRect = %KeepLight
 @onready var _trash_light: TextureRect = %TrashLight

@@ -18,8 +18,6 @@
 [ext_resource type="Texture2D" uid="uid://bhci321euy7ga" path="res://art/ui_icons/list.png" id="16_ic_list"]
 [ext_resource type="Texture2D" uid="uid://bwsojffbgyh0t" path="res://art/ui_icons/shop.png" id="17_ic_shop"]
 [ext_resource type="Texture2D" uid="uid://bi4nefglmml1i" path="res://art/ui_icons/fishing.png" id="18_ic_fish"]
-[ext_resource type="Texture2D" uid="uid://bwjk3pf3qogst" path="res://art/ui_icons/buy.png" id="19_ic_buy"]
-[ext_resource type="Texture2D" uid="uid://cv1rq68ky0fc3" path="res://art/ui_icons/buy_max.png" id="20_ic_buymax"]
 [ext_resource type="Texture2D" uid="uid://bjpnco36j76f0" path="res://art/ui_icons/keep.png" id="21_ic_keep"]
 [ext_resource type="Texture2D" uid="uid://b1snre3pmkd2e" path="res://art/ui_icons/trash.png" id="22_ic_trash"]
 [ext_resource type="Script" uid="uid://beg04w0lyvae0" path="res://game_parts/user_interface/scripts/rank_meter.gd" id="23_rank_meter"]
@@ -377,24 +375,6 @@ grow_vertical = 2
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="BuyButton" type="Button" parent="ShopBar/Items" unique_id=1728275815]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(34, 34)
-layout_mode = 2
-tooltip_text = "Buy one fish of the current rank  (b)"
-focus_mode = 0
-icon = ExtResource("19_ic_buy")
-icon_alignment = 1
-
-[node name="BuyMaxButton" type="Button" parent="ShopBar/Items" unique_id=1195668233]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(34, 34)
-layout_mode = 2
-tooltip_text = "Fill the pool: buy as many as fit and you can afford  (B)"
-focus_mode = 0
-icon = ExtResource("20_ic_buymax")
-icon_alignment = 1
-
 [node name="RankMeter" type="Control" parent="ShopBar/Items" unique_id=204349139]
 unique_name_in_owner = true
 layout_mode = 2
@@ -448,5 +428,3 @@ unique_name_in_owner = true
 [connection signal="pressed" from="Sidebar/Buttons/List" to="." method="_on_list_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/Shop" to="." method="_on_shop_pressed"]
 [connection signal="pressed" from="Sidebar/Buttons/GoFishing" to="." method="_on_go_fishing_pressed"]
-[connection signal="pressed" from="ShopBar/Items/BuyButton" to="." method="_on_buy_pressed"]
-[connection signal="pressed" from="ShopBar/Items/BuyMaxButton" to="." method="_on_buy_max_pressed"]

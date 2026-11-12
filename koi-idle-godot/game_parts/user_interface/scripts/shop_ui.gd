@@ -67,6 +67,14 @@ var _box_chart: Control = null   # chart the box started in, or null = cards
 ## True while the terminal shows the selection summary rather than one fish.
 var _show_summary := false
 
+## Charts collapse button (right of the last chart): how long the charts take
+## to slide away / back.
+@export var charts_collapse_seconds := 0.3
+## True while the charts are tucked away below the screen.
+var charts_collapsed := false
+var _collapse_k := 0.0          # 0 shown .. 1 tucked away
+var _collapse_tween: Tween
+
 # Size of a fish card (fish_card.tscn minimum size and margin), for placing
 # the card row before any cards exist.
 const CARD_HEIGHT := 100.0
@@ -81,6 +89,10 @@ func _ready() -> void:
 		if visible:
 			UiSlide.up_from_bottom(%bellcurve.get_parent().get_parent()))
 	get_viewport().size_changed.connect(_place_cards)
+	%Buy.pressed.connect(buy_one)
+	%BuyMax.pressed.connect(fill_pool)
+	%ChartsToggle.pressed.connect(toggle_charts)
+	_chart_row().sort_children.connect(_apply_collapse)
 	_init_managers()
 	_connect_signals()
 	await _populate(FishHandler.list_of_shop_fish)
@@ -629,6 +641,53 @@ func _place_cards() -> void:
 	var h := maxf(middle - _top_spacer.global_position.y - gap - card_bottom, 0.0)
 	if absf(h - _top_spacer.custom_minimum_size.y) > 1.0:
 		_top_spacer.custom_minimum_size.y = h
+
+
+# --- Charts collapse ---------------------------------------------------------
+
+func _chart_row() -> HBoxContainer:
+	return %bellcurve.get_parent().get_parent()
+
+
+## The three chart boxes (not the collapse button, which stays put).
+func _chart_boxes() -> Array:
+	return [%bellcurve.get_parent(), %Growth_curve.get_parent(), %Histogram.get_parent()]
+
+
+## Slides the charts down out of sight, or back up. The arrow points the way
+## they'll go.
+func toggle_charts() -> void:
+	set_charts_collapsed(not charts_collapsed)
+
+
+func set_charts_collapsed(collapsed: bool, animate := true) -> void:
+	charts_collapsed = collapsed
+	%ChartsToggle.text = "▲" if collapsed else "▼"
+	for box in _chart_boxes():
+		box.mouse_filter = Control.MOUSE_FILTER_IGNORE if collapsed else Control.MOUSE_FILTER_PASS
+	if _collapse_tween:
+		_collapse_tween.kill()
+	var to := 1.0 if collapsed else 0.0
+	if not animate:
+		_set_collapse_k(to)
+		return
+	_collapse_tween = create_tween()
+	_collapse_tween.tween_method(_set_collapse_k, _collapse_k, to, charts_collapse_seconds) \
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+
+
+func _set_collapse_k(k: float) -> void:
+	_collapse_k = k
+	_chart_row().queue_sort()   # lay out, then _apply_collapse moves them
+
+
+## After the row lays out, push the charts down by the collapse amount.
+func _apply_collapse() -> void:
+	var row := _chart_row()
+	var dist := maxf(get_viewport_rect().size.y - row.global_position.y, 0.0)
+	for box in _chart_boxes():
+		box.position.y += dist * _collapse_k
+		box.modulate.a = 1.0 - _collapse_k * 0.5
 
 
 ## Drops the selected rank to the best one you can afford.
