@@ -7,7 +7,7 @@ signal flush_draining
 
 ## Where the water drains (the dark oval at the top of the bowl), in toilet
 ## pixels. The fish spiral in to it and the flush water swirls around it.
-## If the toilet has a ToiletArea/Underwater/Drain node, its position is used
+## If the toilet has a ToiletArea/Underwater/Water/Drain node, its position is used
 ## instead, so moving or scaling the toilet keeps the drain in the right place.
 @export var flush_drain_point:      Vector2 = Vector2(0, -60)
 @export var flush_final_radius:     float   = 10.0
@@ -66,7 +66,9 @@ var _base_avoidance: float = -1.0   # fish's normal avoidance distance, read on 
 
 
 func _ready() -> void:
-	var drain := get_node_or_null("ToiletArea/Underwater/Drain") as Node2D
+	var drain := get_node_or_null("ToiletArea/Underwater/Water/Drain") as Node2D
+	if drain == null:
+		drain = get_node_or_null("ToiletArea/Underwater/Drain") as Node2D
 	if drain:
 		flush_drain_point = drain.global_position
 	var swim_shape := get_node_or_null("ToiletArea/SwimShape") as SwimShape
@@ -75,7 +77,7 @@ func _ready() -> void:
 	# Water layers (WaterSurface sparkles, ToiletArea/Underwater bowl bottom)
 	# get the bowl's shape. The full shape, not the one the flush shrinks.
 	_base_area.setup_water_layers([get_node_or_null("WaterSurface"), get_node_or_null("ToiletArea/Underwater"),
-		get_node_or_null("ToiletArea/Underwater/WaterFloor"),
+		get_node_or_null("ToiletArea/Underwater/Water/WaterFloor"),
 		get_node_or_null("FlushWater")], clip_water_to_swim_area)
 	_set_flush_water(0.0)
 	# Every toilet fish gets the toilet's boundary as it's added.

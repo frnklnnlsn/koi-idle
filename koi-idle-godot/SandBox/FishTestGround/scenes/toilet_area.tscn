@@ -27,6 +27,7 @@ z_index = -20
 script = ExtResource("7_body")
 
 [node name="Water" type="Node2D" parent="Underwater"]
+clip_children = 2
 position = Vector2(-2, 3)
 script = ExtResource("6_ellipse")
 size = Vector2(107, 129)
@@ -36,8 +37,8 @@ shade_center = Vector2(0, -0.55)
 shade_reach = 0.55
 bands = 3
 
-[node name="Drain" type="Node2D" parent="Underwater"]
-position = Vector2(-1, -67)
+[node name="Drain" type="Node2D" parent="Underwater/Water"]
+position = Vector2(1, -70)
 script = ExtResource("6_ellipse")
 size = Vector2(24, 31)
 color = Color(0.52, 0.5, 0.55, 1)
@@ -46,7 +47,7 @@ shade_center = Vector2(0, -0.45)
 shade_reach = 0.85
 bands = 4
 
-[node name="WaterFloor" type="ColorRect" parent="Underwater"]
+[node name="WaterFloor" type="ColorRect" parent="Underwater/Water"]
 material = ExtResource("9_floor")
 offset_left = -140.0
 offset_top = -160.0
