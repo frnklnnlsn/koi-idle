@@ -64,4 +64,5 @@ theme/custom="res://game_parts/user_interface/theme/ui_theme.tres"
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.054902, 0.0666667, 0.176471, 1)
